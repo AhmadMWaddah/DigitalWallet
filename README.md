@@ -210,16 +210,16 @@ This project follows a strict phase-based development workflow with automated Gi
 
 ### **Branch Naming Convention**
 
-| Phases | Branch Name |
-|--------|-------------|
-| 1-3 | `phase-setup-automation` |
-| 4-6 | `phase-identity-auth` |
-| 7-8 | `phase-frontend-core` |
-| 9-10 | `phase-wallet-engine` |
-| 11-12 | `phase-dashboard-htmx` |
-| 13-14 | `phase-async-reporting` |
-| 15-16 | `phase-staff-analytics` |
-| 17-18 | `phase-qa-deployment` |
+| Phase | Branch Name |
+|-------|-------------|
+| 1 | `phase-setup-automation` |
+| 2 | `phase-identity-auth` |
+| 3 | `phase-frontend-core` |
+| 4 | `phase-wallet-engine` |
+| 5 | `phase-dashboard-htmx` |
+| 6 | `phase-async-reporting` |
+| 7 | `phase-staff-analytics` |
+| 8 | `phase-qa-deployment` |
 
 ### **Zero-Error Policy**
 
@@ -283,28 +283,20 @@ pytest --cov=. --cov-report=html
 
 ---
 
-## 📊 Phase Progress
+## 📊 Phase Progress (Optimized 8-Phase Structure)
 
 | Phase | Name | Status | Branch | Tests |
 |-------|------|--------|--------|-------|
-| 1 | Environment Setup & Dual-Settings | ✅ Complete | Merged | 13 passing |
-| 2 | GitHub Repository & Git Init | ✅ Complete | Merged | - |
-| 3 | Workflow Automation Scripts | ✅ Complete | Merged | - |
-| 4 | Custom User Model | ⏳ Pending | - | - |
-| 5 | Profile Models & Signals | ⏳ Pending | - | - |
-| 6 | Login Separation & Redirects | ⏳ Pending | - | - |
-| 7 | Base Template & Modular Static | ⏳ Pending | - | - |
-| 8 | Frontend UI Components | ⏳ Pending | - | - |
-| 9 | Wallet & Transaction Models | ⏳ Pending | - | - |
-| 10 | Atomic Financial Logic | ⏳ Pending | - | - |
-| 11 | HTMX Balance & History Views | ⏳ Pending | - | - |
-| 12 | HTMX Transaction Forms | ⏳ Pending | - | - |
-| 13 | Celery & Redis Integration | ⏳ Pending | - | - |
-| 14 | PDF Statement & Progress Bar | ⏳ Pending | - | - |
-| 15 | Staff Back-Office & Fraud Logic | ⏳ Pending | - | - |
-| 16 | Analytics & Data Visualization | ⏳ Pending | - | - |
-| 17 | Performance Audit & Optimization | ⏳ Pending | - | - |
-| 18 | Deployment (Render + SupaBase) | ⏳ Pending | - | - |
+| **1** | Foundation & Automation | ✅ Complete | Merged | 13 passing |
+| **2** | Identity & Access Management | ⏳ Pending | - | - |
+| **3** | Frontend Foundation | ⏳ Pending | - | - |
+| **4** | Wallet Engine | ⏳ Pending | - | - |
+| **5** | HTMX Dashboard | ⏳ Pending | - | - |
+| **6** | Async & Reporting | ⏳ Pending | - | - |
+| **7** | Staff & Analytics | ⏳ Pending | - | - |
+| **8** | Performance & Deployment | ⏳ Pending | - | - |
+
+> **Note:** The original 18 phases have been consolidated into 8 practical phases for better workflow efficiency. See `Constitution_Digital_Wallet.md` for details.
 
 ---
 
