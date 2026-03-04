@@ -1,0 +1,176 @@
+<!-- --#-- Client Dashboard Template -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Digital Wallet{% endblock %}
+
+{% block content %}
+<!-- --#-- Page Header -->
+<div class="page-header">
+    <h1 class="page-title">Welcome back, {{ user.get_full_name|default:user.email }}</h1>
+    <p class="page-subtitle">Manage your wallet and transactions</p>
+</div>
+
+<!-- --#-- Dashboard Grid -->
+<div class="dashboard-grid">
+
+    <!-- --#-- Left Column -->
+    <div class="dashboard-column">
+
+        <!-- --#-- Balance Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Your Wallet</h2>
+            </div>
+            <div class="card-body">
+                {% include 'components/balance_card.html' with wallet=wallet last_updated=last_updated %}
+            </div>
+        </div>
+
+        <!-- --#-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Quick Actions</h2>
+            </div>
+            <div class="card-body">
+                <div class="btn-group">
+                    <button class="btn btn-primary" hx-get="#" hx-target="#modal-container">
+                        ⬆️ Deposit
+                    </button>
+                    <button class="btn btn-secondary" hx-get="#" hx-target="#modal-container">
+                        ⬇️ Withdraw
+                    </button>
+                    <button class="btn btn-outline" hx-get="#" hx-target="#modal-container">
+                        🔄 Transfer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --#-- Right Column -->
+    <div class="dashboard-column dashboard-column-wide">
+
+        <!-- --#-- Recent Transactions -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-content">
+                    <h2 class="card-title">Recent Transactions</h2>
+                    <a href="#" class="btn btn-sm btn-outline">View All</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="transaction-list">
+                    {% for transaction in transactions %}
+                    {% include 'components/transaction_item.html' with transaction=transaction %}
+                    {% empty %}
+                    <div class="empty-state">
+                        <span class="empty-icon">📭</span>
+                        <p class="empty-text">No transactions yet</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- --#-- Analytics Preview -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Spending Overview</h2>
+            </div>
+            <div class="card-body">
+                <div class="analytics-placeholder">
+                    <p>Analytics coming soon...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --#-- Dashboard Specific Styles */
+    .page-header {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .page-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: var(--color-gray-900);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .page-subtitle {
+        color: var(--color-gray-500);
+        font-size: 1rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: var(--spacing-xl);
+    }
+
+    .dashboard-column {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .dashboard-column-wide {
+        min-width: 0;
+    }
+
+    .card-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--color-gray-900);
+        margin: 0;
+    }
+
+    .card-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .transaction-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-2xl);
+        color: var(--color-gray-500);
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .empty-text {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    .analytics-placeholder {
+        background: var(--color-gray-100);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-xl);
+        text-align: center;
+        color: var(--color-gray-500);
+    }
+
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,50 @@
+<!-- --#-- Navbar Component -->
+<nav class="navbar">
+    <div class="navbar-container">
+        <!-- --#-- Logo -->
+        <div class="navbar-brand">
+            <a href="{% url 'accounts:login_redirect' %}" class="brand-link">
+                <span class="brand-icon">💳</span>
+                <span class="brand-text">Digital Wallet</span>
+            </a>
+        </div>
+
+        <!-- --#-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle" aria-label="Toggle menu">
+            <span class="hamburger"></span>
+        </button>
+
+        <!-- --#-- Right Side Actions -->
+        <div class="navbar-actions">
+            {% if user.is_authenticated %}
+            <!-- --#-- User Menu -->
+            <div class="user-menu">
+                <button class="user-menu-toggle" aria-label="User menu">
+                    <span class="user-avatar">{{ user.email|first|upper }}</span>
+                    <span class="user-email">{{ user.email }}</span>
+                </button>
+                <div class="user-menu-dropdown">
+                    <a href="{% url 'accounts:login_redirect' %}" class="dropdown-item">
+                        <span>📊</span> Dashboard
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <span>⚙️</span> Settings
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <form method="post" action="{% url 'accounts:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item dropdown-logout">
+                            <span>🚪</span> Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <!-- --#-- Auth Links -->
+            <div class="auth-links">
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline">Login</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>

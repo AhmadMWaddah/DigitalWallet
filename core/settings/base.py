@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # -- Local Apps
     "accounts",
+    "wallet",
 ]
 
 MIDDLEWARE = [
@@ -73,7 +74,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 AUTH_USER_MODEL = "accounts.CustomUser"
 
 LOGIN_URL = "accounts:login"
-LOGIN_REDIRECT_URL = "accounts:login_redirect"
+LOGIN_REDIRECT_URL = "wallet:dashboard"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 # -- Session Security
@@ -126,6 +127,15 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Additional static files directories
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+# Media files
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

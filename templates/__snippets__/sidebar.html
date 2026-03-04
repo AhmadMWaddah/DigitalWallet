@@ -1,0 +1,85 @@
+<!-- --#-- Sidebar Navigation -->
+<aside class="sidebar">
+    <div class="sidebar-content">
+        <!-- --#-- Navigation Links -->
+        <nav class="sidebar-nav">
+            {% if user.is_authenticated %}
+            {% if user.is_staff_user %}
+            <!-- --#-- Staff Menu -->
+            <div class="nav-section">
+                <span class="nav-section-title">Staff</span>
+                <a href="/admin/" class="nav-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                    <span class="nav-icon">🏛️</span>
+                    <span class="nav-text">Admin Panel</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Users</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">🚨</span>
+                    <span class="nav-text">Fraud Alerts</span>
+                </a>
+            </div>
+            {% else %}
+            <!-- --#-- Client Menu -->
+            <div class="nav-section">
+                <span class="nav-section-title">Main</span>
+                <a href="{% url 'accounts:login_redirect' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-text">Transactions</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Analytics</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">Actions</span>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">⬆️</span>
+                    <span class="nav-text">Deposit</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">⬇️</span>
+                    <span class="nav-text">Withdraw</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">🔄</span>
+                    <span class="nav-text">Transfer</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">Account</span>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">Profile</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">🔒</span>
+                    <span class="nav-text">Security</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Statements</span>
+                </a>
+            </div>
+            {% endif %}
+            {% else %}
+            <!-- --#-- Guest Menu -->
+            <div class="nav-section">
+                <a href="{% url 'accounts:login' %}" class="nav-item active">
+                    <span class="nav-icon">🔑</span>
+                    <span class="nav-text">Login</span>
+                </a>
+            </div>
+            {% endif %}
+        </nav>
+    </div>
+</aside>

@@ -1,0 +1,69 @@
+<!-- --#-- Digital Wallet Dashboard - Base Template -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- --#-- Meta & Title -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure Digital Wallet Dashboard for managing your finances">
+    <title>{% block title %}Digital Wallet{% endblock %}</title>
+
+    <!-- --#-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+
+    <!-- --#-- HTMX CDN -->
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+    <!-- --#-- Modular CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/modules/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modules/navigation.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modules/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modules/utilities.css' %}">
+
+    <!-- --#-- Page Specific CSS -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- --#-- App Container -->
+    <div class="app-container">
+
+        <!-- --#-- Navbar -->
+        {% include '__snippets__/navbar.html' %}
+
+        <!-- --#-- Main Layout -->
+        <div class="main-layout">
+
+            <!-- --#-- Sidebar -->
+            {% include '__snippets__/sidebar.html' %}
+
+            <!-- --#-- Main Content -->
+            <main class="main-content">
+                <!-- --#-- Messages/Alerts -->
+                {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                    {% include 'components/alert.html' with message=message %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- --#-- Page Content -->
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+
+        <!-- --#-- Footer -->
+        {% include '__snippets__/footer.html' %}
+    </div>
+
+    <!-- --#-- Modal Container -->
+    <div id="modal-container"></div>
+
+    <!-- --#-- Modular JavaScript -->
+    <script src="{% static 'js/modules/utils.js' %}"></script>
+
+    <!-- --#-- Page Specific JavaScript -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

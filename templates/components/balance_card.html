@@ -1,0 +1,32 @@
+<!-- --#-- Balance Card Component -->
+<div class="balance-card">
+    <div class="balance-header">
+        <h3 class="balance-title">Available Balance</h3>
+        <span class="balance-badge {% if wallet.is_frozen %}badge-frozen{% else %}badge-active{% endif %}">
+            {% if wallet.is_frozen %}🔒 Frozen{% else %}✓ Active{% endif %}
+        </span>
+    </div>
+
+    <div class="balance-amount">
+        <span class="currency-symbol">$</span>
+        <span class="amount-value">{{ wallet.balance|default:"0.00" }}</span>
+    </div>
+
+    <div class="balance-actions">
+        <a href="#" class="btn btn-primary" hx-get="{% url 'wallet:deposit' %}" hx-target="#modal-container">
+            <span>⬆️</span> Deposit
+        </a>
+        <a href="#" class="btn btn-secondary" hx-get="{% url 'wallet:withdraw' %}" hx-target="#modal-container">
+            <span>⬇️</span> Withdraw
+        </a>
+        <a href="#" class="btn btn-outline" hx-get="{% url 'wallet:transfer' %}" hx-target="#modal-container">
+            <span>🔄</span> Transfer
+        </a>
+    </div>
+
+    {% if last_updated %}
+    <div class="balance-footer">
+        <small>Last updated: {{ last_updated }}</small>
+    </div>
+    {% endif %}
+</div>

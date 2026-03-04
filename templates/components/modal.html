@@ -1,0 +1,47 @@
+<!-- --#-- Modal Component -->
+<div class="modal-overlay" id="modal-{{ modal_id|default:'default' }}">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 class="modal-title">{% block modal_title %}{{ title|default:"Modal" }}{% endblock %}</h3>
+            <button class="modal-close" onclick="closeModal()" aria-label="Close">
+                <span>&times;</span>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            {% block modal_content %}
+            {{ content|safe }}
+            {% endblock %}
+        </div>
+
+        {% block modal_footer %}
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+            {% if confirm_text %}
+            <button class="btn btn-primary" id="modal-confirm-btn">{{ confirm_text }}</button>
+            {% endif %}
+        </div>
+        {% endblock %}
+    </div>
+</div>
+
+<script>
+function closeModal() {
+    const modal = document.getElementById('modal-{{ modal_id|default:"default" }}');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Close on overlay click
+document.addEventListener('DOMContentLoaded', function() {
+    const overlay = document.querySelector('.modal-overlay');
+    if (overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                closeModal();
+            }
+        });
+    }
+});
+</script>

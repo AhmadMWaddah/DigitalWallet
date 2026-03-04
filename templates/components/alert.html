@@ -1,0 +1,20 @@
+<!-- --#-- Alert Component -->
+{% if message %}
+<div class="alert alert-{{ message.tags|default:'info' }}" role="alert">
+    <div class="alert-content">
+        {% if message.tags == 'success' %}
+        <span class="alert-icon">✓</span>
+        {% elif message.tags == 'error' or message.tags == 'danger' %}
+        <span class="alert-icon">!</span>
+        {% elif message.tags == 'warning' %}
+        <span class="alert-icon">⚠</span>
+        {% else %}
+        <span class="alert-icon">ℹ</span>
+        {% endif %}
+        <span class="alert-message">{{ message }}</span>
+    </div>
+    <button class="alert-close" onclick="this.parentElement.remove()" aria-label="Close">
+        <span>&times;</span>
+    </button>
+</div>
+{% endif %}
