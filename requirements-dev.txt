@@ -1,0 +1,11 @@
+# Development & Testing
+pytest==9.0.*
+pytest-django==4.12.*
+
+# Debugging
+django-debug-toolbar==5.1.*
+
+# Code Quality
+black==25.1.*
+flake8==7.1.*
+isort==6.0.*

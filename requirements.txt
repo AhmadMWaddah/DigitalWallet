@@ -1,0 +1,15 @@
+# Core Dependencies
+django==5.2.*
+django-environ==0.13.0
+psycopg2-binary==2.9.11
+
+# Async Tasks
+celery==5.4.*
+redis==5.2.*
+
+# PDF Generation
+reportlab==4.3.*
+
+# Production
+gunicorn==23.0.*
+whitenoise==6.8.*
