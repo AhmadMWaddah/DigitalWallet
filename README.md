@@ -1,5 +1,3 @@
-![Digital Wallet](https://img.shields.io/badge/Digital-Wallet-blue)
-
 # Digital Wallet Dashboard
 
 ![Digital Wallet Dashboard](Digital_Wallet.png)

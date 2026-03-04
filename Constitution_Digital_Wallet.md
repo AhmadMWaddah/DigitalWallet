@@ -15,8 +15,8 @@
 - **Logic Comments:** Explain **why**, not **what**. Use `# Comment content`.
 - **Section Headers:** Use clean, scannable headers:
   - Python/Bash: `# -- Header Section Name`
-  - HTML: `<!-- -- Header Section Name -->`
-  - CSS/JS: `/* -- Header Section Name */`
+  - HTML: `<!-- --#-- Header Section Name -->`
+  - CSS/JS: `/* --#-- Header Section Name */`
 
 ---
 
@@ -62,41 +62,42 @@ Build a secure, production-ready **Digital Wallet Dashboard** with dual-portal a
 
 ---
 
-## Phase 1: Foundation & Automation ✅
+## Phase 1: Foundation & Automation
 
-**Status:** COMPLETE
+**Goal:** Initialize project with professional settings structure, Git workflow, pre-commit quality hooks, and automation scripts.
 
-**Goal:** Initialize project with professional settings structure, Git workflow, and automation scripts.
-
-**Concepts:** Virtual environments, Django project structure, settings modularization, Git automation.
+**Concepts:** Virtual environments, Django project structure, settings modularization, Git automation, Code Linting.
 
 ### Tasks
 
-1. ✅ Create virtual environment `.env_digital_wallet` with Python 3.12
-2. ✅ Install initial dependencies: `django==5.2.*`, `django-environ`, `psycopg2-binary`
-3. ✅ Start Django project `core` in current directory
-4. ✅ Create settings package: `core/settings/` with `base.py`, `dev.py`, `prod.py`
-5. ✅ Configure `django-environ` for environment-based settings
-6. ✅ Initialize Git: `git init`, `.gitignore`, `.env.example`
-7. ✅ Create GitHub repository: `gh repo create DigitalWallet --public`
-8. ✅ Create automation scripts:
+1. Create virtual environment `.env_digital_wallet` with Python 3.12
+2. Install dependencies: `django==5.2.*`, `django-environ`, `psycopg2-binary`, `pre-commit`, `black`, `flake8`, `isort`
+3. Start Django project `core` in current directory
+4. Create settings package: `core/settings/` with `base.py`, `dev.py`, `prod.py`
+5. Configure `django-environ` for environment-based settings
+6. Initialize Git: `git init`, `.gitignore`, `.env.example`
+7. Create GitHub repository: `gh repo create DigitalWallet --public`
+8. Create automation scripts:
    - `scripts/git-phase-commit.sh` — Phase commits with branch management
    - `scripts/git-phase-merge.sh` — Merge phase to master with cleanup
-   - `scripts/setup.sh` — One-command project setup
-9. ✅ Configure pytest with `pytest.ini` and `conftest.py`
-10. ✅ Write tests for settings structure (13 tests)
-11. ✅ Verify: Server runs on port 8500, all tests pass
+   - `scripts/setup.sh` — One-command project setup (Must include `pre-commit install`)
+9. Configure pytest with `pytest.ini` and `conftest.py`
+10. **Code Quality Setup:** 
+    - Create `.pre-commit-config.yaml` with hooks for black, flake8, isort, and trailing-whitespace.
+    - Run `pre-commit install` to activate the hooks.
+11. Write tests for settings structure
+12. Verify: Server runs on port 8500, all tests pass, and `pre-commit` runs on a dummy commit.
 
 ### Deliverables
 
-- [x] Virtual environment `.env_digital_wallet`
-- [x] Django 5.2 project `core`
-- [x] Settings package (base/dev/prod)
-- [x] `.gitignore`, `.env.example`
-- [x] GitHub repository: https://github.com/AhmadMWaddah/DigitalWallet
-- [x] Automation scripts in `scripts/`
-- [x] Pytest configuration with 13 passing tests
-- [x] Comprehensive `README.md`
+- [ ] Virtual environment `.env_digital_wallet`
+- [ ] Django 5.2 project `core`
+- [ ] Settings package (base/dev/prod)
+- [ ] `.gitignore`, `.env.example`, `.pre-commit-config.yaml`
+- [ ] GitHub repository setup
+- [ ] Automation scripts in `scripts/`
+- [ ] Pytest configuration
+- [ ] Quality hooks (Black, Flake8, Isort) active
 
 ### Verification
 

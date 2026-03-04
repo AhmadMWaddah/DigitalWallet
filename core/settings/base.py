@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # -- Local Apps
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -63,6 +65,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
+
+
+# -- Authentication
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'accounts:login_redirect'
+LOGOUT_REDIRECT_URL = 'accounts:login'
 
 
 # Database
