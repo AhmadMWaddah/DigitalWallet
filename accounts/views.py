@@ -5,14 +5,18 @@ Handles user authentication with portal-based redirects.
 """
 
 from django import forms
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.views import LoginView as BaseLoginView
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
-from django.views.generic import View
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, View
 
+from .forms import ClientRegistrationForm
 from .models import UserType
+
+CustomUser = get_user_model()
 
 # -- Authentication Form
 
@@ -185,3 +189,32 @@ class LoginRedirectView(View):
             return redirect("wallet:dashboard")
 
         return redirect("wallet:dashboard")
+
+
+class ClientRegistrationView(CreateView):
+    """
+    Client registration view.
+
+    Allows new users to create a client account.
+    """
+
+    model = CustomUser
+    form_class = ClientRegistrationForm
+    template_name = "accounts/register.html"
+    success_url = reverse_lazy("accounts:login")
+
+    def form_valid(self, form):
+        """Handle successful registration."""
+        user = form.save()
+
+        # Log in the user after registration
+        login(self.request, user, backend="django.contrib.auth.backends.ModelBackend")
+
+        # Redirect to dashboard
+        return redirect("wallet:dashboard")
+
+    def get_context_data(self, **kwargs):
+        """Add page title to context."""
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Create Account"
+        return context
