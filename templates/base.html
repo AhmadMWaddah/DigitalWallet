@@ -1,6 +1,7 @@
 <!-- --#-- Digital Wallet Dashboard - Base Template -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <!-- --#-- Meta & Title -->
     <meta charset="UTF-8">
@@ -9,19 +10,19 @@
     <title>{% block title %}Digital Wallet{% endblock %}</title>
 
     <!-- --#-- Favicon -->
-    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/Digital_Wallet_Fav_Icon.png' %}">
 
     <!-- --#-- HTMX CDN -->
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 
     <!-- --#-- Modular CSS -->
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/modules/layout.css' %}">
-    <link rel="stylesheet" href="{% static 'css/modules/navigation.css' %}">
-    <link rel="stylesheet" href="{% static 'css/modules/forms.css' %}">
-    <link rel="stylesheet" href="{% static 'css/modules/utilities.css' %}">
-    {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/navigation.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/utilities.css' %}">
 </head>
+
 <body>
     <!-- --#-- App Container -->
     <div class="app-container">
@@ -59,9 +60,10 @@
     <div id="modal-container"></div>
 
     <!-- --#-- Modular JavaScript -->
-    <script src="{% static 'js/modules/utils.js' %}"></script>
+    <script src="{% static 'js/utils.js' %}"></script>
 
     <!-- --#-- Page Specific JavaScript -->
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

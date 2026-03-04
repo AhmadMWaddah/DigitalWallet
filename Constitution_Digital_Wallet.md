@@ -10,7 +10,11 @@
 
 - **Work sequentially** through each phase — do not skip ahead.
 - **Testing Mandate:** Every feature must include corresponding `pytest` test cases. Run tests before every commit.
-- **Git Mandate:** Use `scripts/git-phase-commit.sh` and `scripts/git-phase-merge.sh` for all phase work.
+- **Git Mandate:**
+  - **No Direct Master Commits:** Never commit directly to `master`. All work, including small fixes, must happen in a branch.
+  - **Phase Branches:** Use `phase-n` for ongoing feature work.
+  - **Fix Branches:** Use `fix-<description>` for bugs discovered in code already merged to `master`.
+  - **Automation:** Use `scripts/git-phase-commit.sh` and `scripts/git-phase-merge.sh` for all work.
 - **Views Architecture:** **CBVs** for structural views, **FBVs** for lightweight HTMX actions.
 - **Frontend Architecture:** CSS in `static/css/`, JS in `static/js/`, HTML snippets in `templates/components/`.
 - **Zero-Error Policy:** Never confirm completion without manual or automated verification.
@@ -179,7 +183,7 @@ python manage.py createsuperuser --settings=core.settings.dev
 
 1. Create directory structure:
    - `templates/`, `templates/__snippets__/`, `templates/components/`
-   - `static/css/modules/`, `static/js/modules/`
+   - `static/css/`, `static/js/`
 2. Create `templates/base.html` with responsive shell:
    - Navbar (logo, user menu, notifications)
    - Sidebar (navigation links, collapsible on mobile)
@@ -605,16 +609,14 @@ DigitalWallet/
 │       └── test_fraud.py
 │
 ├── static/
-│   ├── css/
-│   │   └── modules/              # Modular CSS files
-│   │       ├── layout.css
-│   │       ├── navigation.css
-│   │       ├── forms.css
-│   │       └── utilities.css
-│   └── js/
-│       └── modules/              # Modular JavaScript files
-│           ├── charts.js
-│           └── utils.js
+│   ├── css/                      # Modular CSS files
+│   │   ├── layout.css
+│   │   ├── navigation.css
+│   │   ├── forms.css
+│   │   └── utilities.css
+│   └── js/                       # Modular JavaScript files
+│       ├── charts.js
+│       └── utils.js
 │
 ├── templates/
 │   ├── base.html                 # Base template
@@ -655,8 +657,9 @@ DigitalWallet/
 | 6     | `phase-async-reporting`  |
 | 7     | `phase-staff-analytics`  |
 | 8     | `phase-qa-deployment`    |
+| Fix    | `fix-<description>`      |
 
-### Commit to Phase Branch
+### Commit to Branch (Phase or Fix)
 
 ```bash
 # Usage: ./scripts/git-phase-commit.sh <phase_number> "<title>" "<description>"
