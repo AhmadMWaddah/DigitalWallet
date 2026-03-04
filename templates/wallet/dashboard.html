@@ -4,6 +4,10 @@
 
 {% block title %}Dashboard - Digital Wallet{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/modules/dashboard.css' %}">
+{% endblock %}
+
 {% block content %}
 <!-- --#-- Page Header -->
 <div class="page-header">
@@ -86,91 +90,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    /* --#-- Dashboard Specific Styles */
-    .page-header {
-        margin-bottom: var(--spacing-xl);
-    }
-
-    .page-title {
-        font-size: 1.875rem;
-        font-weight: 700;
-        color: var(--color-gray-900);
-        margin-bottom: var(--spacing-xs);
-    }
-
-    .page-subtitle {
-        color: var(--color-gray-500);
-        font-size: 1rem;
-    }
-
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: 1fr 2fr;
-        gap: var(--spacing-xl);
-    }
-
-    .dashboard-column {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-lg);
-    }
-
-    .dashboard-column-wide {
-        min-width: 0;
-    }
-
-    .card-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--color-gray-900);
-        margin: 0;
-    }
-
-    .card-header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .transaction-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-sm);
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: var(--spacing-2xl);
-        color: var(--color-gray-500);
-    }
-
-    .empty-icon {
-        font-size: 3rem;
-        display: block;
-        margin-bottom: var(--spacing-md);
-    }
-
-    .empty-text {
-        font-size: 1rem;
-        margin: 0;
-    }
-
-    .analytics-placeholder {
-        background: var(--color-gray-100);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-xl);
-        text-align: center;
-        color: var(--color-gray-500);
-    }
-
-    @media (max-width: 1024px) {
-        .dashboard-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
 {% endblock %}
