@@ -1,0 +1,95 @@
+# --- Python ---
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual Environment ---
+.env_digital_wallet/
+.env/
+venv/
+ENV/
+env/
+.venv
+
+# --- Django ---
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+/static
+
+# --- Environment Variables ---
+.env
+.env.local
+.env.*.local
+
+# --- IDE ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# --- Testing ---
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+# --- Git ---
+.git/
+.gitignore
+.gitattributes
+
+# --- Documentation ---
+*.md
+!README.md
+!Constitution_Digital_Wallet.md
+
+# --- Backup Files ---
+*.bak
+*.tmp
+*.temp
+
+# --- Node (if needed later) ---
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# --- Celery ---
+celerybeat-schedule
+celerybeat.pid
+
+# --- PyCharm ---
+.iml
+.idea/
+
+# --- VS Code ---
+.vscode/
+*.code-workspace
+
+
+# --- AMW Custom ---
+note.txt
