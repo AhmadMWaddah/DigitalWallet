@@ -6,7 +6,8 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Django](https://img.shields.io/badge/Django-5.2.LTS-green)
-![License](https://img.shields.io/badge/License-Private-red)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Tests](https://img.shields.io/badge/tests-52%20passed-brightgreen)
 
 ---
 
@@ -73,6 +74,7 @@ DigitalWallet/
 ├── .env                          # Local environment variables (NEVER COMMIT)
 ├── .env.example                  # Template for environment variables
 ├── .gitignore                    # Git ignore rules
+├── .pre-commit-config.yaml       # Code quality hooks (black, flake8, isort)
 ├── manage.py                     # Django management script
 ├── pytest.ini                    # Pytest configuration
 ├── conftest.py                   # Pytest fixtures
@@ -80,6 +82,7 @@ DigitalWallet/
 ├── requirements-dev.txt          # Development dependencies
 ├── README.md                     # This file
 ├── Constitution_Digital_Wallet.md # Project constitution & phase plan
+├── LICENSE                       # MIT License
 │
 ├── .env_digital_wallet/          # Python virtual environment
 │
@@ -95,9 +98,13 @@ DigitalWallet/
 │
 ├── accounts/                     # User authentication & profiles
 │   ├── models.py                 # CustomUser, StaffProfile, ClientProfile
+│   ├── managers.py               # CustomUserManager
 │   ├── signals.py                # Auto-profile creation signals
 │   ├── views.py                  # Login/logout views
+│   ├── admin.py                  # Admin registration
 │   └── tests/                    # Authentication tests
+│       ├── test_models.py
+│       └── test_views.py
 │
 ├── wallet/                       # Core financial engine
 │   ├── models.py                 # Wallet, Transaction models
@@ -290,7 +297,7 @@ pytest --cov=. --cov-report=html
 | Phase | Name                         | Status      | Branch | Tests      |
 |-------|------------------------------|-------------|--------|------------|
 | **1** | Foundation & Automation      | ✅ Complete | Merged | 13 passing |
-| **2** | Identity & Access Management | ⏳ Pending  | -      | -          |
+| **2** | Identity & Access Management | ✅ Complete | Merged | 39 passing |
 | **3** | Frontend Foundation          | ⏳ Pending  | -      | -          |
 | **4** | Wallet Engine                | ⏳ Pending  | -      | -          |
 | **5** | HTMX Dashboard               | ⏳ Pending  | -      | -          |
@@ -299,6 +306,24 @@ pytest --cov=. --cov-report=html
 | **8** | Performance & Deployment     | ⏳ Pending  | -      | -          |
 
 > **Note:** The original 18 phases have been consolidated into 8 practical phases for better workflow efficiency. See `Constitution_Digital_Wallet.md` for details.
+
+### **Completed Features:**
+
+**Phase 1 - Foundation:**
+- ✅ Django 5.2 project with settings package (base/dev/prod)
+- ✅ Git workflow with automated phase scripts
+- ✅ Pre-commit hooks (black, flake8, isort)
+- ✅ Pytest configuration with 13 passing tests
+- ✅ GitHub repository setup
+
+**Phase 2 - Identity & Access:**
+- ✅ CustomUser model with email-based authentication
+- ✅ StaffProfile and ClientProfile with auto-creation signals
+- ✅ Portal separation (Staff → /admin/, Client → /dashboard/)
+- ✅ StaffOnlyMixin and ClientOnlyMixin for access control
+- ✅ Custom login view with EmailAuthenticationForm
+- ✅ Session & CSRF security hardening
+- ✅ 39 passing pytest tests
 
 ---
 
@@ -319,7 +344,7 @@ This is a private project. For questions or issues, contact **Ahmad**.
 
 ## 📝 License
 
-**Private Property** - All rights reserved.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -329,4 +354,4 @@ This is a private project. For questions or issues, contact **Ahmad**.
 
 ---
 
-*Last Updated: March 4, 2026*
+*Last Updated: March 5, 2026*
