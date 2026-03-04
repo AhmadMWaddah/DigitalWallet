@@ -35,30 +35,30 @@ Build a secure, production-ready **Digital Wallet Dashboard** with dual-portal a
 
 ### Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Backend** | Python 3.12, Django 5.2 (LTS) |
-| **Database** | PostgreSQL (SupaBase for production) |
-| **Frontend** | HTMX, Custom Modular CSS, Vanilla JS |
-| **Async** | Celery + Redis |
-| **PDF** | ReportLab |
-| **Testing** | Pytest, pytest-django |
-| **Deployment** | Render, Gunicorn, WhiteNoise |
+| Layer           | Technology                                    |
+|-----------------|-----------------------------------------------|
+| **Backend**     | Python 3.12, Django 5.2 (LTS)                 |
+| **Database**    | PostgreSQL (SupaBase for production)          |
+| **Frontend**    | HTMX, Custom Modular CSS, Vanilla JS          |
+| **Async**       | Celery + Redis                                |
+| **PDF**         | ReportLab                                     |
+| **Testing**     | Pytest, pytest-django                         |
+| **Deployment**  | Render, Gunicorn, WhiteNoise                  |
 
 ---
 
 ## Phase Structure Overview
 
-| Phase | Name | Branch | Original Phases |
-|-------|------|--------|-----------------|
-| **1** | Foundation & Automation | `phase-setup-automation` | 1, 2, 3 |
-| **2** | Identity & Access Management | `phase-identity-auth` | 4, 5, 6 |
-| **3** | Frontend Foundation | `phase-frontend-core` | 7, 8 |
-| **4** | Wallet Engine | `phase-wallet-engine` | 9, 10 |
-| **5** | HTMX Dashboard | `phase-dashboard-htmx` | 11, 12 |
-| **6** | Async & Reporting | `phase-async-reporting` | 13, 14 |
-| **7** | Staff & Analytics | `phase-staff-analytics` | 15, 16 |
-| **8** | Performance & Deployment | `phase-qa-deployment` | 17, 18 |
+| Phase | Name                         | Branch                   | Original Phases |
+|-------|------------------------------|--------------------------|-----------------|
+| **1** | Foundation & Automation      | `phase-setup-automation` | 1, 2, 3         |
+| **2** | Identity & Access Management | `phase-identity-auth`    | 4, 5, 6         |
+| **3** | Frontend Foundation          | `phase-frontend-core`    | 7, 8            |
+| **4** | Wallet Engine                | `phase-wallet-engine`    | 9, 10           |
+| **5** | HTMX Dashboard               | `phase-dashboard-htmx`   | 11, 12          |
+| **6** | Async & Reporting            | `phase-async-reporting`  | 13, 14          |
+| **7** | Staff & Analytics            | `phase-staff-analytics`  | 15, 16          |
+| **8** | Performance & Deployment     | `phase-qa-deployment`    | 17, 18          |
 
 ---
 
@@ -82,7 +82,7 @@ Build a secure, production-ready **Digital Wallet Dashboard** with dual-portal a
    - `scripts/git-phase-merge.sh` — Merge phase to master with cleanup
    - `scripts/setup.sh` — One-command project setup (Must include `pre-commit install`)
 9. Configure pytest with `pytest.ini` and `conftest.py`
-10. **Code Quality Setup:** 
+10. **Code Quality Setup:**
     - Create `.pre-commit-config.yaml` with hooks for black, flake8, isort, and trailing-whitespace.
     - Run `pre-commit install` to activate the hooks.
 11. Write tests for settings structure
@@ -639,16 +639,16 @@ DigitalWallet/
 
 ### Branch Naming Convention
 
-| Phase | Branch Name |
-|-------|-------------|
-| 1 | `phase-setup-automation` |
-| 2 | `phase-identity-auth` |
-| 3 | `phase-frontend-core` |
-| 4 | `phase-wallet-engine` |
-| 5 | `phase-dashboard-htmx` |
-| 6 | `phase-async-reporting` |
-| 7 | `phase-staff-analytics` |
-| 8 | `phase-qa-deployment` |
+| Phase | Branch Name              |
+|-------|--------------------------|
+| 1     | `phase-setup-automation` |
+| 2     | `phase-identity-auth`    |
+| 3     | `phase-frontend-core`    |
+| 4     | `phase-wallet-engine`    |
+| 5     | `phase-dashboard-htmx`   |
+| 6     | `phase-async-reporting`  |
+| 7     | `phase-staff-analytics`  |
+| 8     | `phase-qa-deployment`    |
 
 ### Commit to Phase Branch
 

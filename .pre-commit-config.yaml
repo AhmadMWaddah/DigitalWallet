@@ -1,0 +1,38 @@
+# -- Pre-commit Configuration
+# Digital Wallet Project - Code Quality Hooks
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # -- Black: Code Formatter
+  - repo: https://github.com/psf/black
+    rev: 26.1.0
+    hooks:
+      - id: black
+        language_version: python3.12
+        args: [--line-length, "100"]
+
+  # -- Flake8: Linter
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        args: [--max-line-length, "100", --extend-ignore, "E203,W503,E501"]
+        exclude: ^migrations/|^core/settings/(dev|prod)\.py$
+
+  # -- Isort: Import Sorter
+  - repo: https://github.com/PyCQA/isort
+    rev: 8.0.1
+    hooks:
+      - id: isort
+        args: [--profile, black, --line-length, "100"]
+
+  # -- Trailing Whitespace
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: [--maxkb=1024]
