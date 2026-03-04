@@ -4,10 +4,12 @@
 
 set -e
 
+# -- Configuration Section
+
 # Check arguments
 if [ $# -lt 3 ]; then
     echo "Usage: $0 <phase_number> \"<title>\" \"<description>\""
-    echo "Example: $0 1 \"Environment Setup\" \"Created venv, Django project, and settings package\""
+    echo "Example: $0 4 \"Custom User Model\" \"Implemented email-based auth with user_type field\""
     exit 1
 fi
 
@@ -15,7 +17,8 @@ PHASE_NUMBER=$1
 TITLE=$2
 DESCRIPTION=$3
 
-# Determine branch name based on phase number
+# -- Determine Branch Name
+
 if [ "$PHASE_NUMBER" -ge 1 ] && [ "$PHASE_NUMBER" -le 3 ]; then
     BRANCH_NAME="phase-setup-automation"
 elif [ "$PHASE_NUMBER" -ge 4 ] && [ "$PHASE_NUMBER" -le 6 ]; then
@@ -37,6 +40,8 @@ else
     exit 1
 fi
 
+# -- Branch Management
+
 # Create and checkout phase branch if it doesn't exist
 if ! git show-ref --verify --quiet refs/heads/"$BRANCH_NAME"; then
     echo "Creating branch: $BRANCH_NAME"
@@ -46,8 +51,17 @@ else
     git checkout "$BRANCH_NAME"
 fi
 
+# -- Stage & Commit
+
 # Stage all changes
 git add .
+
+# Check if there are changes to commit
+if git diff --staged --quiet; then
+    echo "⚠ No changes to commit. Working tree is clean."
+    echo "✓ Phase $PHASE_NUMBER branch is ready: $BRANCH_NAME"
+    exit 0
+fi
 
 # Commit with title and description
 git commit -m "Phase $PHASE_NUMBER: $TITLE" -m "$DESCRIPTION"
