@@ -1,4 +1,8 @@
+![Digital Wallet](https://img.shields.io/badge/Digital-Wallet-blue)
+
 # Digital Wallet Dashboard
+
+![Digital Wallet Dashboard](Digital_Wallet.png)
 
 A secure, production-ready **Fintech Digital Wallet Dashboard** built with Django 5.2 (LTS), HTMX, and PostgreSQL.
 
@@ -51,16 +55,16 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Backend** | Python 3.12, Django 5.2 (LTS) |
-| **Database** | PostgreSQL (SupaBase for production) |
-| **Frontend** | HTMX, Custom Modular CSS, Vanilla JS |
-| **Async Tasks** | Celery + Redis |
-| **PDF Generation** | ReportLab |
-| **Testing** | Pytest, pytest-django |
-| **Deployment** | Render, Gunicorn, WhiteNoise |
-| **Version Control** | Git, GitHub CLI |
+| Layer               | Technology                               |
+|---------------------|------------------------------------------|
+| **Backend**         | Python 3.12, Django 5.2 (LTS)            |
+| **Database**        | PostgreSQL (SupaBase for production)     |
+| **Frontend**        | HTMX, Custom Modular CSS, Vanilla JS     |
+| **Async Tasks**     | Celery + Redis                           |
+| **PDF Generation**  | ReportLab                                |
+| **Testing**         | Pytest, pytest-django                    |
+| **Deployment**      | Render, Gunicorn, WhiteNoise             |
+| **Version Control** | Git, GitHub CLI                          |
 
 ---
 
@@ -210,16 +214,16 @@ This project follows a strict phase-based development workflow with automated Gi
 
 ### **Branch Naming Convention**
 
-| Phase | Branch Name |
-|-------|-------------|
-| 1 | `phase-setup-automation` |
-| 2 | `phase-identity-auth` |
-| 3 | `phase-frontend-core` |
-| 4 | `phase-wallet-engine` |
-| 5 | `phase-dashboard-htmx` |
-| 6 | `phase-async-reporting` |
-| 7 | `phase-staff-analytics` |
-| 8 | `phase-qa-deployment` |
+| Phase | Branch Name                |
+|-------|----------------------------|
+|   1   | `phase-setup-automation`   |
+|   2   | `phase-identity-auth`      |
+|   3   | `phase-frontend-core`      |
+|   4   | `phase-wallet-engine`      |
+|   5   | `phase-dashboard-htmx`     |
+|   6   | `phase-async-reporting`    |
+|   7   | `phase-staff-analytics`    |
+|   8   | `phase-qa-deployment`      |
 
 ### **Zero-Error Policy**
 
@@ -285,16 +289,16 @@ pytest --cov=. --cov-report=html
 
 ## 📊 Phase Progress (Optimized 8-Phase Structure)
 
-| Phase | Name | Status | Branch | Tests |
-|-------|------|--------|--------|-------|
-| **1** | Foundation & Automation | ✅ Complete | Merged | 13 passing |
-| **2** | Identity & Access Management | ⏳ Pending | - | - |
-| **3** | Frontend Foundation | ⏳ Pending | - | - |
-| **4** | Wallet Engine | ⏳ Pending | - | - |
-| **5** | HTMX Dashboard | ⏳ Pending | - | - |
-| **6** | Async & Reporting | ⏳ Pending | - | - |
-| **7** | Staff & Analytics | ⏳ Pending | - | - |
-| **8** | Performance & Deployment | ⏳ Pending | - | - |
+| Phase | Name                         | Status      | Branch | Tests      |
+|-------|------------------------------|-------------|--------|------------|
+| **1** | Foundation & Automation      | ✅ Complete | Merged | 13 passing |
+| **2** | Identity & Access Management | ⏳ Pending  | -      | -          |
+| **3** | Frontend Foundation          | ⏳ Pending  | -      | -          |
+| **4** | Wallet Engine                | ⏳ Pending  | -      | -          |
+| **5** | HTMX Dashboard               | ⏳ Pending  | -      | -          |
+| **6** | Async & Reporting            | ⏳ Pending  | -      | -          |
+| **7** | Staff & Analytics            | ⏳ Pending  | -      | -          |
+| **8** | Performance & Deployment     | ⏳ Pending  | -      | -          |
 
 > **Note:** The original 18 phases have been consolidated into 8 practical phases for better workflow efficiency. See `Constitution_Digital_Wallet.md` for details.
 
