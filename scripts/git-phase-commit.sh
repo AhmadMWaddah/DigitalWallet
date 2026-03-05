@@ -60,7 +60,8 @@ fi
 # Commit with title and description
 git commit -m "Phase $PHASE_NUMBER: $TITLE" -m "$DESCRIPTION"
 
-# Push to remote
+# Push to remote (Remote-First Workflow)
 git push -u origin "$BRANCH_NAME"
 
 echo "✓ Successfully committed Phase $PHASE_NUMBER to branch: $BRANCH_NAME"
+echo "✓ Branch pushed to origin (Remote-First Workflow)"

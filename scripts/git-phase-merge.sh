@@ -43,9 +43,10 @@ git merge "$BRANCH_NAME" -m "Merge Phase $PHASE_NUMBER: Completed and verified"
 echo "Pushing master to remote..."
 git push origin master
 
-# Delete local and remote phase branch
+# Delete local and remote phase branch (Remote-First Workflow cleanup)
 echo "Cleaning up phase branch..."
 git branch -d "$BRANCH_NAME"
-git push origin --delete "$BRANCH_NAME" || true
+git push origin --delete "$BRANCH_NAME" 2>/dev/null || echo "  (Remote branch already deleted)"
 
 echo "✓ Successfully merged Phase $PHASE_NUMBER ($BRANCH_NAME) into master"
+echo "✓ Remote-First Workflow cleanup complete"

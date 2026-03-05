@@ -12,9 +12,10 @@
 - **Testing Mandate:** Every feature must include corresponding `pytest` test cases. Run tests before every commit.
 - **Git Mandate:**
   - **No Direct Master Commits:** Never commit directly to `master`. All work, including small fixes, must happen in a branch.
+  - **Remote-First Workflow:** Every branch (Phase or Fix) must be pushed to the remote repository (`origin`) immediately after creation or the first commit.
   - **Phase Branches:** Use `phase-n` for ongoing feature work.
   - **Fix Branches:** Use `fix-<description>` for bugs discovered in code already merged to `master`.
-  - **Automation:** Use `scripts/git-phase-commit.sh` and `scripts/git-phase-merge.sh` for all work.
+  - **Automation:** Use `scripts/git-phase-commit.sh` and `scripts/git-phase-merge.sh` for all work. These scripts must handle pushing to and cleaning up the remote.
 - **Views Architecture:** **CBVs** for structural views, **FBVs** for lightweight HTMX actions.
 - **Frontend Architecture:** CSS in `static/css/`, JS in `static/js/`, HTML snippets in `templates/components/`.
 - **Zero-Error Policy:** Never confirm completion without manual or automated verification.
