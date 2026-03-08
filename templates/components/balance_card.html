@@ -1,9 +1,7 @@
-<!-- --#-- Balance Card Component -->
-{% load static %}
-
+<!-- --#-- Balance Card Component - Premium Design -->
 <div class="balance-card">
     <div class="balance-header">
-        <h3 class="balance-title">Available Balance</h3>
+        <h3 class="balance-title">Your Balance</h3>
         <span class="balance-badge {% if wallet.is_frozen %}badge-frozen{% else %}badge-active{% endif %}">
             {% if wallet.is_frozen %}🔒 Frozen{% else %}✓ Active{% endif %}
         </span>
@@ -14,21 +12,9 @@
         <span class="amount-value">{{ wallet.balance|default:"0.00" }}</span>
     </div>
 
-    <div class="balance-actions">
-        <a href="#" class="btn btn-primary" hx-get="#" hx-target="#modal-container">
-            <span>⬆️</span> Deposit
-        </a>
-        <a href="#" class="btn btn-secondary" hx-get="#" hx-target="#modal-container">
-            <span>⬇️</span> Withdraw
-        </a>
-        <a href="#" class="btn btn-outline" hx-get="#" hx-target="#modal-container">
-            <span>🔄</span> Transfer
-        </a>
-    </div>
-
     {% if last_updated %}
     <div class="balance-footer">
-        <small>Last updated: {{ last_updated }}</small>
+        <span>Last updated: {{ last_updated }}</span>
     </div>
     {% endif %}
 </div>

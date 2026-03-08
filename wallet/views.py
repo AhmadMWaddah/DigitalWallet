@@ -70,7 +70,7 @@ class TransactionHistoryView(LoginRequiredMixin, ClientOnlyMixin, View):
         """Return transaction history partial."""
         # Get cursor for pagination (timestamp of last loaded transaction)
         cursor = request.GET.get("cursor")
-        limit = 20
+        limit = int(request.GET.get("limit", 20))  # Default 20, can be overridden
 
         # Get user's wallet
         try:

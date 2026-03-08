@@ -1,31 +1,33 @@
-/* --#-- Layout CSS - Modern Grid System & Base Structure */
+/* --#-- Layout CSS - Modern Purple Theme */
 
-/* --#-- CSS Variables - Modern Color Palette */
+/* --#-- CSS Variables - Purple Color Palette */
 :root {
-    /* Primary Colors - Modern Blue Gradient */
-    --color-primary: #2563eb;
-    --color-primary-dark: #1d4ed8;
-    --color-primary-light: #3b82f6;
-    --color-primary-bg: #eff6ff;
+    /* Primary Colors - Modern Purple Gradient */
+    --color-primary: #7c3aed;
+    --color-primary-dark: #6d28d9;
+    --color-primary-light: #8b5cf6;
+    --color-primary-bg: #f5f3ff;
 
-    /* Secondary Colors - Modern Green */
-    --color-secondary: #10b981;
-    --color-secondary-dark: #059669;
-    --color-secondary-light: #34d399;
+    /* Secondary Colors - Pink Accent */
+    --color-secondary: #db2777;
+    --color-secondary-dark: #be185d;
+    --color-secondary-light: #ec4899;
 
     /* Accent Colors */
-    --color-accent: #8b5cf6;
-    --color-accent-dark: #7c3aed;
+    --color-accent: #06b6d4;
+    --color-accent-dark: #0891b2;
 
     /* Status Colors */
-    --color-success: #22c55e;
-    --color-success-bg: #dcfce7;
+    --color-success: #10b981;
+    --color-success-bg: #d1fae5;
+    --color-success-dark: #059669;
     --color-danger: #ef4444;
     --color-danger-bg: #fee2e2;
+    --color-danger-dark: #dc2626;
     --color-warning: #f59e0b;
     --color-warning-bg: #fef3c7;
-    --color-info: #06b6d4;
-    --color-info-bg: #cffafe;
+    --color-info: #3b82f6;
+    --color-info-bg: #dbeafe;
 
     /* Neutral Colors - Modern Gray Scale */
     --color-white: #ffffff;
@@ -41,41 +43,45 @@
     --color-gray-900: #111827;
 
     /* Background Colors */
-    --bg-primary: #f9fafb;
+    --bg-primary: #fafafa;
     --bg-secondary: #ffffff;
     --bg-tertiary: #f3f4f6;
+    --bg-gradient: linear-gradient(135deg, #fafafa 0%, #f5f3ff 100%);
 
     /* Text Colors */
-    --text-primary: #111827;
+    --text-primary: #1f2937;
     --text-secondary: #6b7280;
     --text-tertiary: #9ca3af;
     --text-inverse: #ffffff;
+    --text-on-purple: #ffffff;
 
     /* Spacing - Modern Scale */
-    --spacing-xs: 0.25rem; /* 4px */
-    --spacing-sm: 0.5rem; /* 8px */
-    --spacing-md: 1rem; /* 16px */
-    --spacing-lg: 1.5rem; /* 24px */
-    --spacing-xl: 2rem; /* 32px */
-    --spacing-2xl: 3rem; /* 48px */
-    --spacing-3xl: 4rem; /* 64px */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    --spacing-3xl: 4rem;
 
-    /* Border Radius - Modern Rounded */
+    /* Border Radius */
     --radius-sm: 0.375rem;
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
     --radius-2xl: 1.5rem;
+    --radius-3xl: 2rem;
     --radius-full: 9999px;
 
-    /* Shadows - Modern Soft Shadows */
-    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+    /* Shadows - Modern Soft Shadows with Purple Tint */
+    --shadow-xs: 0 1px 2px 0 rgba(124, 58, 237, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(124, 58, 237, 0.1), 0 1px 2px -1px rgba(124, 58, 237, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(124, 58, 237, 0.1), 0 2px 4px -2px rgba(124, 58, 237, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(124, 58, 237, 0.1), 0 4px 6px -4px rgba(124, 58, 237, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(124, 58, 237, 0.15), 0 8px 10px -6px rgba(124, 58, 237, 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgba(124, 58, 237, 0.25);
+    --shadow-inner: inset 0 2px 4px 0 rgba(124, 58, 237, 0.05);
+    --shadow-colored: 0 10px 40px -10px rgba(124, 58, 237, 0.5);
 
     /* Transitions */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -83,9 +89,8 @@
     --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Typography */
-    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, sans-serif;
-    --font-mono: "Fira Code", "Courier New", monospace;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "Fira Code", monospace;
 
     --text-xs: 0.75rem;
     --text-sm: 0.875rem;
@@ -104,10 +109,6 @@
     --line-height-tight: 1.25;
     --line-height-normal: 1.5;
     --line-height-relaxed: 1.625;
-
-    --letter-spacing-tight: -0.025em;
-    --letter-spacing-normal: 0;
-    --letter-spacing-wide: 0.025em;
 }
 
 /* --#-- Reset & Base */
@@ -132,17 +133,12 @@ body {
     line-height: var(--line-height-normal);
     font-weight: var(--font-normal);
     color: var(--text-primary);
-    background-color: var(--bg-primary);
+    background: var(--bg-gradient);
     min-height: 100vh;
 }
 
 /* --#-- Typography */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
     font-weight: var(--font-semibold);
     line-height: var(--line-height-tight);
     color: var(--text-primary);
@@ -152,7 +148,7 @@ h6 {
 h1 {
     font-size: var(--text-3xl);
     font-weight: var(--font-bold);
-    letter-spacing: var(--letter-spacing-tight);
+    letter-spacing: -0.025em;
 }
 
 h2 {
@@ -161,10 +157,6 @@ h2 {
 
 h3 {
     font-size: var(--text-xl);
-}
-
-h4 {
-    font-size: var(--text-lg);
 }
 
 p {
@@ -187,14 +179,14 @@ a:hover {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: var(--bg-primary);
+    background: var(--bg-gradient);
 }
 
-/* --#-- Main Layout (Sidebar + Content) */
+/* --#-- Main Layout */
 .main-layout {
     display: flex;
     flex: 1;
-    margin-top: 64px; /* Navbar height */
+    margin-top: 64px;
     min-height: calc(100vh - 64px - 60px);
 }
 
@@ -202,46 +194,22 @@ a:hover {
 .main-content {
     flex: 1;
     padding: var(--spacing-xl);
-    margin-left: 280px; /* Sidebar width */
+    margin-left: 280px;
     min-height: calc(100vh - 64px - 60px);
-    background: var(--bg-primary);
 }
 
-/* --#-- Responsive Breakpoints */
 @media (max-width: 1024px) {
     .main-content {
         margin-left: 0;
         padding: var(--spacing-lg);
     }
-
-    html {
-        font-size: 15px;
-    }
 }
 
-@media (max-width: 768px) {
-    .main-content {
-        padding: var(--spacing-md);
-    }
-
-    html {
-        font-size: 14px;
-    }
-}
-
-/* --#-- Container Utility */
+/* --#-- Container */
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 var(--spacing-md);
-}
-
-.container-narrow {
-    max-width: 800px;
-}
-
-.container-wide {
-    max-width: 1400px;
 }
 
 /* --#-- Grid System */
@@ -258,31 +226,26 @@ a:hover {
     grid-template-columns: repeat(3, 1fr);
 }
 
-.grid-4 {
-    grid-template-columns: repeat(4, 1fr);
-}
-
 @media (max-width: 768px) {
-    .grid-2,
-    .grid-3,
-    .grid-4 {
+    .grid-2, .grid-3 {
         grid-template-columns: 1fr;
     }
 }
 
-/* --#-- Card Base - Modern Design */
+/* --#-- Card Base - Modern Purple Design */
 .card {
     background: var(--bg-secondary);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-2xl);
     padding: var(--spacing-xl);
     margin-bottom: var(--spacing-lg);
     border: 1px solid var(--color-gray-200);
-    transition: box-shadow var(--transition-base), transform var(--transition-base);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
 }
 
 .card:hover {
     box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
 }
 
 .card-header {
@@ -302,9 +265,6 @@ a:hover {
     margin-top: var(--spacing-lg);
     padding-top: var(--spacing-md);
     border-top: 1px solid var(--color-gray-200);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 /* --#-- Page Header */
@@ -317,21 +277,12 @@ a:hover {
     font-weight: var(--font-bold);
     color: var(--text-primary);
     margin-bottom: var(--spacing-xs);
-    letter-spacing: var(--letter-spacing-tight);
 }
 
 .page-subtitle {
     color: var(--text-secondary);
     font-size: var(--text-base);
     margin: 0;
-}
-
-/* --#-- Section Divider */
-.section-divider {
-    height: 1px;
-    background: var(--color-gray-200);
-    margin: var(--spacing-2xl) 0;
-    border: none;
 }
 
 /* --#-- Loading Spinner */
@@ -342,13 +293,11 @@ a:hover {
     height: 20px;
     border: 2px solid var(--color-gray-300);
     border-top-color: var(--color-primary);
-    border-radius: 50%;
+    border-radius: var(--radius-full);
 }
 
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
 }
 
 /* --#-- Scrollbar Styling */
@@ -363,11 +312,10 @@ a:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--color-gray-400);
+    background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
     border-radius: var(--radius-full);
-    transition: background var(--transition-fast);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-gray-500);
+    background: linear-gradient(180deg, var(--color-primary), var(--color-primary-dark));
 }
