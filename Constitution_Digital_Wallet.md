@@ -297,7 +297,7 @@ pytest wallet/tests/test_services.py::test_transfer_atomic_rollback -v
 
 ## Phase 5: HTMX Dashboard
 
-**Goal:** Build dynamic client dashboard with real-time HTMX interactions.
+**Goal:** Build dynamic client dashboard with real-time HTMX interactions for the full wallet lifecycle.
 
 **Concepts:** HTMX `hx-get`, `hx-post`, partial templates, OOB swaps, infinite scroll.
 
@@ -310,38 +310,39 @@ pytest wallet/tests/test_services.py::test_transfer_atomic_rollback -v
 2. Create `TransactionHistoryView` (FBV) returning HTML partial:
    - Use `hx-trigger="load"` for initial fetch
    - Support pagination with cursor-based infinite scroll
-   - Return `transaction_item.html` components
 3. Implement infinite scroll:
    - Add `hx-get` on last transaction item
-   - Pass `?cursor=<timestamp>` for next page
    - Return empty state when no more data
-4. Create `TransferForm` (ModelForm) with validation:
-   - Recipient email or account number
-   - Amount with min/max validation
-   - Prevent self-transfers
-5. Create `TransferView` (CBV) handling HTMX POST:
-   - Valid: Process transfer, return success message + OOB balance update
+4. **Wallet Action Forms (Deposit, Withdraw, Transfer):**
+   - Create `DepositForm`, `WithdrawForm`, and `TransferForm` (ModelForms)
+   - Implement custom validation for each (e.g., min/max limits, frozen checks)
+5. **HTMX Action Views:**
+   - Create views for Deposit, Withdraw, and Transfer handling HTMX POST
+   - Valid: Process via service layer, return success message + OOB balance update
    - Invalid: Return form partial with errors
 6. Create `BalanceCardView` (FBV) for OOB balance updates:
    - Return `balance_card.html` with new balance
 7. Implement HTMX OOB swaps:
-   - Update balance card after successful transfer
-   - Show/hide error alerts
+   - Update balance card after ANY successful transaction
+   - Show/hide error alerts without page reload
 8. Add loading states with `htmx-indicator`
-9. **Testing:** Write tests for:
-   - Dashboard view context data
-   - Transaction history partial rendering
+9. **Seed Data Tool:**
+   - Create a Django management command `seed_wallets` in `wallet/management/commands/`
+   - Logic: Create multiple dummy Client users with pre-funded wallets and random transaction history
+   - Support a `--clear` flag to purge existing dummy data before seeding
+10. **Testing:** Write tests for:
+   - All three transaction flows (Deposit/Withdraw/Transfer) via UI/HTMX
    - Infinite scroll pagination
-   - Form validation and OOB swaps
+   - OOB balance updates correctly reflecting DB changes
+   - Seed command execution and data integrity
 
 ### Deliverables
 
 - [ ] DashboardView with balance and transactions
 - [ ] TransactionHistoryView with infinite scroll
-- [ ] TransferForm and TransferView with HTMX
-- [ ] OOB balance updates
-- [ ] Loading indicators
-- [ ] 15+ pytest tests for HTMX views
+- [ ] Deposit, Withdraw, and Transfer forms with HTMX
+- [ ] OOB balance updates for all actions
+- [ ] 20+ pytest tests for HTMX views and UI flows
 
 ### Verification
 
@@ -496,7 +497,11 @@ python manage.py createsuperuser --settings=core.settings.dev
    - `CustomUser.email`
    - `Transaction.status`
    - `Transaction.type`
-6. Write performance tests with `django-test-migrations` or manual query counting:
+6. **Code Polish & Log Cleanup:**
+   - Resolve all `RuntimeWarning` issues (e.g., naive datetime warnings in tests).
+   - Ensure all `print()` statements are removed and replaced with proper Django logging.
+   - Verify console is 100% clean during test runs.
+7. Write performance tests with `django-test-migrations` or manual query counting:
    - Verify constant query count regardless of list size
 7. Configure `settings/prod.py` for production:
    - `DEBUG = False`
@@ -548,99 +553,99 @@ pytest wallet/tests/test_performance.py::test_transaction_list_query_count -v
 
 ## Project Structure
 
-```
-DigitalWallet/
-├── .env                          # Local secrets (NEVER COMMIT)
-├── .env.example                  # Template for environment variables
-├── .gitignore                    # Git ignore rules
-├── manage.py                     # Django management script
-├── pytest.ini                    # Pytest configuration
-├── conftest.py                   # Pytest fixtures
-├── requirements.txt              # Production dependencies
-├── requirements-dev.txt          # Development dependencies
-├── README.md                     # Project documentation
-├── Constitution_Digital_Wallet.md # This file
-├── Procfile                      # Render deployment config
-│
-├── .env_digital_wallet/          # Python virtual environment
-│
-├── core/                         # Django project settings
-│   ├── settings/
-│   │   ├── __init__.py
-│   │   ├── base.py               # Shared settings
-│   │   ├── dev.py                # Development settings
-│   │   └── prod.py               # Production settings
-│   ├── celery.py                 # Celery configuration
-│   ├── urls.py                   # Root URL configuration
-│   └── wsgi.py                   # WSGI application
-│
-├── accounts/                     # User authentication & profiles
-│   ├── models.py                 # CustomUser, StaffProfile, ClientProfile
-│   ├── managers.py               # CustomUserManager
-│   ├── signals.py                # Auto-profile creation signals
-│   ├── views.py                  # Login/logout views
-│   ├── admin.py                  # Admin registration
-│   └── tests/
-│       ├── test_models.py
-│       ├── test_views.py
-│       └── test_signals.py
-│
-├── wallet/                       # Core financial engine
-│   ├── models.py                 # Wallet, Transaction models
-│   ├── services.py               # Atomic financial operations
-│   ├── exceptions.py             # Custom exceptions
-│   ├── forms.py                  # Transaction forms
-│   ├── views.py                  # Dashboard & transaction views
-│   ├── admin.py                  # Admin registration
-│   └── tests/
-│       ├── test_models.py
-│       ├── test_services.py
-│       ├── test_views.py
-│       └── test_async.py
-│
-├── analytics/                    # Data visualization & reports
-│   ├── views.py                  # Analytics endpoints
-│   └── tests/
-│       └── test_views.py
-│
-├── admin_dashboard/              # Staff back-office tools
-│   ├── views.py                  # Staff dashboard views
-│   ├── fraud_engine.py           # Fraud detection rules
-│   └── tests/
-│       └── test_fraud.py
-│
-├── static/
-│   ├── css/                      # Modular CSS files
-│   │   ├── layout.css
-│   │   ├── navigation.css
-│   │   ├── forms.css
-│   │   └── utilities.css
-│   └── js/                       # Modular JavaScript files
-│       ├── charts.js
-│       └── utils.js
-│
-├── templates/
-│   ├── base.html                 # Base template
-│   ├── __snippets__/             # Reusable snippets
-│   │   ├── navbar.html
-│   │   ├── sidebar.html
-│   │   └── footer.html
-│   └── components/               # Reusable components
-│       ├── balance_card.html
-│       ├── transaction_item.html
-│       ├── alert.html
-│       ├── modal.html
-│       └── progress_bar.html
-│
-├── scripts/                      # Automation bash scripts
-│   ├── git-phase-commit.sh       # Commit to phase branch
-│   ├── git-phase-merge.sh        # Merge phase to master
-│   └── setup.sh                  # Project setup automation
-│
-└── media/                        # User uploads
-    ├── statements/               # Generated PDF statements
-    └── kyc/                      # KYC documents
-```
+   ```
+   DigitalWallet/
+   ├── .env                          # Local secrets (NEVER COMMIT)
+   ├── .env.example                  # Template for environment variables
+   ├── .gitignore                    # Git ignore rules
+   ├── manage.py                     # Django management script
+   ├── pytest.ini                    # Pytest configuration
+   ├── conftest.py                   # Pytest fixtures
+   ├── requirements.txt              # Production dependencies
+   ├── requirements-dev.txt          # Development dependencies
+   ├── README.md                     # Project documentation
+   ├── Constitution_Digital_Wallet.md # This file
+   ├── Procfile                      # Render deployment config
+   │
+   ├── .env_digital_wallet/          # Python virtual environment
+   │
+   ├── core/                         # Django project settings
+   │   ├── settings/
+   │   │   ├── __init__.py
+   │   │   ├── base.py               # Shared settings
+   │   │   ├── dev.py                # Development settings
+   │   │   └── prod.py               # Production settings
+   │   ├── celery.py                 # Celery configuration
+   │   ├── urls.py                   # Root URL configuration
+   │   └── wsgi.py                   # WSGI application
+   │
+   ├── accounts/                     # User authentication & profiles
+   │   ├── models.py                 # CustomUser, StaffProfile, ClientProfile
+   │   ├── managers.py               # CustomUserManager
+   │   ├── signals.py                # Auto-profile creation signals
+   │   ├── views.py                  # Login/logout views
+   │   ├── admin.py                  # Admin registration
+   │   └── tests/
+   │       ├── test_models.py
+   │       ├── test_views.py
+   │       └── test_signals.py
+   │
+   ├── wallet/                       # Core financial engine
+   │   ├── models.py                 # Wallet, Transaction models
+   │   ├── services.py               # Atomic financial operations
+   │   ├── exceptions.py             # Custom exceptions
+   │   ├── forms.py                  # Transaction forms
+   │   ├── views.py                  # Dashboard & transaction views
+   │   ├── admin.py                  # Admin registration
+   │   └── tests/
+   │       ├── test_models.py
+   │       ├── test_services.py
+   │       ├── test_views.py
+   │       └── test_async.py
+   │
+   ├── analytics/                    # Data visualization & reports
+   │   ├── views.py                  # Analytics endpoints
+   │   └── tests/
+   │       └── test_views.py
+   │
+   ├── admin_dashboard/              # Staff back-office tools
+   │   ├── views.py                  # Staff dashboard views
+   │   ├── fraud_engine.py           # Fraud detection rules
+   │   └── tests/
+   │       └── test_fraud.py
+   │
+   ├── static/
+   │   ├── css/                      # Modular CSS files
+   │   │   ├── layout.css
+   │   │   ├── navigation.css
+   │   │   ├── forms.css
+   │   │   └── utilities.css
+   │   └── js/                       # Modular JavaScript files
+   │       ├── charts.js
+   │       └── utils.js
+   │
+   ├── templates/
+   │   ├── base.html                 # Base template
+   │   ├── __snippets__/             # Reusable snippets
+   │   │   ├── navbar.html
+   │   │   ├── sidebar.html
+   │   │   └── footer.html
+   │   └── components/               # Reusable components
+   │       ├── balance_card.html
+   │       ├── transaction_item.html
+   │       ├── alert.html
+   │       ├── modal.html
+   │       └── progress_bar.html
+   │
+   ├── scripts/                      # Automation bash scripts
+   │   ├── git-phase-commit.sh       # Commit to phase branch
+   │   ├── git-phase-merge.sh        # Merge phase to master
+   │   └── setup.sh                  # Project setup automation
+   │
+   └── media/                        # User uploads
+      ├── statements/               # Generated PDF statements
+      └── kyc/                      # KYC documents
+   ```
 
 ---
 
@@ -658,7 +663,7 @@ DigitalWallet/
 | 6     | `phase-async-reporting`  |
 | 7     | `phase-staff-analytics`  |
 | 8     | `phase-qa-deployment`    |
-| Fix    | `fix-<description>`      |
+| Fix   | `fix-<description>`      |
 
 ### Commit to Branch (Phase or Fix)
 

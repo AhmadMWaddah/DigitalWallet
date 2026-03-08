@@ -180,7 +180,7 @@ class TestDashboardViewComponents:
 
         assert "wallet" in context
         assert "transactions" in context
-        assert "last_updated" in context
+        assert "deposit_form" in context  # Forms are in context
 
     def test_dashboard_view_requires_login(self):
         """Test that DashboardView requires authentication."""

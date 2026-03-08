@@ -1,0 +1,23 @@
+<!-- --#-- Transaction List Partial -->
+<!-- Used for HTMX infinite scroll -->
+
+{% load static %}
+
+{% for transaction in transactions %}
+{% include 'components/transaction_item.html' with transaction=transaction %}
+{% empty %}
+<div class="empty-state">
+    <span class="empty-icon">📭</span>
+    <p class="empty-text">No transactions yet</p>
+</div>
+{% endfor %}
+
+{% if has_more and next_cursor %}
+<div hx-get="{% url 'wallet:transaction_history' %}?cursor={{ next_cursor }}"
+     hx-trigger="revealed"
+     hx-swap="afterend">
+    <div class="text-center p-4">
+        <span class="htmx-indicator spinner">Loading more...</span>
+    </div>
+</div>
+{% endif %}

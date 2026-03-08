@@ -1,0 +1,33 @@
+<!-- --#-- Deposit Form Partial -->
+<form hx-post="{% url 'wallet:deposit' %}"
+      hx-target="#deposit-form-container"
+      hx-swap="outerHTML"
+      class="transaction-form">
+
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label for="{{ form.amount.id_for_label }}">Amount</label>
+        {{ form.amount }}
+        {% if form.amount.errors %}
+        <div class="form-error">{{ form.amount.errors.0 }}</div>
+        {% endif %}
+        {% if form.amount.help_text %}
+        <div class="form-help">{{ form.amount.help_text }}</div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label for="{{ form.description.id_for_label }}">Description (Optional)</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+        <div class="form-error">{{ form.description.errors.0 }}</div>
+        {% endif %}
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-block">
+            <span>⬆️</span> Deposit
+        </button>
+    </div>
+</form>

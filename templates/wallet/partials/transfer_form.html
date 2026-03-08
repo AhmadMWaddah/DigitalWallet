@@ -1,0 +1,44 @@
+<!-- --#-- Transfer Form Partial -->
+<form hx-post="{% url 'wallet:transfer' %}"
+      hx-target="#transfer-form-container"
+      hx-swap="outerHTML"
+      class="transaction-form">
+
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label for="{{ form.recipient_email.id_for_label }}">Recipient Email</label>
+        {{ form.recipient_email }}
+        {% if form.recipient_email.errors %}
+        <div class="form-error">{{ form.recipient_email.errors.0 }}</div>
+        {% endif %}
+        {% if form.recipient_email.help_text %}
+        <div class="form-help">{{ form.recipient_email.help_text }}</div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label for="{{ form.amount.id_for_label }}">Amount</label>
+        {{ form.amount }}
+        {% if form.amount.errors %}
+        <div class="form-error">{{ form.amount.errors.0 }}</div>
+        {% endif %}
+        {% if form.amount.help_text %}
+        <div class="form-help">{{ form.amount.help_text }}</div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label for="{{ form.description.id_for_label }}">Description (Optional)</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+        <div class="form-error">{{ form.description.errors.0 }}</div>
+        {% endif %}
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-outline btn-block">
+            <span>🔄</span> Transfer
+        </button>
+    </div>
+</form>

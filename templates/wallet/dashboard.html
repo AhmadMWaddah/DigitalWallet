@@ -15,6 +15,9 @@
     <p class="page-subtitle">Manage your wallet and transactions</p>
 </div>
 
+<!-- --#-- Messages Container -->
+<div id="messages-container"></div>
+
 <!-- --#-- Dashboard Grid -->
 <div class="dashboard-grid">
 
@@ -27,7 +30,13 @@
                 <h2 class="card-title">Your Wallet</h2>
             </div>
             <div class="card-body">
-                {% include 'components/balance_card.html' with wallet=wallet last_updated=last_updated %}
+                {% if wallet %}
+                {% include 'components/balance_card.html' with wallet=wallet last_updated="Just now" %}
+                {% else %}
+                <div class="empty-state">
+                    <p class="empty-text">No wallet found. Please contact support.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -37,16 +46,33 @@
                 <h2 class="card-title">Quick Actions</h2>
             </div>
             <div class="card-body">
-                <div class="btn-group">
-                    <button class="btn btn-primary" hx-get="#" hx-target="#modal-container">
-                        ⬆️ Deposit
-                    </button>
-                    <button class="btn btn-secondary" hx-get="#" hx-target="#modal-container">
-                        ⬇️ Withdraw
-                    </button>
-                    <button class="btn btn-outline" hx-get="#" hx-target="#modal-container">
-                        🔄 Transfer
-                    </button>
+                <div class="action-tabs">
+                    <button class="tab-btn active" data-tab="deposit">⬆️ Deposit</button>
+                    <button class="tab-btn" data-tab="withdraw">⬇️ Withdraw</button>
+                    <button class="tab-btn" data-tab="transfer">🔄 Transfer</button>
+                </div>
+
+                <div class="tab-content">
+                    <!-- Deposit Tab -->
+                    <div id="deposit-tab" class="tab-pane active">
+                        <div id="deposit-form-container">
+                            {% include 'wallet/partials/deposit_form.html' with form=deposit_form %}
+                        </div>
+                    </div>
+
+                    <!-- Withdraw Tab -->
+                    <div id="withdraw-tab" class="tab-pane">
+                        <div id="withdraw-form-container">
+                            {% include 'wallet/partials/withdraw_form.html' with form=withdraw_form %}
+                        </div>
+                    </div>
+
+                    <!-- Transfer Tab -->
+                    <div id="transfer-tab" class="tab-pane">
+                        <div id="transfer-form-container">
+                            {% include 'wallet/partials/transfer_form.html' with form=transfer_form %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -60,34 +86,96 @@
             <div class="card-header">
                 <div class="card-header-content">
                     <h2 class="card-title">Recent Transactions</h2>
-                    <a href="#" class="btn btn-sm btn-outline">View All</a>
+                    <span class="btn btn-sm btn-outline">View All</span>
                 </div>
             </div>
             <div class="card-body">
-                <div class="transaction-list">
-                    {% for transaction in transactions %}
-                    {% include 'components/transaction_item.html' with transaction=transaction %}
-                    {% empty %}
-                    <div class="empty-state">
-                        <span class="empty-icon">📭</span>
-                        <p class="empty-text">No transactions yet</p>
+                <div class="transaction-list"
+                     hx-get="{% url 'wallet:transaction_history' %}"
+                     hx-trigger="load"
+                     hx-swap="innerHTML">
+                    <div class="text-center p-4">
+                        <span class="htmx-indicator spinner">Loading transactions...</span>
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- --#-- Analytics Preview -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Spending Overview</h2>
-            </div>
-            <div class="card-body">
-                <div class="analytics-placeholder">
-                    <p>Analytics coming soon...</p>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --#-- Tab Switching Logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetTab = this.dataset.tab;
+
+                // Remove active class from all buttons and panes
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanes.forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked button and target pane
+                this.classList.add('active');
+                document.getElementById(targetTab + '-tab').classList.add('active');
+            });
+        });
+    });
+</script>
+
+<style>
+    /* --#-- Tab Styles */
+    .action-tabs {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--color-gray-200);
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--color-gray-600);
+        transition: all var(--transition-fast);
+    }
+
+    .tab-btn:hover {
+        color: var(--color-primary);
+    }
+
+    .tab-btn.active {
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
+    }
+
+    .tab-pane {
+        display: none;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    .transaction-form {
+        max-width: 100%;
+    }
+
+    .form-actions {
+        margin-top: var(--spacing-lg);
+    }
+
+    .btn-block {
+        width: 100%;
+    }
+</style>
 {% endblock %}
