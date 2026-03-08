@@ -7,7 +7,7 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Django](https://img.shields.io/badge/Django-5.2.LTS-green)
 ![License](https://img.shields.io/badge/License-MIT-red)
-![Tests](https://img.shields.io/badge/tests-52%20passed-yellow)
+![Tests](https://img.shields.io/badge/tests-118%20passed-brightgreen)
 
 ---
 
@@ -17,6 +17,7 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
+- [Demo Data & Seeding](#demo-data--seeding)
 - [Development Workflow](#development-workflow)
 - [Testing](#testing)
 - [Deployment](#deployment)
@@ -122,13 +123,11 @@ DigitalWallet/
 │   └── tests/                    # Staff tools tests
 │
 ├── static/
-│   ├── css/
-│   │   └── modules/              # Modular CSS files
-│   │       ├── layout.css
-│   │       ├── navigation.css
-│   │       └── forms.css
-│   └── js/
-│       └── modules/              # Modular JavaScript files
+│   ├── css/                      # Modular CSS files
+│   │   ├── layout.css
+│   │   ├── navigation.css
+│   │   └── forms.css
+│   └── js/                       # Modular JavaScript files
 │
 ├── templates/
 │   ├── base.html                 # Base template with responsive shell
@@ -185,15 +184,23 @@ DigitalWallet/
    python manage.py runserver 8500 --settings=core.settings.dev
    ```
 
-5. **Start Celery worker (optional, for async tasks):**
-   ```bash
-   celery -A core worker -l info
-   ```
+---
 
-6. **Start Redis (required for Celery):**
-   ```bash
-   redis-server
-   ```
+## 💎 Demo Data & Seeding
+
+To quickly populate the application with realistic data for testing or demonstration, use the built-in seed command:
+
+```bash
+# Create 5 dummy users with funded wallets and random transactions
+python manage.py seed_wallets --settings=core.settings.dev
+
+# Clear existing dummy data and create a fresh set of 10 users
+python manage.py seed_wallets --clear --count 10 --settings=core.settings.dev
+```
+
+**Default Credentials:**
+- **Emails:** `testuser1@example.com` to `testuserN@example.com`
+- **Password:** `testpass123`
 
 ---
 
@@ -216,26 +223,6 @@ This project follows a strict phase-based development workflow with automated Gi
 # Usage: ./scripts/git-phase-merge.sh <phase_number>
 ./scripts/git-phase-merge.sh 4
 ```
-
-### **Branch Naming Convention**
-
-| Phase | Branch Name                |
-|-------|----------------------------|
-|   1   | `phase-setup-automation`   |
-|   2   | `phase-identity-auth`      |
-|   3   | `phase-frontend-core`      |
-|   4   | `phase-wallet-engine`      |
-|   5   | `phase-dashboard-htmx`     |
-|   6   | `phase-async-reporting`    |
-|   7   | `phase-staff-analytics`    |
-|   8   | `phase-qa-deployment`      |
-
-### **Zero-Error Policy**
-
-Before every commit:
-1. Run tests: `pytest`
-2. Verify manually (if UI changes)
-3. Only then commit
 
 ---
 
@@ -297,41 +284,30 @@ pytest --cov=. --cov-report=html
 | Phase | Name                         | Status      | Branch | Tests      |
 |-------|------------------------------|-------------|--------|------------|
 | **1** | Foundation & Automation      | ✅ Complete | Merged | 13 passing |
-| **2** | Identity & Access Management | ✅ Complete | Merged | 39 passing |
-| **3** | Frontend Foundation          | ✅ Complete | Merged | -          |
-| **4** | Wallet Engine                | ⏳ Pending  | -      | -          |
-| **5** | HTMX Dashboard               | ⏳ Pending  | -      | -          |
+| **2** | Identity & Access Management | ✅ Complete | Merged | 42 passing |
+| **3** | Frontend Foundation          | ✅ Complete | Merged | 9 passing  |
+| **4** | Wallet Engine                | ✅ Complete | Merged | 37 passing |
+| **5** | HTMX Dashboard               | ✅ Complete | Merged | 17 passing |
 | **6** | Async & Reporting            | ⏳ Pending  | -      | -          |
 | **7** | Staff & Analytics            | ⏳ Pending  | -      | -          |
 | **8** | Performance & Deployment     | ⏳ Pending  | -      | -          |
 
-> **Note:** The original 18 phases have been consolidated into 8 practical phases for better workflow efficiency. See `Constitution_Digital_Wallet.md` for details.
-
 ### **Completed Features:**
 
-**Phase 1 - Foundation:**
-- ✅ Django 5.2 project with settings package (base/dev/prod)
-- ✅ Git workflow with automated phase scripts
-- ✅ Pre-commit hooks (black, flake8, isort)
-- ✅ Pytest configuration with 13 passing tests
-- ✅ GitHub repository setup
+**Phase 4 - Wallet Engine:**
+- ✅ Wallet model OneToOne with ClientProfile
+- ✅ Atomic Transaction ledger with idempotency support
+- ✅ Service Layer logic for Deposit, Withdraw, and Transfer
+- ✅ Custom exceptions for financial integrity
+- ✅ 37 passing pytest tests (100% logic coverage)
 
-**Phase 2 - Identity & Access:**
-- ✅ CustomUser model with email-based authentication
-- ✅ StaffProfile and ClientProfile with auto-creation signals
-- ✅ Portal separation (Staff → /admin/, Client → /dashboard/)
-- ✅ StaffOnlyMixin and ClientOnlyMixin for access control
-- ✅ Custom login view with EmailAuthenticationForm
-- ✅ Session & CSRF security hardening
-- ✅ 39 passing pytest tests
-
-**Phase 3 - Frontend Foundation:**
-- ✅ Responsive base.html with navbar, sidebar, main content, footer
-- ✅ Modular CSS architecture (layout, navigation, forms, utilities, dashboard)
-- ✅ HTMX integration via CDN
-- ✅ Reusable components (balance card, transaction item, alert, modal)
-- ✅ Navigation snippets (navbar, sidebar, footer)
-- ✅ DashboardView for testing components
+**Phase 5 - HTMX Dashboard:**
+- ✅ Real-time Balance display with OOB (Out-of-Band) updates
+- ✅ Infinite-scroll transaction history via HTMX
+- ✅ Interactive Deposit, Withdraw, and Transfer forms
+- ✅ Inline form validation and loading indicators
+- ✅ `seed_wallets` management command for demo data
+- ✅ 17 passing pytest tests for UI/HTMX flows
 
 ---
 
@@ -343,10 +319,10 @@ This is a private project. For questions or issues, contact **Ahmad**.
 
 - **Docstrings**: Use `"""Docstring content"""` for classes and complex functions
 - **Comments**: Explain **why**, not **what**
-- **Section Headers**: Use `# -- Section Name` for major code sections
+- **Section Headers**: Use `# --#-- Section Name` for major code sections
 - **Views**: CBVs for structure, FBVs for HTMX actions
-- **CSS**: Modular approach in `static/css/modules/`
-- **JS**: Modular approach in `static/js/modules/`
+- **CSS**: Modular approach in `static/css/`
+- **JS**: Modular approach in `static/js/`
 
 ---
 
@@ -362,4 +338,4 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-*Last Updated: March 5, 2026*
+*Last Updated: March 8, 2026*

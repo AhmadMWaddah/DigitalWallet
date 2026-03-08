@@ -653,17 +653,17 @@ pytest wallet/tests/test_performance.py::test_transaction_list_query_count -v
 
 ### Branch Naming Convention
 
-| Phase | Branch Name              |
-|-------|--------------------------|
-| 1     | `phase-setup-automation` |
-| 2     | `phase-identity-auth`    |
-| 3     | `phase-frontend-core`    |
-| 4     | `phase-wallet-engine`    |
-| 5     | `phase-dashboard-htmx`   |
-| 6     | `phase-async-reporting`  |
-| 7     | `phase-staff-analytics`  |
-| 8     | `phase-qa-deployment`    |
-| Fix   | `fix-<description>`      |
+   | Phase | Branch Name              |
+   |-------|--------------------------|
+   | 1     | `phase-setup-automation` |
+   | 2     | `phase-identity-auth`    |
+   | 3     | `phase-frontend-core`    |
+   | 4     | `phase-wallet-engine`    |
+   | 5     | `phase-dashboard-htmx`   |
+   | 6     | `phase-async-reporting`  |
+   | 7     | `phase-staff-analytics`  |
+   | 8     | `phase-qa-deployment`    |
+   | Fix   | `fix-<description>`      |
 
 ### Commit to Branch (Phase or Fix)
 

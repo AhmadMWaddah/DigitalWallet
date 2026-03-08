@@ -33,7 +33,7 @@ class TestComponentRendering:
 
         rendered = template.render(context)
 
-        assert "Available Balance" in rendered
+        assert "Your Balance" in rendered
         assert "1000.00" in rendered
         assert "Active" in rendered
 
