@@ -8,7 +8,7 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views import View
@@ -121,7 +121,7 @@ class TransactionHistoryView(LoginRequiredMixin, ClientOnlyMixin, View):
             request=request,
         )
 
-        return JsonResponse({"html": html, "has_more": has_more})
+        return HttpResponse(html)
 
 
 class BalanceCardView(LoginRequiredMixin, ClientOnlyMixin, View):
