@@ -1,66 +1,92 @@
 """
-Registration form for client users.
+Accounts app forms.
+
+Custom forms for authentication and password reset.
 """
 
 from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import PasswordResetForm as BasePasswordResetForm
+from django.core.exceptions import ValidationError
 
 from accounts.models import UserType
 
 CustomUser = get_user_model()
 
 
-class ClientRegistrationForm(forms.ModelForm):
+class ClientPasswordResetForm(BasePasswordResetForm):
     """
-    Form for client registration.
+    Password reset form for client users only.
 
-    Allows new users to create an account with email and password.
+    Only allows password reset for users with CLIENT user_type.
     """
 
-    password1 = forms.CharField(
-        label="Password",
-        widget=forms.PasswordInput(attrs={"placeholder": "••••••••"}),
-        help_text="At least 8 characters long.",
+    email = forms.EmailField(
+        label="Email",
+        max_length=254,
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-input",
+                "placeholder": "you@example.com",
+                "autofocus": True,
+            }
+        ),
     )
-
-    password2 = forms.CharField(
-        label="Confirm Password",
-        widget=forms.PasswordInput(attrs={"placeholder": "••••••••"}),
-        help_text="Enter the same password as above.",
-    )
-
-    class Meta:
-        model = CustomUser
-        fields = ["email", "password1", "password2"]
 
     def clean_email(self):
-        """Validate email is not already registered."""
-        email = self.cleaned_data.get("email")
-        if CustomUser.objects.filter(email=email).exists():
-            raise forms.ValidationError("This email is already registered.")
+        """Validate email belongs to a client user."""
+        email = self.cleaned_data["email"]
+
+        try:
+            user = CustomUser.objects.get(email=email)
+
+            # Only allow CLIENT users to reset via this form
+            if user.user_type != UserType.CLIENT:
+                raise ValidationError("Please use the staff password reset system.")
+
+        except CustomUser.DoesNotExist:
+            # Don't reveal if email exists or not (security best practice)
+            pass
+
         return email
 
-    def clean_password2(self):
+
+class ClientSetPasswordForm(forms.Form):
+    """
+    Set password form for client users.
+    """
+
+    new_password1 = forms.CharField(
+        label="New Password",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-input",
+                "placeholder": "••••••••",
+                "autocomplete": "new-password",
+            }
+        ),
+    )
+
+    new_password2 = forms.CharField(
+        label="Confirm New Password",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-input",
+                "placeholder": "••••••••",
+                "autocomplete": "new-password",
+            }
+        ),
+    )
+
+    def clean_new_password2(self):
         """Validate passwords match."""
-        password1 = self.cleaned_data.get("password1")
-        password2 = self.cleaned_data.get("password2")
+        password1 = self.cleaned_data.get("new_password1")
+        password2 = self.cleaned_data.get("new_password2")
 
         if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords do not match.")
+            raise ValidationError("Passwords do not match.")
 
         if len(password1) < 8:
-            raise forms.ValidationError("Password must be at least 8 characters long.")
+            raise ValidationError("Password must be at least 8 characters long.")
 
         return password2
-
-    def save(self, commit=True):
-        """Create user with CLIENT user_type."""
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
-        user.user_type = UserType.CLIENT
-        user.is_verified = False
-
-        if commit:
-            user.save()
-
-        return user

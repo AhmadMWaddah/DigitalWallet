@@ -225,7 +225,7 @@
 
                 <div class="form-group">
                     <label for="id_email" class="form-label">Email Address</label>
-                    {{ form.email }}
+                    <input type="email" name="email" id="id_email" placeholder="you@example.com" required autofocus class="form-input {% if form.email.errors %}error{% endif %}">
                     {% if form.email.errors %}
                     <div class="form-error">{{ form.email.errors.0 }}</div>
                     {% endif %}
@@ -233,7 +233,7 @@
 
                 <div class="form-group">
                     <label for="id_password" class="form-label">Password</label>
-                    {{ form.password }}
+                    <input type="password" name="password" id="id_password" placeholder="••••••••" required class="form-input {% if form.password.errors %}error{% endif %}">
                     {% if form.password.errors %}
                     <div class="form-error">{{ form.password.errors.0 }}</div>
                     {% endif %}
@@ -252,7 +252,7 @@
 
             <!-- --#-- Footer -->
             <div class="login-footer">
-                <p>Forgot your password? <a href="{% url 'accounts:password_reset' %}">Reset it</a></p>
+                <p>Forgot your password? <a href="{% url 'accounts:password_reset_client' %}">Reset it</a></p>
                 <div class="divider"></div>
                 <p>Don't have an account? <a href="{% url 'accounts:register' %}">Register</a></p>
             </div>
