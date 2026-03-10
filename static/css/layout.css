@@ -28,11 +28,12 @@
     border-right: 1px solid var(--glass-border);
     overflow-y: auto;
     z-index: 900;
+    height: calc(100vh - 64px); /* Full height minus navbar */
 }
 
 .sidebar-content {
     padding: var(--spacing-lg);
-    min-height: calc(100vh - 64px);
+    min-height: 100%;
 }
 
 /* --#-- Main Content Area */

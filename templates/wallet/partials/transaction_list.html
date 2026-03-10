@@ -5,11 +5,11 @@
 <div class="transaction-card {% if transaction.type == 'DEPOSIT' %}deposit{% elif transaction.type == 'WITHDRAWAL' %}withdrawal{% elif transaction.type == 'TRANSFER' %}transfer{% endif %} {% if transaction.status == 'FLAGGED' %}flagged{% endif %}">
     <div class="transaction-icon-wrapper">
         {% if transaction.type == 'DEPOSIT' %}
-        <span>⬆️</span>
+        <i class="fas fa-arrow-up"></i>
         {% elif transaction.type == 'WITHDRAWAL' %}
-        <span>⬇️</span>
+        <i class="fas fa-arrow-down"></i>
         {% else %}
-        <span>🔄</span>
+        <i class="fas fa-exchange-alt"></i>
         {% endif %}
     </div>
 

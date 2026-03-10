@@ -5,8 +5,8 @@
     <div class="navbar-container">
         <!-- --#-- Logo -->
         <div class="navbar-brand">
-            <a href="{% url 'accounts:login_redirect' %}" class="brand-link">
-                <span class="brand-icon">💳</span>
+            <a href="{% url 'wallet:dashboard' %}" class="brand-link">
+                <i class="fas fa-wallet brand-icon"></i>
                 <span class="brand-text">Digital Wallet</span>
             </a>
         </div>
@@ -26,17 +26,17 @@
                     <span class="user-email">{{ user.email }}</span>
                 </button>
                 <div class="user-menu-dropdown">
-                    <a href="{% url 'accounts:login_redirect' %}" class="dropdown-item">
-                        <span>📊</span> Dashboard
+                    <a href="{% url 'wallet:dashboard' %}" class="dropdown-item">
+                        <i class="fas fa-chart-line"></i> Dashboard
                     </a>
                     <a href="#" class="dropdown-item">
-                        <span>⚙️</span> Settings
+                        <i class="fas fa-cog"></i> Settings
                     </a>
                     <div class="dropdown-divider"></div>
                     <form method="post" action="{% url 'accounts:logout' %}">
                         {% csrf_token %}
                         <button type="submit" class="dropdown-item dropdown-logout">
-                            <span>🚪</span> Logout
+                            <i class="fas fa-sign-out-alt"></i> Logout
                         </button>
                     </form>
                 </div>
