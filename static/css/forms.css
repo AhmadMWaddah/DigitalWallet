@@ -103,7 +103,7 @@
     margin-top: var(--spacing-xs);
 }
 
-/* --#-- Buttons */
+/* --#-- Buttons - Earth-Tone Design */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -138,40 +138,40 @@
     transform: translateY(0);
 }
 
-/* --#-- Button Variants */
+/* --#-- Button Variants - Earth Tones */
 .btn-primary {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-    color: var(--text-inverse);
-    border-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--copperwood), var(--toasted-almond));
+    color: var(--cornsilk);
+    border-color: var(--copperwood);
     box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
-    box-shadow: var(--shadow-md);
+    background: linear-gradient(135deg, var(--sunlit-clay), var(--copperwood));
+    box-shadow: var(--shadow-md), var(--shadow-glow);
 }
 
 .btn-secondary {
-    background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary-dark));
-    color: var(--text-inverse);
-    border-color: var(--color-secondary);
+    background: linear-gradient(135deg, var(--olive-leaf), var(--black-forest));
+    color: var(--cornsilk);
+    border-color: var(--olive-leaf);
     box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--color-secondary-dark), var(--color-secondary));
+    background: linear-gradient(135deg, var(--black-forest), var(--olive-leaf));
     box-shadow: var(--shadow-md);
 }
 
 .btn-outline {
     background: transparent;
-    color: var(--color-primary);
-    border-color: var(--color-primary);
+    color: var(--sunlit-clay);
+    border-color: var(--sunlit-clay);
 }
 
 .btn-outline:hover:not(:disabled) {
-    background: var(--color-primary);
-    color: var(--text-inverse);
+    background: var(--sunlit-clay);
+    color: var(--black-forest);
 }
 
 .btn-ghost {
@@ -180,14 +180,14 @@
 }
 
 .btn-ghost:hover:not(:disabled) {
-    background: var(--color-gray-100);
-    color: var(--text-primary);
+    background: rgba(254, 250, 224, 0.1);
+    color: var(--cornsilk);
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, var(--color-danger), #dc2626);
-    color: var(--text-inverse);
-    border-color: var(--color-danger);
+    background: linear-gradient(135deg, #c75d5d, #a34545);
+    color: var(--cornsilk);
+    border-color: #c75d5d;
 }
 
 /* --#-- Button Sizes */

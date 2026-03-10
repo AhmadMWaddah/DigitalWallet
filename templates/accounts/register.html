@@ -1,68 +1,291 @@
-<!-- --#-- Client Registration Template -->
-{% extends 'base.html' %}
+<!-- --#-- Register Template - Luxury Earth-Tone Design -->
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Digital Wallet</title>
 
-{% block title %}Create Account - Digital Wallet{% endblock %}
+    <!-- --#-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/Digital_Wallet_Fav_Icon.png' %}">
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/register.css' %}">
-{% endblock %}
+    <!-- --#-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/base_variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
 
-{% block content %}
-<div class="register-container">
-    <div class="register-card">
-        <!-- --#-- Header -->
-        <div class="register-header">
-            <h1 class="register-title">Create Your Account</h1>
-            <p class="register-subtitle">Join Digital Wallet and start managing your finances</p>
-        </div>
+    <!-- --#-- Register Page Styles -->
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--black-forest) 0%, #1a2410 50%, var(--olive-leaf) 100%);
+            padding: var(--spacing-lg);
+        }
 
-        <!-- --#-- Registration Form -->
-        <form method="post" novalidate>
-            {% csrf_token %}
+        .register-wrapper {
+            width: 100%;
+            max-width: 480px;
+        }
 
-            <div class="form-group">
-                <label for="{{ form.email.id_for_label }}">Email Address</label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                <div class="form-error">{{ form.email.errors.0 }}</div>
-                {% endif %}
+        .register-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-3xl);
+            padding: var(--spacing-2xl);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-2xl), var(--shadow-glow);
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .register-logo {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .register-title {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            color: var(--cornsilk);
+            margin-bottom: var(--spacing-sm);
+            background: linear-gradient(135deg, var(--cornsilk), var(--sunlit-clay));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .register-subtitle {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            margin: 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: var(--font-medium);
+            color: var(--cornsilk);
+            font-size: var(--text-sm);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: var(--text-base);
+            font-family: var(--font-sans);
+            border: 1px solid var(--border-color-light);
+            border-radius: var(--radius-lg);
+            background: rgba(254, 250, 224, 0.05);
+            color: var(--cornsilk);
+            transition: all var(--transition-fast);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-bg);
+            background: rgba(254, 250, 224, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .form-input.error {
+            border-color: var(--color-danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .form-error {
+            color: #fca5a5;
+            font-size: var(--text-sm);
+            margin-top: var(--spacing-xs);
+        }
+
+        .form-help {
+            color: var(--text-tertiary);
+            font-size: var(--text-xs);
+            margin-top: var(--spacing-xs);
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: var(--spacing-md);
+            background: linear-gradient(135deg, var(--copperwood), var(--toasted-almond));
+            color: var(--cornsilk);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-md);
+            margin-top: var(--spacing-xl);
+        }
+
+        .btn-register:hover {
+            background: linear-gradient(135deg, var(--sunlit-clay), var(--copperwood));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+
+        .register-footer {
+            margin-top: var(--spacing-xl);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+        }
+
+        .register-footer a {
+            color: var(--sunlit-clay);
+            font-weight: var(--font-semibold);
+            transition: color var(--transition-fast);
+        }
+
+        .register-footer a:hover {
+            color: var(--cornsilk);
+        }
+
+        .alert {
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--text-sm);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--color-danger);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--color-success);
+            color: #6ee7b7;
+        }
+
+        .password-requirements {
+            background: rgba(254, 250, 224, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-sm);
+        }
+
+        .password-requirements ul {
+            margin: 0;
+            padding-left: var(--spacing-lg);
+            color: var(--text-tertiary);
+            font-size: var(--text-xs);
+        }
+
+        .password-requirements li {
+            margin-bottom: var(--spacing-xs);
+        }
+    </style>
+</head>
+<body>
+    <div class="register-wrapper">
+        <div class="register-card">
+            <!-- --#-- Header -->
+            <div class="register-header">
+                <div class="register-logo">🎯</div>
+                <h1 class="register-title">Create Account</h1>
+                <p class="register-subtitle">Join Digital Wallet today</p>
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.password1.id_for_label }}">Password</label>
-                {{ form.password1 }}
-                {% if form.password1.errors %}
-                <div class="form-error">{{ form.password1.errors.0 }}</div>
-                {% endif %}
-                {% if form.password1.help_text %}
-                <div class="form-help">{{ form.password1.help_text }}</div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
-                {{ form.password2 }}
-                {% if form.password2.errors %}
-                <div class="form-error">{{ form.password2.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            {% if form.non_field_errors %}
-            <div class="alert alert-error">
-                {{ form.non_field_errors.0 }}
+            <!-- --#-- Messages -->
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
             </div>
             {% endif %}
 
-            <button type="submit" class="btn btn-primary btn-lg btn-block">
-                Create Account
-            </button>
-        </form>
+            <!-- --#-- Register Form -->
+            <form method="post" novalidate>
+                {% csrf_token %}
 
-        <!-- --#-- Footer -->
-        <div class="register-footer">
-            <p>Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
+                <div class="form-group">
+                    <label for="id_email" class="form-label">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div class="form-error">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                    <div class="form-help">We'll never share your email with anyone else.</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_password1" class="form-label">Password</label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                        <div class="form-error">{{ form.password1.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password2" class="form-label">Confirm Password</label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                        <div class="form-error">{{ form.password2.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="password-requirements">
+                    <ul>
+                        <li>At least 8 characters long</li>
+                        <li>Avoid common passwords</li>
+                        <li>Mix of letters and numbers recommended</li>
+                    </ul>
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {{ form.non_field_errors.0 }}
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn-register">
+                    Create Account →
+                </button>
+            </form>
+
+            <!-- --#-- Footer -->
+            <div class="register-footer">
+                <p>Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
+            </div>
         </div>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>
