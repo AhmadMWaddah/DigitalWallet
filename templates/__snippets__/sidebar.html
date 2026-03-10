@@ -43,15 +43,15 @@
 
             <div class="nav-section">
                 <span class="nav-section-title">Actions</span>
-                <a href="#" class="nav-item">
+                <a href="{% url 'wallet:deposit' %}" class="nav-item">
                     <i class="fas fa-circle-plus nav-icon"></i>
                     <span class="nav-text">Deposit</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{% url 'wallet:withdraw' %}" class="nav-item">
                     <i class="fas fa-circle-minus nav-icon"></i>
                     <span class="nav-text">Withdraw</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{% url 'wallet:transfer' %}" class="nav-item">
                     <i class="fas fa-right-left nav-icon"></i>
                     <span class="nav-text">Transfer</span>
                 </a>

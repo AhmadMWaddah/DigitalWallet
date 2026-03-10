@@ -44,17 +44,17 @@
             </div>
             <div class="card-body">
                 <div class="action-grid">
-                    <a href="#" class="action-btn">
+                    <a href="{% url 'wallet:deposit' %}" class="action-btn">
                         <i class="fas fa-circle-plus action-btn-icon"></i>
                         <span class="action-btn-label">Deposit</span>
                         <span class="action-btn-sublabel">Add funds</span>
                     </a>
-                    <a href="#" class="action-btn">
+                    <a href="{% url 'wallet:withdraw' %}" class="action-btn">
                         <i class="fas fa-circle-minus action-btn-icon"></i>
                         <span class="action-btn-label">Withdraw</span>
                         <span class="action-btn-sublabel">Remove funds</span>
                     </a>
-                    <a href="#" class="action-btn">
+                    <a href="{% url 'wallet:transfer' %}" class="action-btn">
                         <i class="fas fa-right-left action-btn-icon"></i>
                         <span class="action-btn-label">Transfer</span>
                         <span class="action-btn-sublabel">Send money</span>
@@ -85,8 +85,8 @@
 
                 <!-- --#-- Action Buttons -->
                 <div class="transaction-actions">
-                    <a href="#" class="btn btn-outline btn-sm">View All</a>
-                    <button class="btn btn-outline btn-sm">Load More</button>
+                    <a href="#" class="btn btn-outline btn-sm">View All Transactions</a>
+                    <button class="btn btn-outline btn-sm" disabled>Load More</button>
                 </div>
             </div>
         </div>
