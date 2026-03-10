@@ -32,12 +32,11 @@
         <!-- --#-- Navbar -->
         {% include '__snippets__/navbar.html' %}
 
-        <!-- --#-- Main Layout -->
-        <div class="main-layout">
+        <!-- --#-- Sidebar -->
+        {% include '__snippets__/sidebar.html' %}
 
-            <!-- --#-- Sidebar -->
-            {% include '__snippets__/sidebar.html' %}
-
+        <!-- --#-- Main Content Wrapper -->
+        <div class="main-content-wrapper">
             <!-- --#-- Main Content -->
             <main class="main-content">
                 <!-- --#-- Messages/Alerts -->
@@ -52,10 +51,10 @@
                 <!-- --#-- Page Content -->
                 {% block content %}{% endblock %}
             </main>
-        </div>
 
-        <!-- --#-- Footer -->
-        {% include '__snippets__/footer.html' %}
+            <!-- --#-- Footer -->
+            {% include '__snippets__/footer.html' %}
+        </div>
     </div>
 
     <!-- --#-- Modal Container -->
