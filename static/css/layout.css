@@ -22,6 +22,7 @@
     padding: var(--spacing-xl);
     margin-left: 280px; /* Sidebar width */
     min-height: calc(100vh - 64px - 60px);
+    padding-bottom: var(--spacing-xl);
 }
 
 @media (max-width: 1024px) {

@@ -314,12 +314,15 @@
 
 /* --#-- Footer */
 .footer {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
+    background: rgba(40, 54, 24, 0.8);
+    backdrop-filter: blur(12px);
     color: var(--text-secondary);
     padding: var(--spacing-lg) var(--spacing-xl);
     margin-top: auto;
     border-top: 1px solid var(--glass-border);
+    width: 100%;
+    position: relative;
+    z-index: 100;
 }
 
 .footer-container {
@@ -356,11 +359,11 @@
 }
 
 .footer-link:hover {
-    color: var(--color-primary-light);
+    color: var(--sunlit-clay);
 }
 
 .version-badge {
-    background: var(--bg-tertiary);
+    background: rgba(254, 250, 224, 0.1);
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--radius-md);
     font-size: var(--text-xs);
