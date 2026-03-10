@@ -71,10 +71,7 @@
         <!-- --#-- Recent Transactions (Limited to 5) -->
         <div class="card">
             <div class="card-header">
-                <div class="card-header-content">
-                    <h2 class="card-title">Recent Transactions</h2>
-                    <a href="#" class="btn btn-sm btn-outline">View All</a>
-                </div>
+                <h2 class="card-title">Recent Transactions</h2>
             </div>
             <div class="card-body">
                 <div class="transaction-list"
@@ -84,6 +81,12 @@
                     <div class="text-center p-4">
                         <span class="htmx-indicator spinner">Loading...</span>
                     </div>
+                </div>
+
+                <!-- --#-- Action Buttons -->
+                <div class="transaction-actions">
+                    <a href="#" class="btn btn-outline btn-sm">View All</a>
+                    <button class="btn btn-outline btn-sm">Load More</button>
                 </div>
             </div>
         </div>
