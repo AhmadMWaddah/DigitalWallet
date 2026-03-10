@@ -1,4 +1,4 @@
-/* --#-- Dashboard CSS - Modern Purple Design */
+/* --#-- Dashboard CSS - Luxury Earth-Tone Design */
 
 /* --#-- Page Header */
 .page-header {
@@ -8,7 +8,7 @@
 .page-title {
     font-size: var(--text-3xl);
     font-weight: var(--font-bold);
-    color: var(--text-primary);
+    color: var(--cornsilk);
     margin-bottom: var(--spacing-xs);
 }
 
@@ -35,16 +35,16 @@
     min-width: 0;
 }
 
-/* --#-- Your Wallet Card - NEW Premium Design */
+/* --#-- Your Wallet Card - Earth-Tone Premium Design */
 .balance-card {
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
+    background: linear-gradient(135deg, var(--copperwood) 0%, var(--toasted-almond) 50%, var(--sunlit-clay) 100%);
     border-radius: var(--radius-3xl);
     padding: var(--spacing-2xl);
-    color: var(--text-inverse);
-    box-shadow: var(--shadow-colored);
+    color: var(--cornsilk);
+    box-shadow: var(--shadow-2xl), 0 0 60px rgba(188, 108, 37, 0.4);
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(254, 250, 224, 0.2);
 }
 
 /* Animated background effect */
@@ -55,7 +55,7 @@
     right: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(254, 250, 224, 0.15) 0%, transparent 70%);
     animation: pulse 8s ease-in-out infinite;
     pointer-events: none;
 }
@@ -77,11 +77,10 @@
 .balance-title {
     font-size: var(--text-sm);
     font-weight: var(--font-semibold);
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(254, 250, 224, 0.9);
     margin: 0;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .balance-badge {
@@ -90,7 +89,7 @@
     font-size: var(--text-xs);
     font-weight: var(--font-semibold);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(254, 250, 224, 0.3);
 }
 
 .badge-active {
@@ -112,7 +111,7 @@
 .currency-symbol {
     font-size: var(--text-2xl);
     font-weight: var(--font-semibold);
-    opacity: 0.8;
+    opacity: 0.9;
     margin-right: var(--spacing-xs);
     vertical-align: top;
 }
@@ -122,7 +121,7 @@
     font-weight: var(--font-bold);
     letter-spacing: -0.025em;
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(to bottom, #ffffff, #e9d5ff);
+    background: linear-gradient(to bottom, #ffffff, #fefae0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -131,9 +130,9 @@
 .balance-footer {
     margin-top: var(--spacing-md);
     padding-top: var(--spacing-md);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(254, 250, 224, 0.2);
     font-size: var(--text-xs);
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(254, 250, 224, 0.7);
     position: relative;
     z-index: 1;
 }
@@ -154,33 +153,33 @@
     gap: var(--spacing-sm);
     padding: var(--spacing-xl);
     background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
-    border: 1px solid var(--color-gray-200);
+    border: 1px solid var(--border-color-light);
     border-radius: var(--radius-xl);
     text-decoration: none;
-    color: var(--text-primary);
+    color: var(--cornsilk);
     font-weight: var(--font-semibold);
     font-size: var(--text-sm);
     transition: all var(--transition-base);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
     min-height: 120px;
 }
 
 .action-btn:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--color-primary-light);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    border-color: var(--color-primary);
     background: linear-gradient(135deg, var(--color-primary-bg), var(--bg-secondary));
 }
 
 .action-btn-icon {
     font-size: 2.5rem;
     margin-bottom: var(--spacing-xs);
-    filter: drop-shadow(0 2px 4px rgba(124, 58, 237, 0.3));
+    filter: drop-shadow(0 2px 4px rgba(188, 108, 37, 0.3));
 }
 
 .action-btn-label {
     font-weight: var(--font-semibold);
-    color: var(--text-primary);
+    color: var(--cornsilk);
 }
 
 .action-btn-sublabel {
@@ -196,16 +195,17 @@
     gap: var(--spacing-md);
 }
 
-/* --#-- Transaction Card - NEW Design */
+/* --#-- Transaction Card - Earth-Tone Design */
 .transaction-card {
     display: flex;
     align-items: center;
     gap: var(--spacing-lg);
     padding: var(--spacing-lg);
-    background: var(--bg-secondary);
+    background: rgba(40, 54, 24, 0.4);
+    backdrop-filter: blur(12px);
     border-radius: var(--radius-xl);
-    border: 1px solid var(--color-gray-200);
-    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
     transition: all var(--transition-base);
     position: relative;
     overflow: hidden;
@@ -218,31 +218,31 @@
     top: 0;
     bottom: 0;
     width: 4px;
-    background: var(--color-gray-300);
+    background: var(--toasted-almond);
     transition: all var(--transition-fast);
 }
 
 .transaction-card:hover {
     transform: translateX(8px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--color-primary-light);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--toasted-almond);
 }
 
 .transaction-card.deposit::before {
-    background: var(--color-success);
+    background: var(--olive-leaf);
 }
 
 .transaction-card.withdrawal::before {
-    background: var(--color-danger);
+    background: var(--copperwood);
 }
 
 .transaction-card.transfer::before {
-    background: var(--color-info);
+    background: var(--sunlit-clay);
 }
 
 .transaction-card.flagged {
     border-color: var(--color-warning);
-    background: linear-gradient(135deg, var(--bg-secondary), var(--color-warning-bg));
+    background: rgba(245, 158, 11, 0.1);
 }
 
 .transaction-card.flagged::before {
@@ -261,19 +261,23 @@
     position: relative;
 }
 
+/* Earth-Tone Icon Backgrounds - NO BLUE */
 .transaction-card.deposit .transaction-icon-wrapper {
-    background: linear-gradient(135deg, var(--color-success-bg), #6ee7b7);
-    color: var(--color-success-dark);
+    background: linear-gradient(135deg, rgba(96, 108, 56, 0.3), rgba(96, 108, 56, 0.1));
+    color: #a3b18a;
+    border: 1px solid rgba(96, 108, 56, 0.4);
 }
 
 .transaction-card.withdrawal .transaction-icon-wrapper {
-    background: linear-gradient(135deg, var(--color-danger-bg), #fca5a5);
-    color: var(--color-danger-dark);
+    background: linear-gradient(135deg, rgba(188, 108, 37, 0.3), rgba(188, 108, 37, 0.1));
+    color: #dda15e;
+    border: 1px solid rgba(188, 108, 37, 0.4);
 }
 
 .transaction-card.transfer .transaction-icon-wrapper {
-    background: linear-gradient(135deg, var(--color-info-bg), #93c5fd);
-    color: var(--color-accent-dark);
+    background: linear-gradient(135deg, rgba(221, 161, 94, 0.3), rgba(221, 161, 94, 0.1));
+    color: #c98951;
+    border: 1px solid rgba(221, 161, 94, 0.4);
 }
 
 .transaction-details {
@@ -291,7 +295,7 @@
 .transaction-type {
     font-size: var(--text-base);
     font-weight: var(--font-semibold);
-    color: var(--text-primary);
+    color: var(--cornsilk);
 }
 
 .transaction-amount {
@@ -301,11 +305,11 @@
 }
 
 .transaction-amount.positive {
-    color: var(--color-success);
+    color: #a3b18a;
 }
 
 .transaction-amount.negative {
-    color: var(--color-danger);
+    color: #dda15e;
 }
 
 .transaction-meta {
@@ -343,23 +347,27 @@
 }
 
 .status-completed {
-    background: var(--color-success-bg);
-    color: #065f46;
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .status-pending {
-    background: var(--color-warning-bg);
-    color: #92400e;
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .status-failed {
-    background: var(--color-danger-bg);
-    color: #991b1b;
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .status-flagged {
-    background: var(--color-warning-bg);
-    color: #92400e;
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 /* --#-- Empty State */
