@@ -5,11 +5,15 @@
 <div class="transaction-card {% if transaction.type == 'DEPOSIT' %}deposit{% elif transaction.type == 'WITHDRAWAL' %}withdrawal{% elif transaction.type == 'TRANSFER' %}transfer{% endif %} {% if transaction.status == 'FLAGGED' %}flagged{% endif %}">
     <div class="transaction-icon-wrapper">
         {% if transaction.type == 'DEPOSIT' %}
-        <i class="fas fa-arrow-up"></i>
-        {% elif transaction.type == 'WITHDRAWAL' %}
         <i class="fas fa-arrow-down"></i>
-        {% else %}
-        <i class="fas fa-exchange-alt"></i>
+        {% elif transaction.type == 'WITHDRAWAL' %}
+        <i class="fas fa-arrow-up"></i>
+        {% elif transaction.type == 'TRANSFER' %}
+            {% if transaction.wallet == wallet %}
+            <i class="fas fa-arrow-right"></i>
+            {% else %}
+            <i class="fas fa-arrow-left"></i>
+            {% endif %}
         {% endif %}
     </div>
 
@@ -41,7 +45,7 @@
         {% endif %}
 
         <div class="transaction-status-badge status-{{ transaction.status|lower }}">
-            {% if transaction.status == 'COMPLETED' %}✓{% elif transaction.status == 'PENDING' %}⏳{% elif transaction.status == 'FAILED' %}✗{% elif transaction.status == 'FLAGGED' %}🚨{% endif %}
+            {% if transaction.status == 'COMPLETED' %}<i class="fas fa-circle-check"></i>{% elif transaction.status == 'PENDING' %}<i class="fas fa-circle-dot"></i>{% elif transaction.status == 'FAILED' %}<i class="fas fa-circle-xmark"></i>{% elif transaction.status == 'FLAGGED' %}<i class="fas fa-triangle-exclamation"></i>{% endif %}
             {{ transaction.get_status_display }}
         </div>
     </div>
