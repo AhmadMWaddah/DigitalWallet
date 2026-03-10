@@ -5,14 +5,14 @@
 <div class="transaction-card {% if transaction.type == 'DEPOSIT' %}deposit{% elif transaction.type == 'WITHDRAWAL' %}withdrawal{% elif transaction.type == 'TRANSFER' %}transfer{% endif %} {% if transaction.status == 'FLAGGED' %}flagged{% endif %}">
     <div class="transaction-icon-wrapper">
         {% if transaction.type == 'DEPOSIT' %}
-        <i class="fas fa-arrow-down"></i>
+        <i class="fas fa-circle-plus"></i>
         {% elif transaction.type == 'WITHDRAWAL' %}
-        <i class="fas fa-arrow-up"></i>
+        <i class="fas fa-circle-minus"></i>
         {% elif transaction.type == 'TRANSFER' %}
             {% if transaction.wallet == wallet %}
-            <i class="fas fa-arrow-right"></i>
+            <i class="fas fa-right-left"></i>
             {% else %}
-            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-right-left"></i>
             {% endif %}
         {% endif %}
     </div>

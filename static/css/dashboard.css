@@ -18,6 +18,12 @@
     margin: 0;
 }
 
+/* --#-- Card Title Spacing */
+.card-title {
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+}
+
 /* --#-- Dashboard Grid */
 .dashboard-grid {
     display: grid;
