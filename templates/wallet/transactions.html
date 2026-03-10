@@ -1,0 +1,79 @@
+<!-- --#-- Transactions Page Template -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Transactions - Digital Wallet{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Transaction History</h1>
+    <p class="page-subtitle">View all your transactions</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">All Transactions</h2>
+    </div>
+    <div class="card-body">
+        {% if transactions %}
+        <div class="transaction-list">
+            {% for transaction in transactions %}
+            <div class="transaction-card {% if transaction.type == 'DEPOSIT' %}deposit{% elif transaction.type == 'WITHDRAWAL' %}withdrawal{% elif transaction.type == 'TRANSFER' %}transfer{% endif %} {% if transaction.status == 'FLAGGED' %}flagged{% endif %}">
+                <div class="transaction-icon-wrapper">
+                    {% if transaction.type == 'DEPOSIT' %}
+                    <i class="fas fa-circle-plus"></i>
+                    {% elif transaction.type == 'WITHDRAWAL' %}
+                    <i class="fas fa-circle-minus"></i>
+                    {% else %}
+                    <i class="fas fa-right-left"></i>
+                    {% endif %}
+                </div>
+
+                <div class="transaction-details">
+                    <div class="transaction-header">
+                        <span class="transaction-type">{{ transaction.get_type_display }}</span>
+                        <span class="transaction-amount {% if transaction.type == 'DEPOSIT' %}positive{% else %}negative{% endif %}">
+                            {% if transaction.type == 'DEPOSIT' %}+{% endif %}${{ transaction.amount }}
+                        </span>
+                    </div>
+
+                    <div class="transaction-meta">
+                        <span class="transaction-date">{{ transaction.created_at|date:"M d, Y" }}</span>
+                        {% if transaction.counterparty_wallet %}
+                        <span class="transaction-counterparty">
+                            {% if transaction.type == 'TRANSFER' %}
+                                {% if transaction.wallet == wallet %}
+                                    To: {{ transaction.counterparty_wallet.client_profile.full_name|default:"Unknown" }}
+                                {% else %}
+                                    From: {{ transaction.counterparty_wallet.client_profile.full_name|default:"Unknown" }}
+                                {% endif %}
+                            {% endif %}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if transaction.description %}
+                    <div class="transaction-description">{{ transaction.description }}</div>
+                    {% endif %}
+
+                    <div class="transaction-status-badge status-{{ transaction.status|lower }}">
+                        {% if transaction.status == 'COMPLETED' %}<i class="fas fa-circle-check"></i>{% elif transaction.status == 'PENDING' %}<i class="fas fa-circle-dot"></i>{% elif transaction.status == 'FAILED' %}<i class="fas fa-circle-xmark"></i>{% elif transaction.status == 'FLAGGED' %}<i class="fas fa-triangle-exclamation"></i>{% endif %}
+                        {{ transaction.get_status_display }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-icon">📭</span>
+            <p class="empty-text">No transactions yet</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

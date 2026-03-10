@@ -67,21 +67,25 @@ class TransactionHistoryView(LoginRequiredMixin, ClientOnlyMixin, View):
     """
 
     def get(self, request):
-        """Return transaction history partial."""
-        # Get cursor for pagination (timestamp of last loaded transaction)
-        cursor = request.GET.get("cursor")
-        limit = int(request.GET.get("limit", 20))  # Default 20, can be overridden
+        """Return transaction history partial or full page."""
+        # Check if this is an HTMX request
+        if request.headers.get("HX-Request"):
+            # HTMX request - return partial
+            return self.get_partial(request)
+        else:
+            # Direct request - return full page
+            return self.get_full_page(request)
 
-        # Get user's wallet
+    def get_partial(self, request):
+        """Return transaction history partial for HTMX."""
+        cursor = request.GET.get("cursor")
+        limit = int(request.GET.get("limit", 20))
+
         try:
             wallet = request.user.client_profile.wallet
         except Wallet.DoesNotExist:
-            return render(
-                request,
-                "wallet/partials/empty_transactions.html",
-            )
+            return render(request, "wallet/partials/empty_transactions.html")
 
-        # Query transactions with cursor-based pagination
         if cursor:
             transactions = list(
                 wallet.transactions.select_related("counterparty_wallet__client_profile__user")
@@ -95,7 +99,6 @@ class TransactionHistoryView(LoginRequiredMixin, ClientOnlyMixin, View):
                 ).order_by("-created_at")[:limit]
             )
 
-        # Check if more transactions exist
         has_more = False
         if len(transactions) == limit:
             last_transaction = transactions[-1] if transactions else None
@@ -104,24 +107,30 @@ class TransactionHistoryView(LoginRequiredMixin, ClientOnlyMixin, View):
                     created_at__lt=last_transaction.created_at
                 ).exists()
 
-        # Get next cursor
         next_cursor = None
         if has_more and transactions:
             last_transaction = transactions[-1]
             next_cursor = last_transaction.created_at.strftime("%Y-%m-%d %H:%M:%S")
 
-        # Render partial
         html = render_to_string(
             "wallet/partials/transaction_list.html",
-            {
-                "transactions": transactions,
-                "has_more": has_more,
-                "next_cursor": next_cursor,
-            },
+            {"transactions": transactions, "has_more": has_more, "next_cursor": next_cursor},
             request=request,
         )
 
         return HttpResponse(html)
+
+    def get_full_page(self, request):
+        """Return full transaction history page."""
+        try:
+            wallet = request.user.client_profile.wallet
+            transactions = wallet.transactions.select_related(
+                "counterparty_wallet__client_profile__user"
+            ).order_by("-created_at")[:50]
+        except Wallet.DoesNotExist:
+            transactions = []
+
+        return render(request, "wallet/transactions.html", {"transactions": transactions})
 
 
 class BalanceCardView(LoginRequiredMixin, ClientOnlyMixin, View):
@@ -153,6 +162,11 @@ class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
 
     Processes deposit and returns updated balance + success message.
     """
+
+    def get(self, request):
+        """Display deposit page."""
+        form = DepositForm()
+        return render(request, "wallet/deposit.html", {"form": form})
 
     def post(self, request):
         """Handle deposit form submission."""
@@ -241,6 +255,11 @@ class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
     Processes withdrawal and returns updated balance + success message.
     """
 
+    def get(self, request):
+        """Display withdraw page."""
+        form = WithdrawForm()
+        return render(request, "wallet/withdraw.html", {"form": form})
+
     def post(self, request):
         """Handle withdraw form submission."""
         form = WithdrawForm(request.POST)
@@ -327,6 +346,11 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
 
     Processes transfer and returns updated balance + success message.
     """
+
+    def get(self, request):
+        """Display transfer page."""
+        form = TransferForm()
+        return render(request, "wallet/transfer.html", {"form": form})
 
     def post(self, request):
         """Handle transfer form submission."""
