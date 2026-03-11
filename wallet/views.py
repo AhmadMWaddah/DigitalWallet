@@ -6,9 +6,10 @@ Dashboard and transaction views with HTMX interactivity.
 
 import uuid
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, JsonResponse
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views import View
@@ -476,6 +477,14 @@ class StatementRequestView(LoginRequiredMixin, ClientOnlyMixin, View):
         end_date = request.POST.get("end_date")
 
         if not start_date or not end_date:
+            # For HTMX requests, return error HTML
+            if request.headers.get("HX-Request"):
+                html = render_to_string(
+                    "wallet/partials/statement_error.html",
+                    {"error": "Both start date and end date are required."},
+                    request=request,
+                )
+                return HttpResponse(html)
             return JsonResponse(
                 {"success": False, "error": "Both start date and end date are required."}
             )
@@ -483,6 +492,13 @@ class StatementRequestView(LoginRequiredMixin, ClientOnlyMixin, View):
         try:
             wallet = request.user.client_profile.wallet
         except Wallet.DoesNotExist:
+            if request.headers.get("HX-Request"):
+                html = render_to_string(
+                    "wallet/partials/statement_error.html",
+                    {"error": "Wallet not found."},
+                    request=request,
+                )
+                return HttpResponse(html)
             return JsonResponse({"success": False, "error": "Wallet not found."})
 
         # Trigger async task
@@ -490,6 +506,16 @@ class StatementRequestView(LoginRequiredMixin, ClientOnlyMixin, View):
             wallet_id=wallet.id, start_date_str=start_date, end_date_str=end_date
         )
 
+        # For HTMX requests, return progress bar HTML
+        if request.headers.get("HX-Request"):
+            html = render_to_string(
+                "wallet/partials/statement_progress.html",
+                {"task_id": task.id, "progress": 10},
+                request=request,
+            )
+            return HttpResponse(html)
+
+        # For regular requests, return JSON
         return JsonResponse(
             {
                 "success": True,
@@ -529,11 +555,15 @@ class TaskStatusView(LoginRequiredMixin, View):
         elif status == "SUCCESS":
             # Return download button
             result = status_data.get("result", {})
+            file_path = result.get("file_path")
+            # Construct download URL with task_id for the view
+            download_url = reverse("wallet:statement_download", kwargs={"task_id": task_id})
             html = render_to_string(
                 "wallet/partials/statement_download.html",
                 {
                     "task_id": task_id,
-                    "file_path": result.get("file_path"),
+                    "file_path": file_path,
+                    "download_url": download_url,
                     "success": result.get("success", False),
                 },
                 request=request,
@@ -571,6 +601,8 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
 
         Security: Verifies that the statement belongs to the requesting user.
         """
+        import os
+
         from celery.result import AsyncResult
 
         result = AsyncResult(task_id)
@@ -605,4 +637,12 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
         if not file_path:
             return JsonResponse({"success": False, "error": "File path not found."})
 
-        return JsonResponse({"success": True, "download_url": f"/media/{file_path}"})
+        # Construct full path and serve file
+        full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+        if not os.path.exists(full_path):
+            return JsonResponse({"success": False, "error": "File not found."})
+
+        # Serve the file
+        response = FileResponse(open(full_path, "rb"), content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{os.path.basename(file_path)}"'
+        return response

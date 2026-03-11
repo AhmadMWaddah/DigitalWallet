@@ -333,8 +333,16 @@ def generate_statement_pdf_to_media(
     generator = PDFStatementGenerator(wallet, start_date, end_date)
     pdf_buffer = generator.generate()
 
-    # Create filename with task ID for uniqueness
-    filename = f"statement_{wallet.id}_{task_id}.pdf"
+    # Create descriptive filename: {user_name}_statement_{start_date}_to_{end_date}.pdf
+    user_name = wallet.client_profile.full_name or wallet.client_profile.user.email.split("@")[0]
+    # Sanitize user name for filename (replace spaces with underscores, remove special chars)
+    user_name = user_name.replace(" ", "_").replace("-", "_")
+    user_name = "".join(c for c in user_name if c.isalnum() or c == "_")
+
+    start_str = start_date.strftime("%Y-%m-%d")
+    end_str = end_date.strftime("%Y-%m-%d")
+
+    filename = f"{user_name}_statement_{start_str}_to_{end_str}.pdf"
     filepath = os.path.join(statements_dir, filename)
 
     # Write to file

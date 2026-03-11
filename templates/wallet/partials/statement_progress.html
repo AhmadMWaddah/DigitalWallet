@@ -1,5 +1,5 @@
 {# --#-- Statement Progress Bar (HTMX Polling) #}
-{# Displayed while PDF generation is in progress #}
+{# Displayed while PDF generation is in progress - Earth-Tone Design #}
 
 <div id="statement-progress-container"
      hx-get="{% url 'wallet:statement_status' task_id %}"
@@ -23,44 +23,61 @@
 
     <style>
         .statement-progress {
-            padding: 1.5rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-            text-align: center;
+            padding: var(--spacing-lg);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color-light);
         }
 
         .progress-header {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            color: #1a1a2e;
-            font-weight: 500;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
+            font-weight: var(--font-medium);
+            font-size: var(--text-sm);
         }
 
         .progress-header i {
-            color: #0f3460;
+            color: var(--color-primary);
+            font-size: var(--text-lg);
         }
 
         .progress-bar-container {
             width: 100%;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-full);
             overflow: hidden;
-            margin-bottom: 0.75rem;
+            margin-bottom: var(--spacing-sm);
+            border: 1px solid var(--border-color);
         }
 
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
-            transition: width 0.3s ease;
-            border-radius: 4px;
+            background: linear-gradient(90deg, var(--copperwood) 0%, var(--toasted-almond) 50%, var(--sunlit-clay) 100%);
+            transition: width 0.5s ease;
+            border-radius: var(--radius-full);
+            box-shadow: 0 0 10px rgba(188, 108, 37, 0.5);
         }
 
         .progress-status small {
-            color: #666;
+            color: var(--text-secondary);
+            font-size: var(--text-xs);
+            display: block;
+            text-align: center;
+        }
+
+        /* Pulse animation for loading */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .progress-status {
+            animation: pulse 2s ease-in-out infinite;
         }
     </style>
 </div>

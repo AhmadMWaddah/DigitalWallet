@@ -1,5 +1,5 @@
 {# --#-- Statement Download Button (HTMX Success State) #}
-{# Displayed when PDF generation is complete #}
+{# Displayed when PDF generation is complete - Earth-Tone Design #}
 
 <div id="statement-download-container" class="statement-success">
     <div class="success-icon">
@@ -11,60 +11,71 @@
         <p>Your account statement has been generated successfully.</p>
     </div>
 
-    <a href="{{ download_url|default:'/media/'|add:file_path }}"
+    <a href="{{ download_url }}"
        class="btn btn-download"
-       download>
-        <i class="fas fa-download"></i>
+       target="_blank">
+        <i class="fas fa-file-pdf"></i>
         Download Statement (PDF)
     </a>
 
     <style>
         .statement-success {
-            padding: 1.5rem;
-            background: #e8f5e9;
-            border-radius: 8px;
+            padding: var(--spacing-lg);
+            background: rgba(96, 108, 56, 0.15);
+            border-radius: var(--radius-lg);
             text-align: center;
-            border: 1px solid #c8e6c9;
+            border: 1px solid var(--color-success);
         }
 
         .success-icon {
-            font-size: 3rem;
-            color: #2e7d32;
-            margin-bottom: 0.75rem;
+            font-size: 2.5rem;
+            color: var(--color-success);
+            margin-bottom: var(--spacing-sm);
+            animation: successPop 0.5s ease-out;
+        }
+
+        @keyframes successPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
 
         .success-message h4 {
-            color: #1a1a2e;
-            margin: 0 0 0.5rem 0;
-            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin: 0 0 var(--spacing-xs) 0;
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
         }
 
         .success-message p {
-            color: #666;
-            margin: 0 0 1rem 0;
-            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0 0 var(--spacing-md) 0;
+            font-size: var(--text-sm);
         }
 
         .btn-download {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: white;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: linear-gradient(135deg, var(--olive-leaf) 0%, var(--black-forest) 100%);
+            color: var(--cornsilk);
             text-decoration: none;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: var(--radius-md);
+            font-weight: var(--font-medium);
+            font-size: var(--text-sm);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(96, 108, 56, 0.3);
         }
 
         .btn-download:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(26, 26, 46, 0.3);
+            box-shadow: 0 6px 20px rgba(96, 108, 56, 0.4);
+            background: linear-gradient(135deg, var(--black-forest) 0%, var(--olive-leaf) 100%);
         }
 
         .btn-download i {
-            font-size: 1.1rem;
+            font-size: var(--text-base);
         }
     </style>
 </div>

@@ -1,5 +1,5 @@
 {# --#-- Statement Error Message (HTMX Failure State) #}
-{# Displayed when PDF generation fails #}
+{# Displayed when PDF generation fails - Earth-Tone Design #}
 
 <div id="statement-error-container" class="statement-error">
     <div class="error-icon">
@@ -19,51 +19,55 @@
 
     <style>
         .statement-error {
-            padding: 1.5rem;
-            background: #ffebee;
-            border-radius: 8px;
+            padding: var(--spacing-lg);
+            background: rgba(199, 93, 93, 0.15);
+            border-radius: var(--radius-lg);
             text-align: center;
-            border: 1px solid #ffcdd2;
+            border: 1px solid var(--color-danger);
         }
 
         .error-icon {
-            font-size: 3rem;
-            color: #c62828;
-            margin-bottom: 0.75rem;
+            font-size: 2.5rem;
+            color: var(--color-danger);
+            margin-bottom: var(--spacing-sm);
         }
 
         .error-message h4 {
-            color: #1a1a2e;
-            margin: 0 0 0.5rem 0;
-            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin: 0 0 var(--spacing-xs) 0;
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
         }
 
         .error-message p {
-            color: #666;
-            margin: 0 0 1rem 0;
-            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0 0 var(--spacing-md) 0;
+            font-size: var(--text-sm);
         }
 
         .btn-retry {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: #c62828;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color-light);
+            border-radius: var(--radius-md);
+            font-weight: var(--font-medium);
+            font-size: var(--text-sm);
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
         }
 
         .btn-retry:hover {
-            background: #b71c1c;
+            background: var(--bg-card);
+            border-color: var(--color-danger);
+            color: var(--color-danger);
         }
 
         .btn-retry i {
-            font-size: 1.1rem;
+            font-size: var(--text-sm);
         }
     </style>
 </div>
