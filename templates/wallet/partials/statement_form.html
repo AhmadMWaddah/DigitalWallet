@@ -1,0 +1,140 @@
+{# --#-- Statement Request Form Component #}
+{# Reusable form for requesting PDF statements #}
+
+<div class="statement-request-form" id="statement-request-form-container">
+    <form id="statement-request-form"
+          hx-post="{% url 'wallet:statement_request' %}"
+          hx-target="#statement-result"
+          hx-swap="innerHTML"
+          hx-on::after-request="if(event.detail.successful) { /* Stop polling on success */ }">
+
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="start_date">
+                <i class="fas fa-calendar-alt"></i>
+                Start Date
+            </label>
+            <input type="date"
+                   id="start_date"
+                   name="start_date"
+                   required
+                   max="{% now 'Y-m-d' %}"
+                   class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="end_date">
+                <i class="fas fa-calendar-alt"></i>
+                End Date
+            </label>
+            <input type="date"
+                   id="end_date"
+                   name="end_date"
+                   required
+                   max="{% now 'Y-m-d' %}"
+                   class="form-control">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-file-pdf"></i>
+                Generate Statement
+            </button>
+        </div>
+    </form>
+
+    {# Result container for HTMX responses #}
+    <div id="statement-result"></div>
+
+    <style>
+        .statement-request-form {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #1a1a2e;
+            font-weight: 500;
+        }
+
+        .form-group label i {
+            margin-right: 0.5rem;
+            color: #0f3460;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1a1a2e;
+        }
+
+        .form-actions {
+            margin-top: 1.5rem;
+        }
+
+        .btn-primary {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 26, 46, 0.3);
+        }
+
+        .btn-primary i {
+            font-size: 1.1rem;
+        }
+
+        /* Loading state */
+        .btn-primary.htmx-request {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
+
+    <script>
+        // Auto-set default date range (last 30 days)
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+
+            if (startDateInput && endDateInput && !startDateInput.value) {
+                const today = new Date();
+                const thirtyDaysAgo = new Date(today);
+                thirtyDaysAgo.setDate(today.getDate() - 30);
+
+                endDateInput.value = today.toISOString().split('T')[0];
+                startDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+            }
+        });
+    </script>
+</div>

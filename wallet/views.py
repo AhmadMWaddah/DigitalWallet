@@ -20,6 +20,7 @@ from accounts.views import ClientOnlyMixin
 from .forms import DepositForm, TransferForm, WithdrawForm
 from .models import Wallet
 from .services import deposit_funds, transfer_funds, withdraw_funds
+from .tasks import generate_statement_pdf, get_task_status
 
 CustomUser = get_user_model()
 
@@ -456,3 +457,152 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                     "errors": form.errors,
                 }
             )
+
+
+class StatementRequestView(LoginRequiredMixin, ClientOnlyMixin, View):
+    """
+    Statement request view for generating PDF statements.
+
+    Handles form submission and triggers async PDF generation.
+    """
+
+    def post(self, request):
+        """
+        Handle statement request form submission.
+
+        Triggers Celery task to generate PDF and returns task ID for polling.
+        """
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+
+        if not start_date or not end_date:
+            return JsonResponse(
+                {"success": False, "error": "Both start date and end date are required."}
+            )
+
+        try:
+            wallet = request.user.client_profile.wallet
+        except Wallet.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Wallet not found."})
+
+        # Trigger async task
+        task = generate_statement_pdf.delay(
+            wallet_id=wallet.id, start_date_str=start_date, end_date_str=end_date
+        )
+
+        return JsonResponse(
+            {
+                "success": True,
+                "task_id": task.id,
+            }
+        )
+
+
+class TaskStatusView(LoginRequiredMixin, View):
+    """
+    Task status view for HTMX polling.
+
+    Returns HTML fragment based on task state (PENDING/STARTED/SUCCESS/FAILURE).
+    """
+
+    def get(self, request, task_id):
+        """
+        Get task status and return appropriate HTML fragment.
+
+        States:
+        - PENDING/STARTED: Progress bar with polling
+        - SUCCESS: Download button
+        - FAILURE: Error message with retry option
+        """
+        status_data = get_task_status(task_id)
+        status = status_data.get("status", "PENDING")
+
+        if status in ["PENDING", "STARTED"]:
+            # Return progress bar with continued polling
+            html = render_to_string(
+                "wallet/partials/statement_progress.html",
+                {"task_id": task_id, "progress": status_data.get("info", {}).get("progress", 0)},
+                request=request,
+            )
+            return HttpResponse(html)
+
+        elif status == "SUCCESS":
+            # Return download button
+            result = status_data.get("result", {})
+            html = render_to_string(
+                "wallet/partials/statement_download.html",
+                {
+                    "task_id": task_id,
+                    "file_path": result.get("file_path"),
+                    "success": result.get("success", False),
+                },
+                request=request,
+            )
+            return HttpResponse(html)
+
+        elif status == "FAILURE":
+            # Return error message
+            html = render_to_string(
+                "wallet/partials/statement_error.html",
+                {"task_id": task_id, "error": status_data.get("error", "Unknown error occurred")},
+                request=request,
+            )
+            return HttpResponse(html)
+
+        # Default: return unknown state
+        html = render_to_string(
+            "wallet/partials/statement_progress.html",
+            {"task_id": task_id, "progress": 0},
+            request=request,
+        )
+        return HttpResponse(html)
+
+
+class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
+    """
+    Statement download view with ownership verification.
+
+    Ensures users can only download their own statements.
+    """
+
+    def get(self, request, task_id):
+        """
+        Download generated statement after verifying ownership.
+
+        Security: Verifies that the statement belongs to the requesting user.
+        """
+        from celery.result import AsyncResult
+
+        result = AsyncResult(task_id)
+
+        if result.status != "SUCCESS":
+            return JsonResponse({"success": False, "error": "Statement not ready yet."})
+
+        task_result = result.result
+        if not task_result or not isinstance(task_result, dict):
+            return JsonResponse({"success": False, "error": "Invalid task result."})
+
+        # Security check: Verify wallet ownership
+        wallet_id = task_result.get("wallet_id")
+        if not wallet_id:
+            return JsonResponse({"success": False, "error": "Invalid statement data."})
+
+        try:
+            wallet = Wallet.objects.get(pk=wallet_id)
+            # Verify ownership
+            if wallet.client_profile.user != request.user:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": "Access denied. This statement does not belong to you.",
+                    }
+                )
+        except Wallet.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Statement not found."})
+
+        # File is ready for download
+        file_path = task_result.get("file_path")
+        if not file_path:
+            return JsonResponse({"success": False, "error": "File path not found."})
+
+        return JsonResponse({"success": True, "download_url": f"/media/{file_path}"})

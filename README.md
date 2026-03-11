@@ -22,34 +22,32 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 - [Testing](#testing)
 - [Deployment](#deployment)
 - [Phase Progress](#phase-progress)
+- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 
 ---
 
-## ✨ Features
+## ✨ Features (v1.0 - Current)
 
 ### **Dual-Portal System**
-- **Staff Portal**: Admin and labor access with fraud monitoring tools
-- **Client Portal**: User dashboard for wallet management
+- **Staff Portal**: Django Admin integration for user and wallet management.
+- **Client Portal**: Dedicated dashboard for wallet operations and history.
 
 ### **Financial Operations**
-- 💰 **Deposits**: Add funds to wallet
-- 💸 **Withdrawals**: Remove funds from wallet
-- 🔄 **Transfers**: Send money between users
-- 📊 **Transaction History**: Infinite-scroll ledger with real-time updates
+- 💰 **Deposits**: Add funds to wallet via HTMX-powered forms.
+- 💸 **Withdrawals**: Securely remove funds with balance validation.
+- 🔄 **Transfers**: Atomic peer-to-peer transfers with rollback protection.
+- 📊 **Transaction History**: Infinite-scroll ledger with cursor-based pagination.
 
-### **Security & Compliance**
-- 🔒 **Email-based Authentication**: No usernames, secure email login
-- 🚨 **Fraud Detection**: Automated flagging of suspicious transactions
-  - Transfers > $10,000
-  - > 5 transfers per hour
-- ❄️ **Account Freezing**: Staff can freeze suspicious accounts
+### **Identity & Security**
+- 🔒 **Email-based Authentication**: Secure login using email instead of usernames.
+- 👤 **Automated Profiles**: Client and Staff profiles auto-created via Django signals.
+- 🛡️ **Atomic Integrity**: All financial operations use `transaction.atomic()` and idempotency checks.
 
-### **Advanced Features**
-- 📄 **PDF Statements**: Async generation with HTMX progress bars
-- 📈 **Analytics Dashboard**: Spending visualization with Chart.js
-- ⚡ **HTMX Interactivity**: Real-time balance updates, no page reloads
-- 🎨 **Custom Modular CSS**: No Bootstrap/Tailwind, clean separation of concerns
+### **HTMX Interactivity**
+- ⚡ **Real-time Balance**: Out-of-Band (OOB) updates refresh balance card without page reloads.
+- 🔄 **Inline Forms**: Deposit, Withdraw, and Transfer forms render and submit via HTMX.
+- ⌛ **Loading States**: Visual feedback during transaction processing using `htmx-indicator`.
 
 ---
 
@@ -60,8 +58,8 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 | **Backend**         | Python 3.12, Django 5.2 (LTS)            |
 | **Database**        | PostgreSQL (SupaBase for production)     |
 | **Frontend**        | HTMX, Custom Modular CSS, Vanilla JS     |
-| **Async Tasks**     | Celery + Redis                           |
-| **PDF Generation**  | ReportLab                                |
+| **Async Foundation**| Celery + Redis (Ready for Phase 6)       |
+| **PDF Foundation**  | ReportLab (Ready for Phase 6)            |
 | **Testing**         | Pytest, pytest-django                    |
 | **Deployment**      | Render, Gunicorn, WhiteNoise             |
 | **Version Control** | Git, GitHub CLI                          |
@@ -93,8 +91,8 @@ DigitalWallet/
 │   │   ├── base.py               # Shared settings
 │   │   ├── dev.py                # Development settings
 │   │   └── prod.py               # Production settings
-│   ├── celery.py                 # Celery configuration
 │   ├── urls.py                   # Root URL configuration
+│   ├── asgi.py                   # ASGI application
 │   └── wsgi.py                   # WSGI application
 │
 ├── accounts/                     # User authentication & profiles
@@ -104,45 +102,32 @@ DigitalWallet/
 │   ├── views.py                  # Login/logout views
 │   ├── admin.py                  # Admin registration
 │   └── tests/                    # Authentication tests
-│       ├── test_models.py
-│       └── test_views.py
 │
 ├── wallet/                       # Core financial engine
 │   ├── models.py                 # Wallet, Transaction models
 │   ├── services.py               # Atomic financial operations
 │   ├── views.py                  # Dashboard & transaction views
+│   ├── forms.py                  # Transaction forms
+│   ├── exceptions.py             # Financial logic exceptions
 │   └── tests/                    # Wallet & transaction tests
 │
-├── analytics/                    # Data visualization & reports
-│   ├── views.py                  # Analytics endpoints
-│   └── tests/                    # Analytics tests
-│
-├── admin_dashboard/              # Staff back-office tools
-│   ├── views.py                  # Staff dashboard views
-│   ├── fraud_engine.py           # Fraud detection rules
-│   └── tests/                    # Staff tools tests
-│
 ├── static/
-│   ├── css/                      # Modular CSS files
-│   │   ├── layout.css
-│   │   ├── navigation.css
-│   │   └── forms.css
+│   ├── css/                      # Modular CSS files (layout, navigation, forms)
 │   └── js/                       # Modular JavaScript files
 │
 ├── templates/
 │   ├── base.html                 # Base template with responsive shell
 │   ├── __snippets__/             # Reusable snippets (navbar, sidebar, footer)
-│   └── components/               # Reusable components
-│       ├── balance_card.html
-│       ├── transaction_item.html
-│       └── alert.html
+│   ├── components/               # Reusable components (balance_card, modal)
+│   ├── accounts/                 # Auth templates
+│   └── wallet/                   # Dashboard templates
 │
 ├── scripts/                      # Automation scripts
 │   ├── git-phase-commit.sh       # Commit to phase branch
 │   ├── git-phase-merge.sh        # Merge phase to master
 │   └── setup.sh                  # Project setup automation
 │
-└── media/                        # User uploads (PDFs, KYC documents)
+└── media/                        # User uploads (Ready for statements)
 ```
 
 ---
@@ -153,7 +138,7 @@ DigitalWallet/
 
 - Python 3.12+
 - PostgreSQL (for production)
-- Redis (for Celery)
+- Redis (for Celery - Starting Phase 6)
 - Git
 
 ### **Installation**
@@ -214,14 +199,14 @@ This project follows a strict phase-based development workflow with automated Gi
 
 ```bash
 # Usage: ./scripts/git-phase-commit.sh <phase_number> "<title>" "<description>"
-./scripts/git-phase-commit.sh 4 "Implemented Custom User Model" "Replaced username with email and added user_type field. Verified with tests."
+./scripts/git-phase-commit.sh 5 "HTMX Dashboard" "Implemented dashboard with infinite scroll and OOB balance updates."
 ```
 
 #### **Merge Phase to Master:**
 
 ```bash
 # Usage: ./scripts/git-phase-merge.sh <phase_number>
-./scripts/git-phase-merge.sh 4
+./scripts/git-phase-merge.sh 5
 ```
 
 ---
@@ -237,7 +222,7 @@ pytest
 ### **Run Specific Test File:**
 
 ```bash
-pytest accounts/tests/test_models.py -v
+pytest wallet/tests/test_views.py -v
 ```
 
 ### **Run with Coverage:**
@@ -248,7 +233,7 @@ pytest --cov=. --cov-report=html
 
 ### **Testing Mandate**
 
-**Every feature must have corresponding tests.** No exceptions.
+**Every feature must have corresponding tests.** No exceptions. Total currently: **131 passed**.
 
 ---
 
@@ -272,11 +257,6 @@ pytest --cov=. --cov-report=html
    - Set build command: `./scripts/setup.sh`
    - Set start command: `gunicorn core.wsgi --bind 0.0.0.0:$PORT`
 
-4. Run migrations:
-   ```bash
-   python manage.py migrate --settings=core.settings.prod
-   ```
-
 ---
 
 ## 📊 Phase Progress (Optimized 8-Phase Structure)
@@ -284,30 +264,27 @@ pytest --cov=. --cov-report=html
 | Phase | Name                         | Status      | Branch | Tests      |
 |-------|------------------------------|-------------|--------|------------|
 | **1** | Foundation & Automation      | ✅ Complete | Merged | 13 passing |
-| **2** | Identity & Access Management | ✅ Complete | Merged | 42 passing |
+| **2** | Identity & Access Management | ✅ Complete | Merged | 46 passing |
 | **3** | Frontend Foundation          | ✅ Complete | Merged | 9 passing  |
 | **4** | Wallet Engine                | ✅ Complete | Merged | 37 passing |
-| **5** | HTMX Dashboard               | ✅ Complete | Merged | 17 passing |
-| **6** | Async & Reporting            | ⏳ Pending  | -      | -          |
-| **7** | Staff & Analytics            | ⏳ Pending  | -      | -          |
-| **8** | Performance & Deployment     | ⏳ Pending  | -      | -          |
+| **5** | HTMX Dashboard               | ✅ Complete | Merged | 26 passing |
+| **6** | Async & Reporting            | ⏳ Next Up  | -      | -          |
+| **7** | Staff & Analytics            | ⏳ Planned  | -      | -          |
+| **8** | Performance & Deployment     | ⏳ Planned  | -      | -          |
 
-### **Completed Features:**
+---
 
-**Phase 4 - Wallet Engine:**
-- ✅ Wallet model OneToOne with ClientProfile
-- ✅ Atomic Transaction ledger with idempotency support
-- ✅ Service Layer logic for Deposit, Withdraw, and Transfer
-- ✅ Custom exceptions for financial integrity
-- ✅ 37 passing pytest tests (100% logic coverage)
+## 🛤️ Roadmap (Upcoming Features)
 
-**Phase 5 - HTMX Dashboard:**
-- ✅ Real-time Balance display with OOB (Out-of-Band) updates
-- ✅ Infinite-scroll transaction history via HTMX
-- ✅ Interactive Deposit, Withdraw, and Transfer forms
-- ✅ Inline form validation and loading indicators
-- ✅ `seed_wallets` management command for demo data
-- ✅ 17 passing pytest tests for UI/HTMX flows
+### **Phase 6: Async & Reporting**
+- 📄 **PDF Statements**: Async generation using ReportLab.
+- ⌛ **HTMX Polling**: Progress bars for background PDF generation.
+- 📧 **Notifications**: Email alerts for large transactions.
+
+### **Phase 7: Staff & Analytics**
+- 🚨 **Fraud Detection**: Automated flagging of transfers > $10K or > 5/hour.
+- ❄️ **Account Management**: Staff ability to freeze/unfreeze wallets.
+- 📈 **Analytics Dashboard**: Spending visualization with Chart.js.
 
 ---
 
@@ -322,7 +299,6 @@ This is a private project. For questions or issues, contact **Ahmad**.
 - **Section Headers**: Use `# --#-- Section Name` for major code sections
 - **Views**: CBVs for structure, FBVs for HTMX actions
 - **CSS**: Modular approach in `static/css/`
-- **JS**: Modular approach in `static/js/`
 
 ---
 
@@ -338,4 +314,4 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-*Last Updated: March 8, 2026*
+*Last Updated: March 11, 2026*

@@ -1,0 +1,66 @@
+{# --#-- Statement Progress Bar (HTMX Polling) #}
+{# Displayed while PDF generation is in progress #}
+
+<div id="statement-progress-container"
+     hx-get="{% url 'wallet:statement_status' task_id %}"
+     hx-trigger="every 2s"
+     hx-swap="outerHTML">
+
+    <div class="statement-progress">
+        <div class="progress-header">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            <span>Generating your statement...</span>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" style="width: {{ progress|default:0 }}%;"></div>
+        </div>
+
+        <div class="progress-status">
+            <small>Please wait while we prepare your statement...</small>
+        </div>
+    </div>
+
+    <style>
+        .statement-progress {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: #1a1a2e;
+            font-weight: 500;
+        }
+
+        .progress-header i {
+            color: #0f3460;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .progress-status small {
+            color: #666;
+        }
+    </style>
+</div>

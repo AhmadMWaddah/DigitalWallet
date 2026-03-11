@@ -1,0 +1,69 @@
+{# --#-- Statement Error Message (HTMX Failure State) #}
+{# Displayed when PDF generation fails #}
+
+<div id="statement-error-container" class="statement-error">
+    <div class="error-icon">
+        <i class="fas fa-exclamation-circle"></i>
+    </div>
+
+    <div class="error-message">
+        <h4>Generation Failed</h4>
+        <p>{{ error|default:"An unexpected error occurred while generating your statement." }}</p>
+    </div>
+
+    <button class="btn btn-retry"
+            onclick="document.getElementById('statement-request-form').reset(); document.getElementById('statement-result').innerHTML = '';">
+        <i class="fas fa-redo"></i>
+        Try Again
+    </button>
+
+    <style>
+        .statement-error {
+            padding: 1.5rem;
+            background: #ffebee;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #ffcdd2;
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            color: #c62828;
+            margin-bottom: 0.75rem;
+        }
+
+        .error-message h4 {
+            color: #1a1a2e;
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+        }
+
+        .error-message p {
+            color: #666;
+            margin: 0 0 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .btn-retry {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #c62828;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-retry:hover {
+            background: #b71c1c;
+        }
+
+        .btn-retry i {
+            font-size: 1.1rem;
+        }
+    </style>
+</div>

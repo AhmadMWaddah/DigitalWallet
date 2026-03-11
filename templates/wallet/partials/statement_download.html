@@ -1,0 +1,70 @@
+{# --#-- Statement Download Button (HTMX Success State) #}
+{# Displayed when PDF generation is complete #}
+
+<div id="statement-download-container" class="statement-success">
+    <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+    </div>
+
+    <div class="success-message">
+        <h4>Statement Ready!</h4>
+        <p>Your account statement has been generated successfully.</p>
+    </div>
+
+    <a href="{{ download_url|default:'/media/'|add:file_path }}"
+       class="btn btn-download"
+       download>
+        <i class="fas fa-download"></i>
+        Download Statement (PDF)
+    </a>
+
+    <style>
+        .statement-success {
+            padding: 1.5rem;
+            background: #e8f5e9;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #c8e6c9;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            color: #2e7d32;
+            margin-bottom: 0.75rem;
+        }
+
+        .success-message h4 {
+            color: #1a1a2e;
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+        }
+
+        .success-message p {
+            color: #666;
+            margin: 0 0 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 26, 46, 0.3);
+        }
+
+        .btn-download i {
+            font-size: 1.1rem;
+        }
+    </style>
+</div>
