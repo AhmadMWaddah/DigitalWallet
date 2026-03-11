@@ -7,7 +7,7 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Django](https://img.shields.io/badge/Django-5.2.LTS-green)
 ![License](https://img.shields.io/badge/License-MIT-red)
-![Tests](https://img.shields.io/badge/tests-118%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-131%20passed-brightgreen)
 
 ---
 
