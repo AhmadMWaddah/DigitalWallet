@@ -541,14 +541,23 @@ class TaskStatusView(LoginRequiredMixin, View):
         - SUCCESS: Download button
         - FAILURE: Error message with retry option
         """
-        status_data = get_task_status(task_id)
+        # Get status from cache directly (more reliable)
+        from django.core.cache import cache
+
+        status_data = cache.get(f"task_status_{task_id}")
+
+        # Fallback to task function if cache miss
+        if not status_data:
+            status_data = get_task_status(task_id)
+
         status = status_data.get("status", "PENDING")
 
         if status in ["PENDING", "STARTED"]:
             # Return progress bar with continued polling
+            progress = status_data.get("progress", 0) or status_data.get("info", {}).get("progress", 0)
             html = render_to_string(
                 "wallet/partials/statement_progress.html",
-                {"task_id": task_id, "progress": status_data.get("info", {}).get("progress", 0)},
+                {"task_id": task_id, "progress": progress},
                 request=request,
             )
             return HttpResponse(html)
