@@ -11,12 +11,30 @@
         <p>Your account statement has been generated successfully.</p>
     </div>
 
-    <a href="{{ download_url }}"
-       class="btn btn-download"
-       target="_blank">
-        <i class="fas fa-file-pdf"></i>
-        Download Statement (PDF)
-    </a>
+    <div class="download-actions">
+        {# Regular download link - HTMX doesn't handle file downloads well #}
+        <a href="{{ download_url }}"
+           class="btn btn-download"
+           download>
+            <i class="fas fa-file-pdf"></i>
+            Download Statement (PDF)
+        </a>
+        <p class="download-hint">
+            <small>Click to download. You can download this statement multiple times.</small>
+        </p>
+    </div>
+
+    <div class="secondary-actions">
+        {# Reload the form by fetching it from the template #}
+        <button class="btn btn-secondary"
+                hx-get="{% url 'wallet:dashboard' %}"
+                hx-target="#statement-request-form-container"
+                hx-select="#statement-request-form-container"
+                hx-swap="outerHTML">
+            <i class="fas fa-redo"></i>
+            Generate New Statement
+        </button>
+    </div>
 
     <style>
         .statement-success {
@@ -53,6 +71,10 @@
             font-size: var(--text-sm);
         }
 
+        .download-actions {
+            margin-top: var(--spacing-md);
+        }
+
         .btn-download {
             display: inline-flex;
             align-items: center;
@@ -76,6 +98,11 @@
 
         .btn-download i {
             font-size: var(--text-base);
+        }
+
+        .download-hint {
+            margin-top: var(--spacing-sm);
+            color: var(--text-tertiary);
         }
     </style>
 </div>

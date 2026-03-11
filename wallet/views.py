@@ -618,21 +618,50 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
         result = AsyncResult(task_id)
 
         if result.status != "SUCCESS":
+            # For HTMX requests, return error HTML
+            if request.headers.get("HX-Request"):
+                html = render_to_string(
+                    "wallet/partials/statement_error.html",
+                    {"error": "Statement not ready yet. Please try again."},
+                    request=request,
+                )
+                return HttpResponse(html)
             return JsonResponse({"success": False, "error": "Statement not ready yet."})
 
         task_result = result.result
         if not task_result or not isinstance(task_result, dict):
+            if request.headers.get("HX-Request"):
+                html = render_to_string(
+                    "wallet/partials/statement_error.html",
+                    {"error": "Invalid task result."},
+                    request=request,
+                )
+                return HttpResponse(html)
             return JsonResponse({"success": False, "error": "Invalid task result."})
 
         # Security check: Verify wallet ownership
         wallet_id = task_result.get("wallet_id")
         if not wallet_id:
+            if request.headers.get("HX-Request"):
+                html = render_to_string(
+                    "wallet/partials/statement_error.html",
+                    {"error": "Invalid statement data."},
+                    request=request,
+                )
+                return HttpResponse(html)
             return JsonResponse({"success": False, "error": "Invalid statement data."})
 
         try:
             wallet = Wallet.objects.get(pk=wallet_id)
             # Verify ownership
             if wallet.client_profile.user != request.user:
+                if request.headers.get("HX-Request"):
+                    html = render_to_string(
+                        "wallet/partials/statement_error.html",
+                        {"error": "Access denied."},
+                        request=request,
+                    )
+                    return HttpResponse(html)
                 return JsonResponse(
                     {
                         "success": False,
@@ -640,16 +669,37 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
                     }
                 )
         except Wallet.DoesNotExist:
+            if request.headers.get("HX-Request"):
+                html = render_to_string(
+                    "wallet/partials/statement_error.html",
+                    {"error": "Statement not found."},
+                    request=request,
+                )
+                return HttpResponse(html)
             return JsonResponse({"success": False, "error": "Statement not found."})
 
         # File is ready for download
         file_path = task_result.get("file_path")
         if not file_path:
+            if request.headers.get("HX-Request"):
+                html = render_to_string(
+                    "wallet/partials/statement_error.html",
+                    {"error": "File not found."},
+                    request=request,
+                )
+                return HttpResponse(html)
             return JsonResponse({"success": False, "error": "File path not found."})
 
         # Construct full path and serve file
         full_path = os.path.join(settings.MEDIA_ROOT, file_path)
         if not os.path.exists(full_path):
+            if request.headers.get("HX-Request"):
+                html = render_to_string(
+                    "wallet/partials/statement_error.html",
+                    {"error": "File not found on server."},
+                    request=request,
+                )
+                return HttpResponse(html)
             return JsonResponse({"success": False, "error": "File not found."})
 
         # Serve the file
