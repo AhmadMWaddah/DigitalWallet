@@ -176,14 +176,13 @@ class TestDepositView:
         response = client.post(
             reverse("wallet:deposit"),
             {"amount": "50.00", "description": "Test deposit"},
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_HX_REQUEST="true",
         )
 
         assert response.status_code == 200
-        data = json.loads(response.content)
-        assert data["success"] is True
-        assert "balance" in data
-        assert "message" in data
+        # HTMX requests return HTML, not JSON
+        assert response["Content-Type"] == "text/html; charset=utf-8"
+        assert b"alert-success" in response.content or b"Deposited" in response.content or b"50" in response.content
 
         wallet.refresh_from_db()
         assert wallet.balance == Decimal("150.00")
@@ -203,12 +202,13 @@ class TestDepositView:
         response = client.post(
             reverse("wallet:deposit"),
             {"amount": "-50.00"},
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_HX_REQUEST="true",
         )
 
-        data = json.loads(response.content)
-        assert data["success"] is False
-        assert "form" in data  # Form with errors returned
+        # HTMX requests return HTML with form errors
+        assert response.status_code == 200
+        assert response["Content-Type"] == "text/html; charset=utf-8"
+        assert b"form-error" in response.content or b"error" in response.content.lower()
 
 
 @pytest.mark.django_db
@@ -343,12 +343,13 @@ class TestTransferView:
                 "recipient_email": "self-transfer@test.com",
                 "amount": "100.00",
             },
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_HX_REQUEST="true",
         )
 
-        data = json.loads(response.content)
-        assert data["success"] is False
-        assert "form" in data  # Form with errors
+        # HTMX requests return HTML with error
+        assert response.status_code == 200
+        assert response["Content-Type"] == "text/html; charset=utf-8"
+        assert b"form-error" in response.content or b"yourself" in response.content.lower()
 
     def test_transfer_to_nonexistent_user(self, client):
         """Test transfer to non-existent user fails."""

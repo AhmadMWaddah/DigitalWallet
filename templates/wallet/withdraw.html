@@ -9,6 +9,9 @@
 {% endblock %}
 
 {% block content %}
+<!-- Messages Container for HTMX responses -->
+<div id="messages-container"></div>
+
 <div class="page-header">
     <h1 class="page-title">Withdraw Funds</h1>
     <p class="page-subtitle">Remove money from your wallet</p>
@@ -21,7 +24,11 @@
                 <h2 class="card-title">Withdraw Form</h2>
             </div>
             <div class="card-body">
-                <form method="post" hx-post="{% url 'wallet:withdraw' %}" hx-target="#messages-container" hx-swap="innerHTML">
+                <form method="post" 
+                      hx-post="{% url 'wallet:withdraw' %}" 
+                      hx-target="#messages-container" 
+                      hx-swap="innerHTML"
+                      hx-indicator=".htmx-indicator">
                     {% csrf_token %}
 
                     <div class="form-group">
@@ -44,6 +51,9 @@
                     <button type="submit" class="btn btn-outline btn-lg">
                         <i class="fas fa-circle-minus"></i> Withdraw Funds
                     </button>
+                    <span class="htmx-indicator" style="margin-left: var(--spacing-md);">
+                        <i class="fas fa-circle-notch fa-spin"></i> Processing...
+                    </span>
                 </form>
             </div>
         </div>

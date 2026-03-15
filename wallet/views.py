@@ -91,16 +91,15 @@ class TransactionHistoryView(LoginRequiredMixin, ClientOnlyMixin, View):
         except Wallet.DoesNotExist:
             return render(request, "wallet/partials/empty_transactions.html")
 
-        transactions = list(
-            wallet.transactions.select_related(
-                "counterparty_wallet__client_profile__user"
-            ).order_by("-created_at")[offset:offset + limit]
-        )
+        # Get transactions with offset and limit
+        all_transactions = wallet.transactions.select_related(
+            "counterparty_wallet__client_profile__user"
+        ).order_by("-created_at")
 
-        has_more = wallet.transactions.filter(
-            created_at__lt=transactions[-1].created_at if transactions else timezone.now()
-        ).exists() if len(transactions) == limit else False
+        transactions = list(all_transactions[offset:offset + limit])
 
+        # Check if there are more transactions
+        has_more = (offset + limit) < all_transactions.count()
         next_offset = offset + limit if has_more else None
 
         html = render_to_string(
@@ -110,6 +109,7 @@ class TransactionHistoryView(LoginRequiredMixin, ClientOnlyMixin, View):
                 "has_more": has_more,
                 "next_offset": next_offset,
                 "limit": limit,
+                "wallet": wallet,
             },
             request=request,
         )
@@ -193,55 +193,40 @@ class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
                     request=request,
                 )
 
-                # Render updated balance
-                balance_html = render_to_string(
-                    "components/balance_card.html",
-                    {"wallet": wallet, "last_updated": "Just now"},
-                    request=request,
-                )
+                # For HTMX requests, return just the message
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(message_html)
 
-                # Render updated transaction list
-                transactions = wallet.transactions.select_related(
-                    "counterparty_wallet__client_profile__user"
-                ).order_by("-created_at")[:20]
-
-                transactions_html = render_to_string(
-                    "wallet/partials/transaction_list.html",
-                    {"transactions": transactions, "has_more": False, "next_cursor": None},
-                    request=request,
-                )
-
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "message": message_html,
-                        "balance": balance_html,
-                        "transactions": transactions_html,
-                    }
-                )
+                # For regular requests, return JSON
+                return JsonResponse({"success": True, "message": f"Deposited ${transaction.amount:.2f}"})
 
             except Exception as e:
-                return JsonResponse(
+                error_html = render_to_string(
+                    "components/alert.html",
                     {
-                        "success": False,
-                        "error": str(e),
-                    }
+                        "message": type(
+                            "Message",
+                            (),
+                            {"tags": "danger", "message": str(e)},
+                        )()
+                    },
+                    request=request,
                 )
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(error_html)
+                return JsonResponse({"success": False, "error": str(e)})
         else:
-            # Return form with errors
-            form_html = render_to_string(
-                "wallet/partials/deposit_form.html",
-                {"form": form},
-                request=request,
-            )
+            # Return form with errors for HTMX
+            if request.headers.get("HX-Request"):
+                form_html = render_to_string(
+                    "wallet/partials/deposit_form.html",
+                    {"form": form},
+                    request=request,
+                )
+                return HttpResponse(form_html)
 
-            return JsonResponse(
-                {
-                    "success": False,
-                    "form": form_html,
-                    "errors": form.errors,
-                }
-            )
+            # For regular requests, return JSON with errors
+            return JsonResponse({"success": False, "errors": form.errors})
 
 
 class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
@@ -285,55 +270,40 @@ class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
                     request=request,
                 )
 
-                # Render updated balance
-                balance_html = render_to_string(
-                    "components/balance_card.html",
-                    {"wallet": wallet, "last_updated": "Just now"},
-                    request=request,
-                )
+                # For HTMX requests, return just the message
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(message_html)
 
-                # Render updated transaction list
-                transactions = wallet.transactions.select_related(
-                    "counterparty_wallet__client_profile__user"
-                ).order_by("-created_at")[:20]
-
-                transactions_html = render_to_string(
-                    "wallet/partials/transaction_list.html",
-                    {"transactions": transactions, "has_more": False, "next_cursor": None},
-                    request=request,
-                )
-
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "message": message_html,
-                        "balance": balance_html,
-                        "transactions": transactions_html,
-                    }
-                )
+                # For regular requests, return JSON
+                return JsonResponse({"success": True, "message": f"Withdrew ${transaction.amount:.2f}"})
 
             except Exception as e:
-                return JsonResponse(
+                error_html = render_to_string(
+                    "components/alert.html",
                     {
-                        "success": False,
-                        "error": str(e),
-                    }
+                        "message": type(
+                            "Message",
+                            (),
+                            {"tags": "danger", "message": str(e)},
+                        )()
+                    },
+                    request=request,
                 )
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(error_html)
+                return JsonResponse({"success": False, "error": str(e)})
         else:
-            # Return form with errors
-            form_html = render_to_string(
-                "wallet/partials/withdraw_form.html",
-                {"form": form},
-                request=request,
-            )
-
-            return JsonResponse(
-                {
-                    "success": False,
-                    "form": form_html,
-                    "errors": form.errors,
-                }
-            )
+            # Return form with errors for HTMX
+            if request.headers.get("HX-Request"):
+                form_html = render_to_string(
+                    "wallet/partials/withdraw_form.html",
+                    {"form": form},
+                    request=request,
+                )
+                return HttpResponse(form_html)
+            
+            # For regular requests, return JSON with errors
+            return JsonResponse({"success": False, "errors": form.errors})
 
 
 class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
@@ -354,12 +324,20 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
         try:
             sender_wallet = request.user.client_profile.wallet
         except Wallet.DoesNotExist:
-            return JsonResponse(
+            error_html = render_to_string(
+                "components/alert.html",
                 {
-                    "success": False,
-                    "error": "Wallet not found.",
-                }
+                    "message": type(
+                        "Message",
+                        (),
+                        {"tags": "danger", "message": "Wallet not found."},
+                    )()
+                },
+                request=request,
             )
+            if request.headers.get("HX-Request"):
+                return HttpResponse(error_html)
+            return JsonResponse({"success": False, "error": "Wallet not found."})
 
         form = TransferForm(request.POST, sender_wallet=sender_wallet)
 
@@ -396,62 +374,55 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                     request=request,
                 )
 
-                # Render updated balance
-                balance_html = render_to_string(
-                    "components/balance_card.html",
-                    {"wallet": sender_wallet, "last_updated": "Just now"},
-                    request=request,
-                )
+                # For HTMX requests, return just the message
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(message_html)
 
-                # Render updated transaction list
-                transactions = sender_wallet.transactions.select_related(
-                    "counterparty_wallet__client_profile__user"
-                ).order_by("-created_at")[:20]
-
-                transactions_html = render_to_string(
-                    "wallet/partials/transaction_list.html",
-                    {"transactions": transactions, "has_more": False, "next_cursor": None},
-                    request=request,
-                )
-
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "message": message_html,
-                        "balance": balance_html,
-                        "transactions": transactions_html,
-                    }
-                )
+                # For regular requests, return JSON
+                return JsonResponse({"success": True, "message": f"Transferred ${transaction.amount:.2f}"})
 
             except ClientProfile.DoesNotExist:
-                return JsonResponse(
+                error_html = render_to_string(
+                    "components/alert.html",
                     {
-                        "success": False,
-                        "error": "Recipient not found.",
-                    }
+                        "message": type(
+                            "Message",
+                            (),
+                            {"tags": "danger", "message": "Recipient not found."},
+                        )()
+                    },
+                    request=request,
                 )
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(error_html)
+                return JsonResponse({"success": False, "error": "Recipient not found."})
             except Exception as e:
-                return JsonResponse(
+                error_html = render_to_string(
+                    "components/alert.html",
                     {
-                        "success": False,
-                        "error": str(e),
-                    }
+                        "message": type(
+                            "Message",
+                            (),
+                            {"tags": "danger", "message": str(e)},
+                        )()
+                    },
+                    request=request,
                 )
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(error_html)
+                return JsonResponse({"success": False, "error": str(e)})
         else:
-            # Return form with errors
-            form_html = render_to_string(
-                "wallet/partials/transfer_form.html",
-                {"form": form},
-                request=request,
-            )
+            # Return form with errors for HTMX
+            if request.headers.get("HX-Request"):
+                form_html = render_to_string(
+                    "wallet/partials/transfer_form.html",
+                    {"form": form},
+                    request=request,
+                )
+                return HttpResponse(form_html)
 
-            return JsonResponse(
-                {
-                    "success": False,
-                    "form": form_html,
-                    "errors": form.errors,
-                }
-            )
+            # For regular requests, return JSON with errors
+            return JsonResponse({"success": False, "errors": form.errors})
 
 
 class StatementFormPartialView(LoginRequiredMixin, ClientOnlyMixin, View):
