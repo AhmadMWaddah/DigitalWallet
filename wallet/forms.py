@@ -26,6 +26,7 @@ class DepositForm(forms.Form):
         decimal_places=2,
         widget=forms.NumberInput(
             attrs={
+                "class": "form-input",
                 "placeholder": "Enter amount",
                 "step": "0.01",
                 "min": "0.01",
@@ -37,7 +38,12 @@ class DepositForm(forms.Form):
     description = forms.CharField(
         max_length=255,
         required=False,
-        widget=forms.TextInput(attrs={"placeholder": "Description (optional)"}),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-input",
+                "placeholder": "Description (optional)",
+            }
+        ),
     )
 
     def clean_amount(self):
@@ -59,6 +65,7 @@ class WithdrawForm(forms.Form):
         decimal_places=2,
         widget=forms.NumberInput(
             attrs={
+                "class": "form-input",
                 "placeholder": "Enter amount",
                 "step": "0.01",
                 "min": "0.01",
@@ -70,7 +77,12 @@ class WithdrawForm(forms.Form):
     description = forms.CharField(
         max_length=255,
         required=False,
-        widget=forms.TextInput(attrs={"placeholder": "Description (optional)"}),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-input",
+                "placeholder": "Description (optional)",
+            }
+        ),
     )
 
     def clean_amount(self):
@@ -87,7 +99,13 @@ class TransferForm(forms.Form):
     """
 
     recipient_email = forms.EmailField(
-        widget=forms.EmailInput(attrs={"placeholder": "recipient@example.com", "type": "email"}),
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-input",
+                "placeholder": "recipient@example.com",
+                "type": "email",
+            }
+        ),
         help_text="Enter the recipient's email address",
     )
 
@@ -97,6 +115,7 @@ class TransferForm(forms.Form):
         decimal_places=2,
         widget=forms.NumberInput(
             attrs={
+                "class": "form-input",
                 "placeholder": "Enter amount",
                 "step": "0.01",
                 "min": "0.01",
@@ -108,7 +127,12 @@ class TransferForm(forms.Form):
     description = forms.CharField(
         max_length=255,
         required=False,
-        widget=forms.TextInput(attrs={"placeholder": "Description (optional)"}),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-input",
+                "placeholder": "Description (optional)",
+            }
+        ),
     )
 
     def __init__(self, *args, **kwargs):
