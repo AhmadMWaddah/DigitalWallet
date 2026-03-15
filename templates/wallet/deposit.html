@@ -28,7 +28,8 @@
                       hx-post="{% url 'wallet:deposit' %}" 
                       hx-target="#messages-container" 
                       hx-swap="innerHTML"
-                      hx-indicator=".htmx-indicator">
+                      hx-indicator=".htmx-indicator"
+                      hx-on::after-request="if(event.detail.successful) this.reset()">
                     {% csrf_token %}
 
                     <div class="form-group">
@@ -73,16 +74,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    // Clear form after successful deposit
-    document.body.addEventListener('htmx:afterSwap', function(event) {
-        if (event.detail.trigger === 'clearForm') {
-            const form = event.target.closest('form');
-            if (form) {
-                form.reset();
-            }
-        }
-    });
-</script>
 {% endblock %}

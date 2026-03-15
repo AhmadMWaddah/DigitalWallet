@@ -180,7 +180,7 @@ class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
                     reference_id=f"DEP-{wallet.id}-{uuid.uuid4().hex[:12]}",
                 )
 
-                # For HTMX requests, return success message and clear form
+                # For HTMX requests, return success message
                 if request.headers.get("HX-Request"):
                     # Return success message
                     message_html = render_to_string(
@@ -193,10 +193,7 @@ class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
                         },
                         request=request,
                     )
-                    response = HttpResponse(message_html)
-                    # Clear form after success
-                    response.headers["HX-Trigger-After-Swap"] = "clearForm"
-                    return response
+                    return HttpResponse(message_html)
 
                 # For regular requests, return JSON
                 return JsonResponse({"success": True, "message": f"Deposited ${transaction.amount:,.2f}"})
@@ -257,7 +254,7 @@ class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
                     reference_id=f"WDR-{wallet.id}-{uuid.uuid4().hex[:12]}",
                 )
 
-                # For HTMX requests, return success message and clear form
+                # For HTMX requests, return success message
                 if request.headers.get("HX-Request"):
                     message_html = render_to_string(
                         "components/alert.html",
@@ -269,10 +266,7 @@ class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
                         },
                         request=request,
                     )
-                    response = HttpResponse(message_html)
-                    # Clear form after success
-                    response.headers["HX-Trigger-After-Swap"] = "clearForm"
-                    return response
+                    return HttpResponse(message_html)
 
                 # For regular requests, return JSON
                 return JsonResponse({"success": True, "message": f"Withdrew ${transaction.amount:,.2f}"})
@@ -373,7 +367,7 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                     request=request,
                 )
 
-                # For HTMX requests, return success message and clear form
+                # For HTMX requests, return success message
                 if request.headers.get("HX-Request"):
                     message_html = render_to_string(
                         "components/alert.html",
@@ -385,10 +379,7 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                         },
                         request=request,
                     )
-                    response = HttpResponse(message_html)
-                    # Clear form after success
-                    response.headers["HX-Trigger-After-Swap"] = "clearForm"
-                    return response
+                    return HttpResponse(message_html)
 
                 # For regular requests, return JSON
                 return JsonResponse({"success": True, "message": f"Transferred ${transaction.amount:,.2f}"})
@@ -587,12 +578,22 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
         Security: Verifies that the statement belongs to the requesting user.
         """
         import os
+        import glob
 
-        from django.core.cache import cache
+        from celery.result import AsyncResult
         from django.http import FileResponse
 
-        # Get task result from cache (more reliable than AsyncResult)
-        task_result = cache.get(f"task_result_{task_id}")
+        # First try to get result from Celery AsyncResult
+        result = AsyncResult(task_id)
+        
+        task_result = None
+        if result.status == 'SUCCESS' and result.result:
+            task_result = result.result
+        
+        # Fallback to cache if AsyncResult doesn't have the result
+        if not task_result:
+            from django.core.cache import cache
+            task_result = cache.get(f"task_result_{task_id}")
 
         if not task_result or not isinstance(task_result, dict):
             return JsonResponse({"success": False, "error": "Statement not found. Please generate a new statement."})
@@ -618,8 +619,18 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
         except Wallet.DoesNotExist:
             return JsonResponse({"success": False, "error": "Statement not found."})
 
-        # Get file path from cache result
+        # Get file path from result
         file_path = task_result.get("file_path")
+        
+        # If file_path not in result, try to find the file in statements directory
+        if not file_path:
+            statements_dir = os.path.join(settings.MEDIA_ROOT, "statements")
+            pattern = os.path.join(statements_dir, f"*{wallet_id}*.pdf")
+            files = glob.glob(pattern)
+            if files:
+                # Get the most recent file
+                file_path = os.path.relpath(max(files, key=os.path.getctime), settings.MEDIA_ROOT)
+
         if not file_path:
             return JsonResponse({"success": False, "error": "File path not found."})
 
