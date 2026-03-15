@@ -1,7 +1,4 @@
-<!-- --#-- Transaction List Partial -->
-{% load static %}
-
-{% for transaction in transactions %}
+<!-- --#-- Transaction Item Component -->
 <div class="transaction-card {% if transaction.type == 'DEPOSIT' %}deposit{% elif transaction.type == 'WITHDRAWAL' %}withdrawal{% elif transaction.type == 'TRANSFER' %}transfer{% endif %} {% if transaction.status == 'FLAGGED' %}flagged{% endif %}">
     <div class="transaction-icon-wrapper">
         {% if transaction.type == 'DEPOSIT' %}
@@ -9,11 +6,7 @@
         {% elif transaction.type == 'WITHDRAWAL' %}
         <i class="fas fa-circle-minus"></i>
         {% elif transaction.type == 'TRANSFER' %}
-            {% if transaction.wallet == wallet %}
-            <i class="fas fa-right-left"></i>
-            {% else %}
-            <i class="fas fa-right-left"></i>
-            {% endif %}
+        <i class="fas fa-right-left"></i>
         {% endif %}
     </div>
 
@@ -50,24 +43,3 @@
         </div>
     </div>
 </div>
-{% empty %}
-<div class="empty-state">
-    <span class="empty-icon">📭</span>
-    <p class="empty-text">No transactions yet</p>
-</div>
-{% endfor %}
-
-{# Load More Button - Only show if there are more transactions #}
-{% if has_more and next_offset %}
-<div id="load-more-container"
-     hx-get="{% url 'wallet:transaction_history' %}?offset={{ next_offset }}&limit={{ limit|default:5 }}"
-     hx-trigger="revealed"
-     hx-swap="afterend">
-    <button class="btn btn-outline btn-sm load-more-btn"
-            hx-get="{% url 'wallet:transaction_history' %}?offset={{ next_offset }}&limit={{ limit|default:5 }}"
-            hx-target="#load-more-container"
-            hx-swap="outerHTML">
-        <i class="fas fa-plus"></i> Load More
-    </button>
-</div>
-{% endif %}

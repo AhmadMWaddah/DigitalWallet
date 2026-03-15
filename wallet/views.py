@@ -9,18 +9,20 @@ import uuid
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.http import FileResponse, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import ListView, TemplateView
 
 from accounts.models import ClientProfile
 from accounts.views import ClientOnlyMixin
 
 from .forms import DepositForm, TransferForm, WithdrawForm
-from .models import Wallet
+from .models import Transaction, Wallet
 from .services import deposit_funds, transfer_funds, withdraw_funds
 from .tasks import generate_statement_pdf, get_task_status
 
@@ -64,7 +66,7 @@ class DashboardView(LoginRequiredMixin, ClientOnlyMixin, TemplateView):
 
 class TransactionHistoryView(LoginRequiredMixin, ClientOnlyMixin, View):
     """
-    Transaction history view for HTMX infinite scroll.
+    Transaction history view for HTMX with Load More functionality.
 
     Returns HTML partial of transactions for pagination.
     """
@@ -81,43 +83,34 @@ class TransactionHistoryView(LoginRequiredMixin, ClientOnlyMixin, View):
 
     def get_partial(self, request):
         """Return transaction history partial for HTMX."""
-        cursor = request.GET.get("cursor")
-        limit = int(request.GET.get("limit", 20))
+        offset = int(request.GET.get("offset", 0))
+        limit = int(request.GET.get("limit", 5))
 
         try:
             wallet = request.user.client_profile.wallet
         except Wallet.DoesNotExist:
             return render(request, "wallet/partials/empty_transactions.html")
 
-        if cursor:
-            transactions = list(
-                wallet.transactions.select_related("counterparty_wallet__client_profile__user")
-                .filter(created_at__lt=cursor)
-                .order_by("-created_at")[:limit]
-            )
-        else:
-            transactions = list(
-                wallet.transactions.select_related(
-                    "counterparty_wallet__client_profile__user"
-                ).order_by("-created_at")[:limit]
-            )
+        transactions = list(
+            wallet.transactions.select_related(
+                "counterparty_wallet__client_profile__user"
+            ).order_by("-created_at")[offset:offset + limit]
+        )
 
-        has_more = False
-        if len(transactions) == limit:
-            last_transaction = transactions[-1] if transactions else None
-            if last_transaction:
-                has_more = wallet.transactions.filter(
-                    created_at__lt=last_transaction.created_at
-                ).exists()
+        has_more = wallet.transactions.filter(
+            created_at__lt=transactions[-1].created_at if transactions else timezone.now()
+        ).exists() if len(transactions) == limit else False
 
-        next_cursor = None
-        if has_more and transactions:
-            last_transaction = transactions[-1]
-            next_cursor = last_transaction.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        next_offset = offset + limit if has_more else None
 
         html = render_to_string(
             "wallet/partials/transaction_list.html",
-            {"transactions": transactions, "has_more": has_more, "next_cursor": next_cursor},
+            {
+                "transactions": transactions,
+                "has_more": has_more,
+                "next_offset": next_offset,
+                "limit": limit,
+            },
             request=request,
         )
 
@@ -658,3 +651,37 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
         response = FileResponse(open(full_path, "rb"), content_type="application/pdf", as_attachment=True)
         response["Content-Disposition"] = f'attachment; filename="{os.path.basename(file_path)}"'
         return response
+
+
+class TransactionListView(LoginRequiredMixin, ClientOnlyMixin, ListView):
+    """
+    Full transaction history page with pagination.
+
+    Displays all user transactions with standard pagination.
+    """
+
+    model = Transaction
+    template_name = "wallet/transaction_list_page.html"
+    context_object_name = "transactions"
+    paginate_by = 20
+
+    def get_queryset(self):
+        """Get user's transactions ordered by date."""
+        try:
+            wallet = self.request.user.client_profile.wallet
+            return Transaction.objects.filter(
+                wallet=wallet
+            ).select_related(
+                "counterparty_wallet__client_profile__user"
+            ).order_by("-created_at")
+        except Wallet.DoesNotExist:
+            return Transaction.objects.none()
+
+    def get_context_data(self, **kwargs):
+        """Add wallet to context."""
+        context = super().get_context_data(**kwargs)
+        try:
+            context["wallet"] = self.request.user.client_profile.wallet
+        except Wallet.DoesNotExist:
+            context["wallet"] = None
+        return context

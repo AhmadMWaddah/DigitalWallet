@@ -15,6 +15,7 @@ from .views import (
     StatementRequestView,
     TaskStatusView,
     TransactionHistoryView,
+    TransactionListView,
     TransferView,
     WithdrawView,
 )
@@ -24,6 +25,7 @@ app_name = "wallet"
 urlpatterns = [
     path("", DashboardView.as_view(), name="dashboard"),
     path("transactions/history/", TransactionHistoryView.as_view(), name="transaction_history"),
+    path("transactions/", TransactionListView.as_view(), name="transaction_list"),
     path("balance/", BalanceCardView.as_view(), name="balance"),
     path("deposit/", DepositView.as_view(), name="deposit"),
     path("withdraw/", WithdrawView.as_view(), name="withdraw"),
