@@ -143,11 +143,11 @@
     z-index: 1;
 }
 
-/* --#-- Quick Actions - Button Grid Design */
+/* --#-- Quick Actions - 3-Column Card Grid Design */
 .action-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
 }
 
@@ -157,41 +157,98 @@
     align-items: center;
     justify-content: center;
     gap: var(--spacing-sm);
-    padding: var(--spacing-xl);
-    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
-    border: 1px solid var(--border-color-light);
+    padding: var(--spacing-xl) var(--spacing-lg);
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-tertiary));
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
     text-decoration: none;
     color: var(--cornsilk);
     font-weight: var(--font-semibold);
     font-size: var(--text-sm);
     transition: all var(--transition-base);
-    box-shadow: var(--shadow-md);
-    min-height: 120px;
+    box-shadow: var(--shadow-sm);
+    min-height: 140px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle gradient overlay on hover */
+.action-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(188, 108, 37, 0.1), transparent);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    pointer-events: none;
 }
 
 .action-btn:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(188, 108, 37, 0.2);
     border-color: var(--color-primary);
-    background: linear-gradient(135deg, var(--color-primary-bg), var(--bg-secondary));
+    background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+}
+
+.action-btn:hover::before {
+    opacity: 1;
+}
+
+.action-btn:active {
+    transform: translateY(-2px);
 }
 
 .action-btn-icon {
     font-size: 2.5rem;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
     filter: drop-shadow(0 2px 4px rgba(188, 108, 37, 0.3));
+    transition: transform var(--transition-base);
+}
+
+.action-btn:hover .action-btn-icon {
+    transform: scale(1.1);
 }
 
 .action-btn-label {
     font-weight: var(--font-semibold);
     color: var(--cornsilk);
+    font-size: var(--text-sm);
+    margin-bottom: var(--spacing-xs);
 }
 
 .action-btn-sublabel {
     font-size: var(--text-xs);
     color: var(--text-tertiary);
     font-weight: var(--font-normal);
+    text-align: center;
+}
+
+/* Responsive: Stack on mobile */
+@media (max-width: 768px) {
+    .action-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .action-btn {
+        min-height: 100px;
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: var(--spacing-md) var(--spacing-lg);
+        gap: var(--spacing-md);
+    }
+
+    .action-btn-icon {
+        font-size: 2rem;
+        margin-bottom: 0;
+    }
+
+    .action-btn-label {
+        margin-bottom: 0;
+    }
 }
 
 /* --#-- Transaction List */
@@ -419,21 +476,6 @@
 
     .amount-value {
         font-size: 2.5rem;
-    }
-
-    .action-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .action-btn {
-        flex-direction: row;
-        min-height: 80px;
-        padding: var(--spacing-md);
-    }
-
-    .action-btn-icon {
-        font-size: 2rem;
-        margin-bottom: 0;
     }
 }
 
