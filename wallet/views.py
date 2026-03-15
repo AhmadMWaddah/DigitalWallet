@@ -180,35 +180,35 @@ class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
                     reference_id=f"DEP-{wallet.id}-{uuid.uuid4().hex[:12]}",
                 )
 
-                # Render success message
-                message_html = render_to_string(
-                    "components/alert.html",
-                    {
-                        "message": type(
-                            "Message",
-                            (),
-                            {"tags": "success", "message": f"Deposited ${transaction.amount:.2f}"},
-                        )()
-                    },
-                    request=request,
-                )
-
-                # For HTMX requests, return just the message
+                # For HTMX requests, return success message and clear form
                 if request.headers.get("HX-Request"):
-                    return HttpResponse(message_html)
+                    # Return success message
+                    message_html = render_to_string(
+                        "components/alert.html",
+                        {
+                            "message": {
+                                "tags": "success",
+                                "message": f"Successfully deposited ${transaction.amount:,.2f} to your wallet!"
+                            }
+                        },
+                        request=request,
+                    )
+                    response = HttpResponse(message_html)
+                    # Clear form after success
+                    response.headers["HX-Trigger-After-Swap"] = "clearForm"
+                    return response
 
                 # For regular requests, return JSON
-                return JsonResponse({"success": True, "message": f"Deposited ${transaction.amount:.2f}"})
+                return JsonResponse({"success": True, "message": f"Deposited ${transaction.amount:,.2f}"})
 
             except Exception as e:
                 error_html = render_to_string(
                     "components/alert.html",
                     {
-                        "message": type(
-                            "Message",
-                            (),
-                            {"tags": "danger", "message": str(e)},
-                        )()
+                        "message": {
+                            "tags": "danger",
+                            "message": f"Deposit failed: {str(e)}"
+                        }
                     },
                     request=request,
                 )
@@ -224,7 +224,7 @@ class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
                     request=request,
                 )
                 return HttpResponse(form_html)
-
+            
             # For regular requests, return JSON with errors
             return JsonResponse({"success": False, "errors": form.errors})
 
@@ -257,35 +257,34 @@ class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
                     reference_id=f"WDR-{wallet.id}-{uuid.uuid4().hex[:12]}",
                 )
 
-                # Render success message
-                message_html = render_to_string(
-                    "components/alert.html",
-                    {
-                        "message": type(
-                            "Message",
-                            (),
-                            {"tags": "success", "message": f"Withdrew ${transaction.amount:.2f}"},
-                        )()
-                    },
-                    request=request,
-                )
-
-                # For HTMX requests, return just the message
+                # For HTMX requests, return success message and clear form
                 if request.headers.get("HX-Request"):
-                    return HttpResponse(message_html)
+                    message_html = render_to_string(
+                        "components/alert.html",
+                        {
+                            "message": {
+                                "tags": "success",
+                                "message": f"Successfully withdrew ${transaction.amount:,.2f} from your wallet!"
+                            }
+                        },
+                        request=request,
+                    )
+                    response = HttpResponse(message_html)
+                    # Clear form after success
+                    response.headers["HX-Trigger-After-Swap"] = "clearForm"
+                    return response
 
                 # For regular requests, return JSON
-                return JsonResponse({"success": True, "message": f"Withdrew ${transaction.amount:.2f}"})
+                return JsonResponse({"success": True, "message": f"Withdrew ${transaction.amount:,.2f}"})
 
             except Exception as e:
                 error_html = render_to_string(
                     "components/alert.html",
                     {
-                        "message": type(
-                            "Message",
-                            (),
-                            {"tags": "danger", "message": str(e)},
-                        )()
+                        "message": {
+                            "tags": "danger",
+                            "message": f"Withdrawal failed: {str(e)}"
+                        }
                     },
                     request=request,
                 )
@@ -374,22 +373,34 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                     request=request,
                 )
 
-                # For HTMX requests, return just the message
+                # For HTMX requests, return success message and clear form
                 if request.headers.get("HX-Request"):
-                    return HttpResponse(message_html)
+                    message_html = render_to_string(
+                        "components/alert.html",
+                        {
+                            "message": {
+                                "tags": "success",
+                                "message": f"Successfully transferred ${transaction.amount:,.2f} to {recipient_profile.user.email}!"
+                            }
+                        },
+                        request=request,
+                    )
+                    response = HttpResponse(message_html)
+                    # Clear form after success
+                    response.headers["HX-Trigger-After-Swap"] = "clearForm"
+                    return response
 
                 # For regular requests, return JSON
-                return JsonResponse({"success": True, "message": f"Transferred ${transaction.amount:.2f}"})
+                return JsonResponse({"success": True, "message": f"Transferred ${transaction.amount:,.2f}"})
 
             except ClientProfile.DoesNotExist:
                 error_html = render_to_string(
                     "components/alert.html",
                     {
-                        "message": type(
-                            "Message",
-                            (),
-                            {"tags": "danger", "message": "Recipient not found."},
-                        )()
+                        "message": {
+                            "tags": "danger",
+                            "message": "Recipient not found. Please check the email address."
+                        }
                     },
                     request=request,
                 )
@@ -400,11 +411,10 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                 error_html = render_to_string(
                     "components/alert.html",
                     {
-                        "message": type(
-                            "Message",
-                            (),
-                            {"tags": "danger", "message": str(e)},
-                        )()
+                        "message": {
+                            "tags": "danger",
+                            "message": f"Transfer failed: {str(e)}"
+                        }
                     },
                     request=request,
                 )
@@ -420,7 +430,7 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                     request=request,
                 )
                 return HttpResponse(form_html)
-
+            
             # For regular requests, return JSON with errors
             return JsonResponse({"success": False, "errors": form.errors})
 

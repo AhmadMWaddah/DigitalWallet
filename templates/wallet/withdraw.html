@@ -74,4 +74,16 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Clear form after successful withdrawal
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        if (event.detail.trigger === 'clearForm') {
+            const form = event.target.closest('form');
+            if (form) {
+                form.reset();
+            }
+        }
+    });
+</script>
 {% endblock %}

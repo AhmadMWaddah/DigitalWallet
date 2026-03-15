@@ -3,15 +3,15 @@
 <div class="alert alert-{{ message.tags|default:'info' }}" role="alert">
     <div class="alert-content">
         {% if message.tags == 'success' %}
-        <span class="alert-icon">✓</span>
+        <span class="alert-icon"><i class="fas fa-check-circle"></i></span>
         {% elif message.tags == 'error' or message.tags == 'danger' %}
-        <span class="alert-icon">!</span>
+        <span class="alert-icon"><i class="fas fa-exclamation-circle"></i></span>
         {% elif message.tags == 'warning' %}
-        <span class="alert-icon">⚠</span>
+        <span class="alert-icon"><i class="fas fa-exclamation-triangle"></i></span>
         {% else %}
-        <span class="alert-icon">ℹ</span>
+        <span class="alert-icon"><i class="fas fa-info-circle"></i></span>
         {% endif %}
-        <span class="alert-message">{{ message }}</span>
+        <span class="alert-message">{{ message.message|default:message }}</span>
     </div>
     <button class="alert-close" onclick="this.parentElement.remove()" aria-label="Close">
         <span>&times;</span>
