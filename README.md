@@ -7,7 +7,7 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Django](https://img.shields.io/badge/Django-5.2.LTS-green)
 ![License](https://img.shields.io/badge/License-MIT-red)
-![Tests](https://img.shields.io/badge/tests-141%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-144%20passed-brightgreen)
 
 ---
 
@@ -27,7 +27,7 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 
 ---
 
-## ✨ Features (v1.1 - Current)
+## ✨ Features (v1.2 - Current)
 
 ### **Dual-Portal System**
 - **Staff Portal**: Django Admin integration for user and wallet management.
@@ -39,9 +39,9 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 - 🔄 **Transfers**: Atomic peer-to-peer transfers with rollback protection.
 - 📊 **Transaction History**: Infinite-scroll ledger with cursor-based pagination.
 
-### **Async & Reporting (New!)**
+### **Async & Reporting (Latest!)**
 - 📄 **PDF Statements**: Professional transaction reports generated asynchronously via Celery & ReportLab.
-- ⌛ **Real-time Progress**: HTMX-powered progress bars with polling for background tasks.
+- ⌛ **Real-time Progress**: HTMX-powered state-machine UI for background tasks.
 - 📉 **Running Balance**: Accurate historical balance tracking and "Opening Balance" calculations.
 
 ### **Identity & Security**
@@ -116,10 +116,12 @@ DigitalWallet/
 │   ├── forms.py                  # Transaction forms
 │   ├── tasks.py                  # Celery background tasks
 │   ├── exceptions.py             # Financial logic exceptions
+│   ├── utils/
+│   │   └── pdf_generator.py      # PDF generation service
 │   └── tests/                    # Wallet & transaction tests
 │
 ├── static/
-│   ├── css/                      # Modular CSS files (layout, navigation, forms)
+│   ├── css/                      # Modular CSS files (layout, navigation, forms, dashboard)
 │   └── js/                       # Modular JavaScript files
 │
 ├── templates/
@@ -192,12 +194,6 @@ python manage.py seed_wallets --settings=core.settings.dev
 pytest
 ```
 
-### **Run Specific Test File:**
-
-```bash
-pytest wallet/tests/test_async.py -v
-```
-
 ### **Run with Coverage:**
 
 ```bash
@@ -206,7 +202,7 @@ pytest --cov=. --cov-report=html
 
 ### **Testing Mandate**
 
-**Every feature must have corresponding tests.** No exceptions. Total currently: **141 passed**.
+**Every feature must have corresponding tests.** Total currently: **144 passed**.
 
 ---
 
@@ -219,13 +215,13 @@ pytest --cov=. --cov-report=html
 | **3** | Frontend Foundation          | ✅ Complete | Merged | 9 passing  |
 | **4** | Wallet Engine                | ✅ Complete | Merged | 37 passing |
 | **5** | HTMX Dashboard               | ✅ Complete | Merged | 26 passing |
-| **6** | Async & Reporting            | ✅ Complete | Merged | 10 passing |
+| **6** | Async & Reporting            | ✅ Complete | Merged | 13 passing |
 | **7** | Staff & Analytics            | ⏳ Next Up  | -      | -          |
 | **8** | Performance & Deployment     | ⏳ Planned  | -      | -          |
 
 ---
 
-## Tracks & Roadmap (Upcoming Features)
+## 🛤️ Roadmap (Upcoming Features)
 
 ### **Phase 7: Staff & Analytics**
 - 🚨 **Fraud Detection**: Automated flagging of transfers > $10K or > 5/hour.
@@ -246,7 +242,7 @@ This is a private project. For questions or issues, contact **Ahmad**.
 
 ## 📝 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
 
 ---
 
@@ -256,4 +252,4 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-*Last Updated: March 11, 2026*
+*Last Updated: March 15, 2026*
