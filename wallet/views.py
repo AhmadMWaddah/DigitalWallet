@@ -530,14 +530,18 @@ class TaskStatusView(LoginRequiredMixin, View):
     """
     Task status view for HTMX polling.
 
-    Returns HTML fragment based on task state:
-    - PENDING/STARTED: Progress bar (continues polling)
-    - SUCCESS: Download button (replaces container)
-    - FAILURE: Error message with retry
+    Returns HTML fragment based on task state (PENDING/STARTED/SUCCESS/FAILURE).
     """
 
     def get(self, request, task_id):
-        """Get task status and return appropriate HTML fragment."""
+        """
+        Get task status and return appropriate HTML fragment.
+
+        States:
+        - PENDING/STARTED: Progress bar with polling
+        - SUCCESS: Download button
+        - FAILURE: Error message with retry option
+        """
         # Get status from cache directly (more reliable)
         from django.core.cache import cache
 
@@ -550,8 +554,8 @@ class TaskStatusView(LoginRequiredMixin, View):
         status = status_data.get("status", "PENDING")
 
         if status in ["PENDING", "STARTED"]:
-            # Return progress bar (continues polling)
-            progress = status_data.get("progress", 0)
+            # Return progress bar with continued polling
+            progress = status_data.get("progress", 0) or status_data.get("info", {}).get("progress", 0)
             html = render_to_string(
                 "wallet/partials/statement_progress.html",
                 {"task_id": task_id, "progress": progress},
@@ -560,9 +564,10 @@ class TaskStatusView(LoginRequiredMixin, View):
             return HttpResponse(html)
 
         elif status == "SUCCESS":
-            # Return download button (replaces entire container)
+            # Return download button
             result = status_data.get("result", {})
             file_path = result.get("file_path")
+            # Construct download URL with task_id for the view
             download_url = reverse("wallet:statement_download", kwargs={"task_id": task_id})
             html = render_to_string(
                 "wallet/partials/statement_download.html",
@@ -585,7 +590,7 @@ class TaskStatusView(LoginRequiredMixin, View):
             )
             return HttpResponse(html)
 
-        # Default: return progress bar
+        # Default: return unknown state
         html = render_to_string(
             "wallet/partials/statement_progress.html",
             {"task_id": task_id, "progress": 0},
@@ -609,55 +614,27 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
         """
         import os
 
-        from celery.result import AsyncResult
+        from django.core.cache import cache
+        from django.http import FileResponse
 
-        result = AsyncResult(task_id)
+        # Get task result from cache (more reliable than AsyncResult)
+        task_result = cache.get(f"task_result_{task_id}")
 
-        if result.status != "SUCCESS":
-            # For HTMX requests, return error HTML
-            if request.headers.get("HX-Request"):
-                html = render_to_string(
-                    "wallet/partials/statement_error.html",
-                    {"error": "Statement not ready yet. Please try again."},
-                    request=request,
-                )
-                return HttpResponse(html)
-            return JsonResponse({"success": False, "error": "Statement not ready yet."})
-
-        task_result = result.result
         if not task_result or not isinstance(task_result, dict):
-            if request.headers.get("HX-Request"):
-                html = render_to_string(
-                    "wallet/partials/statement_error.html",
-                    {"error": "Invalid task result."},
-                    request=request,
-                )
-                return HttpResponse(html)
-            return JsonResponse({"success": False, "error": "Invalid task result."})
+            return JsonResponse({"success": False, "error": "Statement not found. Please generate a new statement."})
+
+        if not task_result.get("success"):
+            return JsonResponse({"success": False, "error": task_result.get("error", "Statement generation failed.")})
 
         # Security check: Verify wallet ownership
         wallet_id = task_result.get("wallet_id")
         if not wallet_id:
-            if request.headers.get("HX-Request"):
-                html = render_to_string(
-                    "wallet/partials/statement_error.html",
-                    {"error": "Invalid statement data."},
-                    request=request,
-                )
-                return HttpResponse(html)
             return JsonResponse({"success": False, "error": "Invalid statement data."})
 
         try:
-            wallet = Wallet.objects.get(pk=wallet_id)
+            wallet = Wallet.objects.select_related("client_profile__user").get(pk=wallet_id)
             # Verify ownership
             if wallet.client_profile.user != request.user:
-                if request.headers.get("HX-Request"):
-                    html = render_to_string(
-                        "wallet/partials/statement_error.html",
-                        {"error": "Access denied."},
-                        request=request,
-                    )
-                    return HttpResponse(html)
                 return JsonResponse(
                     {
                         "success": False,
@@ -665,40 +642,19 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
                     }
                 )
         except Wallet.DoesNotExist:
-            if request.headers.get("HX-Request"):
-                html = render_to_string(
-                    "wallet/partials/statement_error.html",
-                    {"error": "Statement not found."},
-                    request=request,
-                )
-                return HttpResponse(html)
             return JsonResponse({"success": False, "error": "Statement not found."})
 
-        # File is ready for download
+        # Get file path from cache result
         file_path = task_result.get("file_path")
         if not file_path:
-            if request.headers.get("HX-Request"):
-                html = render_to_string(
-                    "wallet/partials/statement_error.html",
-                    {"error": "File not found."},
-                    request=request,
-                )
-                return HttpResponse(html)
             return JsonResponse({"success": False, "error": "File path not found."})
 
         # Construct full path and serve file
         full_path = os.path.join(settings.MEDIA_ROOT, file_path)
         if not os.path.exists(full_path):
-            if request.headers.get("HX-Request"):
-                html = render_to_string(
-                    "wallet/partials/statement_error.html",
-                    {"error": "File not found on server."},
-                    request=request,
-                )
-                return HttpResponse(html)
-            return JsonResponse({"success": False, "error": "File not found."})
+            return JsonResponse({"success": False, "error": "File not found on server."})
 
-        # Serve the file
-        response = FileResponse(open(full_path, "rb"), content_type="application/pdf")
+        # Serve the file as attachment
+        response = FileResponse(open(full_path, "rb"), content_type="application/pdf", as_attachment=True)
         response["Content-Disposition"] = f'attachment; filename="{os.path.basename(file_path)}"'
         return response

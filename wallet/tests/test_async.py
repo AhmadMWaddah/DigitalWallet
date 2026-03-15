@@ -419,10 +419,12 @@ class TestOpeningBalanceCalculation:
             elif txn.type == "WITHDRAWAL":
                 opening_balance -= txn.amount
             elif txn.type == "TRANSFER":
-                # Outgoing transfer (counterparty_wallet is None or different wallet)
-                if txn.counterparty_wallet is None or txn.counterparty_wallet != wallet:
+                # EXPLICIT LOGIC per requirements:
+                # - If txn.wallet == self.wallet: OUTGOING (subtract)
+                # - If txn.counterparty_wallet == self.wallet: INCOMING (add)
+                if txn.wallet == wallet:
                     opening_balance -= txn.amount
-                else:
+                elif txn.counterparty_wallet == wallet:
                     opening_balance += txn.amount
 
         assert opening_balance == Decimal("700.00"), f"Expected $700.00, got ${opening_balance}, found {prior_transactions.count()} prior transactions"
@@ -442,9 +444,12 @@ class TestOpeningBalanceCalculation:
             elif txn.type == "WITHDRAWAL":
                 net_change -= txn.amount
             elif txn.type == "TRANSFER":
-                if txn.counterparty_wallet is None or txn.counterparty_wallet != wallet:
+                # EXPLICIT LOGIC per requirements:
+                # - If txn.wallet == self.wallet: OUTGOING (subtract)
+                # - If txn.counterparty_wallet == self.wallet: INCOMING (add)
+                if txn.wallet == wallet:
                     net_change -= txn.amount
-                else:
+                elif txn.counterparty_wallet == wallet:
                     net_change += txn.amount
 
         closing_balance = opening_balance + net_change

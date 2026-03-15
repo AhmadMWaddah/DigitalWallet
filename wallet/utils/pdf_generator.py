@@ -133,9 +133,9 @@ class PDFStatementGenerator:
         # Calculate Opening Balance = All deposits/incoming - All withdrawals/outgoing BEFORE start date
         opening_balance = Decimal("0.00")
         prior_transactions = self.wallet.transactions.filter(
-            created_at__lt=self.start_date, 
+            created_at__lt=self.start_date,
             status="COMPLETED"
-        )
+        ).select_related("counterparty_wallet")
 
         for txn in prior_transactions:
             if txn.type == "DEPOSIT":
@@ -143,18 +143,19 @@ class PDFStatementGenerator:
             elif txn.type == "WITHDRAWAL":
                 opening_balance -= txn.amount
             elif txn.type == "TRANSFER":
-                # If we are the primary wallet, we are the sender (outgoing)
+                # EXPLICIT LOGIC per requirements:
+                # - If txn.wallet == self.wallet: OUTGOING (subtract)
+                # - If txn.counterparty_wallet == self.wallet: INCOMING (add)
                 if txn.wallet == self.wallet:
                     opening_balance -= txn.amount
-                # If we are the counterparty, we are the receiver (incoming)
-                else:
+                elif txn.counterparty_wallet == self.wallet:
                     opening_balance += txn.amount
 
         # Calculate net change during period
         net_change = Decimal("0.00")
         period_transactions = self.wallet.transactions.filter(
-            created_at__gte=self.start_date, 
-            created_at__lte=self.end_date, 
+            created_at__gte=self.start_date,
+            created_at__lte=self.end_date,
             status="COMPLETED"
         ).order_by("created_at")
 
@@ -164,9 +165,12 @@ class PDFStatementGenerator:
             elif txn.type == "WITHDRAWAL":
                 net_change -= txn.amount
             elif txn.type == "TRANSFER":
+                # EXPLICIT LOGIC per requirements:
+                # - If txn.wallet == self.wallet: OUTGOING (subtract)
+                # - If txn.counterparty_wallet == self.wallet: INCOMING (add)
                 if txn.wallet == self.wallet:
                     net_change -= txn.amount
-                else:
+                elif txn.counterparty_wallet == self.wallet:
                     net_change += txn.amount
 
         closing_balance = opening_balance + net_change
@@ -233,7 +237,7 @@ class PDFStatementGenerator:
 
         # Build transaction data
         data = [["Date", "Type", "Description", "Amount", "Balance"]]
-        
+
         running_balance = opening_balance
 
         for txn in transactions:
@@ -244,12 +248,18 @@ class PDFStatementGenerator:
                 amt = -txn.amount
                 amount_str = f"-${txn.amount:,.2f}"
             elif txn.type == "TRANSFER":
+                # EXPLICIT LOGIC per requirements:
+                # - If txn.wallet == self.wallet: OUTGOING (subtract)
+                # - If txn.counterparty_wallet == self.wallet: INCOMING (add)
                 if txn.wallet == self.wallet:
                     amt = -txn.amount
                     amount_str = f"-${txn.amount:,.2f}"
-                else:
+                elif txn.counterparty_wallet == self.wallet:
                     amt = txn.amount
                     amount_str = f"+${txn.amount:,.2f}"
+                else:
+                    amt = Decimal("0.00")
+                    amount_str = f"${txn.amount:,.2f}"
             else:
                 amt = Decimal("0.00")
                 amount_str = f"${txn.amount:,.2f}"
