@@ -186,6 +186,35 @@ python manage.py seed_wallets --settings=core.settings.dev
 
 ---
 
+## 🔄 Development Workflow
+
+### **Phase-Based Development**
+
+This project follows a strict phase-based development workflow with automated Git scripts.
+
+#### **Commit to a Phase Branch:**
+
+```bash
+# Usage: ./scripts/git-phase-commit.sh <phase_number> "<title>" "<description>"
+./scripts/git-phase-commit.sh 6 "Async & Reporting" "Implemented PDF generation and HTMX polling."
+```
+
+#### **Merge Phase to Master:**
+
+```bash
+# Usage: ./scripts/git-phase-merge.sh <phase_number>
+./scripts/git-phase-merge.sh 6
+```
+
+#### **Master Merge Best Practices:**
+
+- **Master is the Truth:** The `master` branch is our production-ready source of truth. It must never contain failing tests or incomplete features.
+- **Merge Fixes Immediately:** Bug fixes should be merged to `master` as soon as they are verified and tested to maintain a healthy baseline.
+- **Milestone Merging:** Only merge full phases into `master` once every task in that phase is complete and verified. Avoid partial or "per-snippet" merges to prevent commit noise and instability.
+- **Branch Isolation:** Keep all work in `phase-n` or `fix-` branches until the final validation is complete.
+
+---
+
 ## 🧪 Testing
 
 ### **Run All Tests:**

@@ -15,6 +15,11 @@
   - **Remote-First Workflow:** Every branch (Phase or Fix) must be pushed to the remote repository (`origin`) immediately after creation or the first commit.
   - **Phase Branches:** Use `phase-n` for ongoing feature work.
   - **Fix Branches:** Use `fix-<description>` for bugs discovered in code already merged to `master`.
+  - **Master Merge Policy (The "Golden Rule"):**
+    - **Master is the Truth:** `master` must always be healthy. If a test fails, it does not belong in `master`. If a feature is half-finished, it stays in its branch.
+    - **Merge Fixes Immediately:** Merge `fix-` branches into `master` as soon as the bug is verified fixed and all tests pass.
+    - **Merge Phases at Milestones:** Do NOT merge `phase-n` branches partially. Only merge into `master` when the *entire* Phase is 100% complete, all deliverables are met, and the full test suite passes. This is treated as a "Release."
+    - **No "Per-Snippet" Merges:** Never merge into `master` after every individual response or small code change during a phase. Maintain isolation in the branch until the milestone is validated.
   - **Automation:** Use `scripts/git-phase-commit.sh` and `scripts/git-phase-merge.sh` for all work. These scripts must handle pushing to and cleaning up the remote.
 - **Views Architecture:** **CBVs** for structural views, **FBVs** for lightweight HTMX actions.
 - **Frontend Architecture:** CSS in `static/css/`, JS in `static/js/`, HTML snippets in `templates/components/`.
