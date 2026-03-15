@@ -1,54 +1,48 @@
-{# --#-- Statement Request Form Component #}
-{# Reusable form for requesting PDF statements - Earth-Tone Design #}
+{# --#-- Statement Request Form (Initial State) #}
+{# Form submits to start PDF generation #}
 
-<div class="statement-request-form" id="statement-request-form-container">
-    <form id="statement-request-form"
-          hx-post="{% url 'wallet:statement_request' %}"
-          hx-target="#statement-result"
-          hx-swap="innerHTML"
-          hx-on::after-request="if(event.detail.successful) { /* Stop polling on success */ }">
+<form class="statement-request-form"
+      hx-post="{% url 'wallet:statement_request' %}"
+      hx-target="#statement-section"
+      hx-swap="innerHTML">
 
-        {% csrf_token %}
+    {% csrf_token %}
 
-        <div class="form-row">
-            <div class="form-group">
-                <label for="start_date">
-                    <i class="fas fa-calendar-alt"></i>
-                    Start Date
-                </label>
-                <input type="date"
-                       id="start_date"
-                       name="start_date"
-                       required
-                       max="{% now 'Y-m-d' %}"
-                       class="form-control">
-            </div>
-
-            <div class="form-group">
-                <label for="end_date">
-                    <i class="fas fa-calendar-alt"></i>
-                    End Date
-                </label>
-                <input type="date"
-                       id="end_date"
-                       name="end_date"
-                       required
-                       max="{% now 'Y-m-d' %}"
-                       class="form-control">
-            </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="start_date">
+                <i class="fas fa-calendar-alt"></i>
+                Start Date
+            </label>
+            <input type="date"
+                   id="start_date"
+                   name="start_date"
+                   required
+                   max="{% now 'Y-m-d' %}"
+                   class="form-control">
         </div>
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-statement">
-                <i class="fas fa-file-pdf"></i>
-                Generate Statement
-            </button>
+        <div class="form-group">
+            <label for="end_date">
+                <i class="fas fa-calendar-alt"></i>
+                End Date
+            </label>
+            <input type="date"
+                   id="end_date"
+                   name="end_date"
+                   required
+                   max="{% now 'Y-m-d' %}"
+                   class="form-control">
         </div>
-    </form>
+    </div>
 
-    {# Result container for HTMX responses #}
-    <div id="statement-result"></div>
-</div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-statement">
+            <i class="fas fa-file-pdf"></i>
+            Generate Statement
+        </button>
+    </div>
+</form>
 
 <style>
     .statement-request-form {

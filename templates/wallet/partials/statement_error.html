@@ -1,7 +1,7 @@
-{# --#-- Statement Error Message (HTMX Failure State) #}
-{# Displayed when PDF generation fails - Earth-Tone Design #}
+{# --#-- Error State #}
+{# Shows error message with retry option #}
 
-<div id="statement-error-container" class="statement-error">
+<div class="statement-error">
     <div class="error-icon">
         <i class="fas fa-exclamation-circle"></i>
     </div>
@@ -11,11 +11,15 @@
         <p>{{ error|default:"An unexpected error occurred while generating your statement." }}</p>
     </div>
 
-    <button class="btn btn-retry"
-            onclick="document.getElementById('statement-request-form').reset(); document.getElementById('statement-result').innerHTML = '';">
-        <i class="fas fa-redo"></i>
-        Try Again
-    </button>
+    <div class="retry-actions">
+        <button class="btn btn-retry"
+                hx-get="{% url 'wallet:statement_form_partial' %}"
+                hx-target="#statement-section"
+                hx-swap="innerHTML">
+            <i class="fas fa-redo"></i>
+            Try Again
+        </button>
+    </div>
 
     <style>
         .statement-error {
@@ -43,6 +47,10 @@
             color: var(--text-secondary);
             margin: 0 0 var(--spacing-md) 0;
             font-size: var(--text-sm);
+        }
+
+        .retry-actions {
+            margin-top: var(--spacing-md);
         }
 
         .btn-retry {

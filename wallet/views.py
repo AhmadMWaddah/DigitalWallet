@@ -461,6 +461,23 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
             )
 
 
+class StatementFormPartialView(LoginRequiredMixin, ClientOnlyMixin, View):
+    """
+    Return the statement request form partial.
+
+    Used to reset the form after download or error.
+    """
+
+    def get(self, request):
+        """Return the form partial HTML."""
+        html = render_to_string(
+            "wallet/partials/statement_form.html",
+            {},
+            request=request,
+        )
+        return HttpResponse(html)
+
+
 class StatementRequestView(LoginRequiredMixin, ClientOnlyMixin, View):
     """
     Statement request view for generating PDF statements.
@@ -472,75 +489,55 @@ class StatementRequestView(LoginRequiredMixin, ClientOnlyMixin, View):
         """
         Handle statement request form submission.
 
-        Triggers Celery task to generate PDF and returns task ID for polling.
+        Triggers Celery task to generate PDF and returns progress bar for polling.
         """
         start_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
 
         if not start_date or not end_date:
-            # For HTMX requests, return error HTML
-            if request.headers.get("HX-Request"):
-                html = render_to_string(
-                    "wallet/partials/statement_error.html",
-                    {"error": "Both start date and end date are required."},
-                    request=request,
-                )
-                return HttpResponse(html)
-            return JsonResponse(
-                {"success": False, "error": "Both start date and end date are required."}
+            html = render_to_string(
+                "wallet/partials/statement_error.html",
+                {"error": "Both start date and end date are required."},
+                request=request,
             )
+            return HttpResponse(html)
 
         try:
             wallet = request.user.client_profile.wallet
         except Wallet.DoesNotExist:
-            if request.headers.get("HX-Request"):
-                html = render_to_string(
-                    "wallet/partials/statement_error.html",
-                    {"error": "Wallet not found."},
-                    request=request,
-                )
-                return HttpResponse(html)
-            return JsonResponse({"success": False, "error": "Wallet not found."})
+            html = render_to_string(
+                "wallet/partials/statement_error.html",
+                {"error": "Wallet not found."},
+                request=request,
+            )
+            return HttpResponse(html)
 
         # Trigger async task
         task = generate_statement_pdf.delay(
             wallet_id=wallet.id, start_date_str=start_date, end_date_str=end_date
         )
 
-        # For HTMX requests, return progress bar HTML
-        if request.headers.get("HX-Request"):
-            html = render_to_string(
-                "wallet/partials/statement_progress.html",
-                {"task_id": task.id, "progress": 10},
-                request=request,
-            )
-            return HttpResponse(html)
-
-        # For regular requests, return JSON
-        return JsonResponse(
-            {
-                "success": True,
-                "task_id": task.id,
-            }
+        # Return progress bar for HTMX polling
+        html = render_to_string(
+            "wallet/partials/statement_progress.html",
+            {"task_id": task.id, "progress": 10},
+            request=request,
         )
+        return HttpResponse(html)
 
 
 class TaskStatusView(LoginRequiredMixin, View):
     """
     Task status view for HTMX polling.
 
-    Returns HTML fragment based on task state (PENDING/STARTED/SUCCESS/FAILURE).
+    Returns HTML fragment based on task state:
+    - PENDING/STARTED: Progress bar (continues polling)
+    - SUCCESS: Download button (replaces container)
+    - FAILURE: Error message with retry
     """
 
     def get(self, request, task_id):
-        """
-        Get task status and return appropriate HTML fragment.
-
-        States:
-        - PENDING/STARTED: Progress bar with polling
-        - SUCCESS: Download button
-        - FAILURE: Error message with retry option
-        """
+        """Get task status and return appropriate HTML fragment."""
         # Get status from cache directly (more reliable)
         from django.core.cache import cache
 
@@ -553,8 +550,8 @@ class TaskStatusView(LoginRequiredMixin, View):
         status = status_data.get("status", "PENDING")
 
         if status in ["PENDING", "STARTED"]:
-            # Return progress bar with continued polling
-            progress = status_data.get("progress", 0) or status_data.get("info", {}).get("progress", 0)
+            # Return progress bar (continues polling)
+            progress = status_data.get("progress", 0)
             html = render_to_string(
                 "wallet/partials/statement_progress.html",
                 {"task_id": task_id, "progress": progress},
@@ -563,10 +560,9 @@ class TaskStatusView(LoginRequiredMixin, View):
             return HttpResponse(html)
 
         elif status == "SUCCESS":
-            # Return download button
+            # Return download button (replaces entire container)
             result = status_data.get("result", {})
             file_path = result.get("file_path")
-            # Construct download URL with task_id for the view
             download_url = reverse("wallet:statement_download", kwargs={"task_id": task_id})
             html = render_to_string(
                 "wallet/partials/statement_download.html",
@@ -589,7 +585,7 @@ class TaskStatusView(LoginRequiredMixin, View):
             )
             return HttpResponse(html)
 
-        # Default: return unknown state
+        # Default: return progress bar
         html = render_to_string(
             "wallet/partials/statement_progress.html",
             {"task_id": task_id, "progress": 0},

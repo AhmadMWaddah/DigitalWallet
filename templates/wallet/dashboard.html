@@ -68,7 +68,7 @@
     <!-- --#-- Right Column -->
     <div class="dashboard-column dashboard-column-wide">
 
-        <!-- --#-- Statement Generation -->
+        <!-- --#-- Statement Generation (State Machine UI) -->
         <div class="card">
             <div class="card-header">
                 <h2 class="card-title">
@@ -78,7 +78,13 @@
             </div>
             <div class="card-body">
                 <p class="card-description">Generate and download your account statement as a PDF.</p>
-                {% include 'wallet/partials/statement_form.html' %}
+                {# Single container for all states - Form, Progress, or Download #}
+                <div id="statement-section"
+                     hx-target="#statement-section"
+                     hx-swap="innerHTML">
+                    {# Initial state: Show form #}
+                    {% include 'wallet/partials/statement_form.html' %}
+                </div>
             </div>
         </div>
 

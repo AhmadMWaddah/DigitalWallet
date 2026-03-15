@@ -7,7 +7,7 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Django](https://img.shields.io/badge/Django-5.2.LTS-green)
 ![License](https://img.shields.io/badge/License-MIT-red)
-![Tests](https://img.shields.io/badge/tests-131%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-141%20passed-brightgreen)
 
 ---
 
@@ -27,7 +27,7 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 
 ---
 
-## ✨ Features (v1.0 - Current)
+## ✨ Features (v1.1 - Current)
 
 ### **Dual-Portal System**
 - **Staff Portal**: Django Admin integration for user and wallet management.
@@ -38,6 +38,11 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 - 💸 **Withdrawals**: Securely remove funds with balance validation.
 - 🔄 **Transfers**: Atomic peer-to-peer transfers with rollback protection.
 - 📊 **Transaction History**: Infinite-scroll ledger with cursor-based pagination.
+
+### **Async & Reporting (New!)**
+- 📄 **PDF Statements**: Professional transaction reports generated asynchronously via Celery & ReportLab.
+- ⌛ **Real-time Progress**: HTMX-powered progress bars with polling for background tasks.
+- 📉 **Running Balance**: Accurate historical balance tracking and "Opening Balance" calculations.
 
 ### **Identity & Security**
 - 🔒 **Email-based Authentication**: Secure login using email instead of usernames.
@@ -58,8 +63,8 @@ A secure, production-ready **Fintech Digital Wallet Dashboard** built with Djang
 | **Backend**         | Python 3.12, Django 5.2 (LTS)            |
 | **Database**        | PostgreSQL (SupaBase for production)     |
 | **Frontend**        | HTMX, Custom Modular CSS, Vanilla JS     |
-| **Async Foundation**| Celery + Redis (Ready for Phase 6)       |
-| **PDF Foundation**  | ReportLab (Ready for Phase 6)            |
+| **Async Tasks**     | Celery + Redis                           |
+| **PDF Generation**  | ReportLab                                |
 | **Testing**         | Pytest, pytest-django                    |
 | **Deployment**      | Render, Gunicorn, WhiteNoise             |
 | **Version Control** | Git, GitHub CLI                          |
@@ -91,6 +96,7 @@ DigitalWallet/
 │   │   ├── base.py               # Shared settings
 │   │   ├── dev.py                # Development settings
 │   │   └── prod.py               # Production settings
+│   ├── celery.py                 # Celery configuration
 │   ├── urls.py                   # Root URL configuration
 │   ├── asgi.py                   # ASGI application
 │   └── wsgi.py                   # WSGI application
@@ -108,6 +114,7 @@ DigitalWallet/
 │   ├── services.py               # Atomic financial operations
 │   ├── views.py                  # Dashboard & transaction views
 │   ├── forms.py                  # Transaction forms
+│   ├── tasks.py                  # Celery background tasks
 │   ├── exceptions.py             # Financial logic exceptions
 │   └── tests/                    # Wallet & transaction tests
 │
@@ -127,7 +134,7 @@ DigitalWallet/
 │   ├── git-phase-merge.sh        # Merge phase to master
 │   └── setup.sh                  # Project setup automation
 │
-└── media/                        # User uploads (Ready for statements)
+└── media/                        # User uploads (PDF statements)
 ```
 
 ---
@@ -138,7 +145,7 @@ DigitalWallet/
 
 - Python 3.12+
 - PostgreSQL (for production)
-- Redis (for Celery - Starting Phase 6)
+- Redis (for Celery)
 - Git
 
 ### **Installation**
@@ -153,11 +160,6 @@ DigitalWallet/
    ```bash
    ./scripts/setup.sh
    ```
-
-   This will:
-   - Activate the virtual environment
-   - Install dependencies
-   - Run database migrations
 
 3. **Create a superuser:**
    ```bash
@@ -178,35 +180,6 @@ To quickly populate the application with realistic data for testing or demonstra
 ```bash
 # Create 5 dummy users with funded wallets and random transactions
 python manage.py seed_wallets --settings=core.settings.dev
-
-# Clear existing dummy data and create a fresh set of 10 users
-python manage.py seed_wallets --clear --count 10 --settings=core.settings.dev
-```
-
-**Default Credentials:**
-- **Emails:** `testuser1@example.com` to `testuserN@example.com`
-- **Password:** `testpass123`
-
----
-
-## 🔄 Development Workflow
-
-### **Phase-Based Development**
-
-This project follows a strict phase-based development workflow with automated Git scripts.
-
-#### **Commit to a Phase Branch:**
-
-```bash
-# Usage: ./scripts/git-phase-commit.sh <phase_number> "<title>" "<description>"
-./scripts/git-phase-commit.sh 5 "HTMX Dashboard" "Implemented dashboard with infinite scroll and OOB balance updates."
-```
-
-#### **Merge Phase to Master:**
-
-```bash
-# Usage: ./scripts/git-phase-merge.sh <phase_number>
-./scripts/git-phase-merge.sh 5
 ```
 
 ---
@@ -222,7 +195,7 @@ pytest
 ### **Run Specific Test File:**
 
 ```bash
-pytest wallet/tests/test_views.py -v
+pytest wallet/tests/test_async.py -v
 ```
 
 ### **Run with Coverage:**
@@ -233,29 +206,7 @@ pytest --cov=. --cov-report=html
 
 ### **Testing Mandate**
 
-**Every feature must have corresponding tests.** No exceptions. Total currently: **131 passed**.
-
----
-
-## 🌐 Deployment
-
-### **Production Settings**
-
-1. Set environment variables on Render:
-   - `SECRET_KEY`
-   - `DATABASE_URL` (SupaBase PostgreSQL)
-   - `CELERY_BROKER_URL` (Redis)
-   - `ALLOWED_HOSTS`
-
-2. Configure `core/settings/prod.py`:
-   - `DEBUG = False`
-   - WhiteNoise for static files
-   - Secure cookie settings
-
-3. Deploy to Render:
-   - Connect GitHub repository
-   - Set build command: `./scripts/setup.sh`
-   - Set start command: `gunicorn core.wsgi --bind 0.0.0.0:$PORT`
+**Every feature must have corresponding tests.** No exceptions. Total currently: **141 passed**.
 
 ---
 
@@ -268,37 +219,28 @@ pytest --cov=. --cov-report=html
 | **3** | Frontend Foundation          | ✅ Complete | Merged | 9 passing  |
 | **4** | Wallet Engine                | ✅ Complete | Merged | 37 passing |
 | **5** | HTMX Dashboard               | ✅ Complete | Merged | 26 passing |
-| **6** | Async & Reporting            | ⏳ Next Up  | -      | -          |
-| **7** | Staff & Analytics            | ⏳ Planned  | -      | -          |
+| **6** | Async & Reporting            | ✅ Complete | Merged | 10 passing |
+| **7** | Staff & Analytics            | ⏳ Next Up  | -      | -          |
 | **8** | Performance & Deployment     | ⏳ Planned  | -      | -          |
 
 ---
 
-## 🛤️ Roadmap (Upcoming Features)
-
-### **Phase 6: Async & Reporting**
-- 📄 **PDF Statements**: Async generation using ReportLab.
-- ⌛ **HTMX Polling**: Progress bars for background PDF generation.
-- 📧 **Notifications**: Email alerts for large transactions.
+## Tracks & Roadmap (Upcoming Features)
 
 ### **Phase 7: Staff & Analytics**
 - 🚨 **Fraud Detection**: Automated flagging of transfers > $10K or > 5/hour.
 - ❄️ **Account Management**: Staff ability to freeze/unfreeze wallets.
 - 📈 **Analytics Dashboard**: Spending visualization with Chart.js.
 
+### **Phase 8: Performance & Deployment**
+- 🚀 **Optimization**: Select related/prefetch related for N+1 fixes.
+- ☁️ **Deployment**: Production-ready setup on Render with WhiteNoise.
+
 ---
 
 ## 🤝 Contributing
 
 This is a private project. For questions or issues, contact **Ahmad**.
-
-### **Code Standards**
-
-- **Docstrings**: Use `"""Docstring content"""` for classes and complex functions
-- **Comments**: Explain **why**, not **what**
-- **Section Headers**: Use `# --#-- Section Name` for major code sections
-- **Views**: CBVs for structure, FBVs for HTMX actions
-- **CSS**: Modular approach in `static/css/`
 
 ---
 

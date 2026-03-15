@@ -1,7 +1,7 @@
-{# --#-- Statement Download Button (HTMX Success State) #}
-{# Displayed when PDF generation is complete - Earth-Tone Design #}
+{# --#-- Download State (Result State) #}
+{# Shows download button and option to generate new statement #}
 
-<div id="statement-download-container" class="statement-success">
+<div class="statement-success">
     <div class="success-icon">
         <i class="fas fa-check-circle"></i>
     </div>
@@ -12,7 +12,7 @@
     </div>
 
     <div class="download-actions">
-        {# Regular download link - HTMX doesn't handle file downloads well #}
+        {# Standard link for file download (HTMX doesn't handle files) #}
         <a href="{{ download_url }}"
            class="btn btn-download"
            download>
@@ -25,12 +25,11 @@
     </div>
 
     <div class="secondary-actions">
-        {# Reload the form by fetching it from the template #}
+        {# Button to show form again - triggers form partial #}
         <button class="btn btn-secondary"
-                hx-get="{% url 'wallet:dashboard' %}"
-                hx-target="#statement-request-form-container"
-                hx-select="#statement-request-form-container"
-                hx-swap="outerHTML">
+                hx-get="{% url 'wallet:statement_form_partial' %}"
+                hx-target="#statement-section"
+                hx-swap="innerHTML">
             <i class="fas fa-redo"></i>
             Generate New Statement
         </button>
@@ -103,6 +102,36 @@
         .download-hint {
             margin-top: var(--spacing-sm);
             color: var(--text-tertiary);
+        }
+
+        .secondary-actions {
+            margin-top: var(--spacing-md);
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color-light);
+            border-radius: var(--radius-md);
+            font-weight: var(--font-medium);
+            font-size: var(--text-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--color-primary);
+        }
+
+        .btn-secondary i {
+            font-size: var(--text-sm);
         }
     </style>
 </div>

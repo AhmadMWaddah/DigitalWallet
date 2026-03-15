@@ -127,43 +127,47 @@ class PDFStatementGenerator:
         elements.append(Spacer(1, 0.25 * inch))
 
     def _add_balance_summary(self, elements, custom_styles):
-        """Add current balance summary."""
+        """Add current balance summary with opening balance calculation."""
         elements.append(Paragraph("Balance Summary", custom_styles["subheader"]))
 
-        # Get transactions up to end date for running balance
-        transactions = self.wallet.transactions.filter(
-            created_at__lte=self.end_date, status="COMPLETED"
+        # Calculate Opening Balance = All deposits/incoming - All withdrawals/outgoing BEFORE start date
+        opening_balance = Decimal("0.00")
+        prior_transactions = self.wallet.transactions.filter(
+            created_at__lt=self.start_date, 
+            status="COMPLETED"
         )
 
-        # Calculate opening and closing balance
-        opening_balance = Decimal("0.00")
-        if transactions.exists():
-            # Get balance before start date
-            prior_transactions = self.wallet.transactions.filter(
-                created_at__lt=self.start_date, status="COMPLETED"
-            )
-            for txn in prior_transactions:
-                if txn.type in ["DEPOSIT", "TRANSFER"]:
-                    if txn.counterparty_wallet == self.wallet:
-                        opening_balance += txn.amount
-                    else:
-                        opening_balance -= txn.amount
-                elif txn.type == "WITHDRAWAL":
+        for txn in prior_transactions:
+            if txn.type == "DEPOSIT":
+                opening_balance += txn.amount
+            elif txn.type == "WITHDRAWAL":
+                opening_balance -= txn.amount
+            elif txn.type == "TRANSFER":
+                # If we are the primary wallet, we are the sender (outgoing)
+                if txn.wallet == self.wallet:
                     opening_balance -= txn.amount
+                # If we are the counterparty, we are the receiver (incoming)
+                else:
+                    opening_balance += txn.amount
 
         # Calculate net change during period
         net_change = Decimal("0.00")
         period_transactions = self.wallet.transactions.filter(
-            created_at__gte=self.start_date, created_at__lte=self.end_date, status="COMPLETED"
-        )
+            created_at__gte=self.start_date, 
+            created_at__lte=self.end_date, 
+            status="COMPLETED"
+        ).order_by("created_at")
+
         for txn in period_transactions:
-            if txn.type in ["DEPOSIT", "TRANSFER"]:
-                if txn.counterparty_wallet == self.wallet:
-                    net_change += txn.amount
-                else:
-                    net_change -= txn.amount
+            if txn.type == "DEPOSIT":
+                net_change += txn.amount
             elif txn.type == "WITHDRAWAL":
                 net_change -= txn.amount
+            elif txn.type == "TRANSFER":
+                if txn.wallet == self.wallet:
+                    net_change -= txn.amount
+                else:
+                    net_change += txn.amount
 
         closing_balance = opening_balance + net_change
 
@@ -193,14 +197,33 @@ class PDFStatementGenerator:
         elements.append(Spacer(1, 0.5 * inch))
 
     def _add_transactions(self, elements, custom_styles):
-        """Add transaction history table."""
+        """Add transaction history table with running balance."""
         elements.append(Paragraph("Transaction History", custom_styles["subheader"]))
         elements.append(Spacer(1, 0.1 * inch))
 
-        # Get transactions for the period
+        # Re-calculate opening balance for running balance
+        opening_balance = Decimal("0.00")
+        prior_transactions = self.wallet.transactions.filter(
+            created_at__lt=self.start_date, 
+            status="COMPLETED"
+        )
+        for txn in prior_transactions:
+            if txn.type == "DEPOSIT":
+                opening_balance += txn.amount
+            elif txn.type == "WITHDRAWAL":
+                opening_balance -= txn.amount
+            elif txn.type == "TRANSFER":
+                if txn.wallet == self.wallet:
+                    opening_balance -= txn.amount
+                else:
+                    opening_balance += txn.amount
+
+        # Get transactions for the period - chronological for running balance calculation
         transactions = self.wallet.transactions.filter(
-            created_at__gte=self.start_date, created_at__lte=self.end_date, status="COMPLETED"
-        ).order_by("-created_at")
+            created_at__gte=self.start_date, 
+            created_at__lte=self.end_date, 
+            status="COMPLETED"
+        ).order_by("created_at")
 
         if not transactions.exists():
             elements.append(
@@ -209,37 +232,52 @@ class PDFStatementGenerator:
             return
 
         # Build transaction data
-        data = [["Date", "Type", "Description", "Amount"]]
+        data = [["Date", "Type", "Description", "Amount", "Balance"]]
+        
+        running_balance = opening_balance
 
         for txn in transactions:
-            # Determine amount sign based on transaction type and direction
             if txn.type == "DEPOSIT":
-                amount = f"+${txn.amount:,.2f}"
+                amt = txn.amount
+                amount_str = f"+${txn.amount:,.2f}"
             elif txn.type == "WITHDRAWAL":
-                amount = f"-${txn.amount:,.2f}"
+                amt = -txn.amount
+                amount_str = f"-${txn.amount:,.2f}"
             elif txn.type == "TRANSFER":
-                if txn.counterparty_wallet == self.wallet:
-                    amount = f"+${txn.amount:,.2f}"  # Incoming
+                if txn.wallet == self.wallet:
+                    amt = -txn.amount
+                    amount_str = f"-${txn.amount:,.2f}"
                 else:
-                    amount = f"-${txn.amount:,.2f}"  # Outgoing
+                    amt = txn.amount
+                    amount_str = f"+${txn.amount:,.2f}"
             else:
-                amount = f"${txn.amount:,.2f}"
+                amt = Decimal("0.00")
+                amount_str = f"${txn.amount:,.2f}"
+
+            running_balance += amt
 
             data.append(
                 [
                     txn.created_at.strftime("%Y-%m-%d"),
                     txn.get_type_display(),
                     (
-                        txn.description[:30] + "..."
-                        if len(txn.description or "") > 30
+                        txn.description[:25] + "..."
+                        if len(txn.description or "") > 25
                         else (txn.description or "-")
                     ),
-                    amount,
+                    amount_str,
+                    f"${running_balance:,.2f}",
                 ]
             )
 
+        # Reverse for display (most recent at top) but keep header at top
+        header = data[0]
+        rows = data[1:]
+        rows.reverse()
+        data = [header] + rows
+
         # Create table
-        table = Table(data, colWidths=[1.5 * inch, 1 * inch, 2.5 * inch, 1.5 * inch])
+        table = Table(data, colWidths=[1.1 * inch, 0.9 * inch, 2.2 * inch, 1.1 * inch, 1.2 * inch])
         table.setStyle(
             TableStyle(
                 [
@@ -249,7 +287,7 @@ class PDFStatementGenerator:
                     ("TOPPADDING", (0, 0), (-1, -1), 6),
                     ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1a1a2e")),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                    ("ALIGN", (3, 0), (3, -1), "RIGHT"),
+                    ("ALIGN", (3, 0), (4, -1), "RIGHT"),
                     ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
                     (
                         "ROWBACKGROUNDS",

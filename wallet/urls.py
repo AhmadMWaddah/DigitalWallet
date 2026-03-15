@@ -11,6 +11,7 @@ from .views import (
     DashboardView,
     DepositView,
     StatementDownloadView,
+    StatementFormPartialView,
     StatementRequestView,
     TaskStatusView,
     TransactionHistoryView,
@@ -28,6 +29,7 @@ urlpatterns = [
     path("withdraw/", WithdrawView.as_view(), name="withdraw"),
     path("transfer/", TransferView.as_view(), name="transfer"),
     # Statement generation
+    path("statement/form/", StatementFormPartialView.as_view(), name="statement_form_partial"),
     path("statement/request/", StatementRequestView.as_view(), name="statement_request"),
     path("statement/status/<str:task_id>/", TaskStatusView.as_view(), name="statement_status"),
     path(

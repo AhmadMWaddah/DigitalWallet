@@ -1,24 +1,23 @@
-{# --#-- Statement Progress Bar (HTMX Polling) #}
-{# Displayed while PDF generation is in progress - Earth-Tone Design #}
+{# --#-- Progress Bar (Polling State) #}
+{# Polls every 2 seconds until task completes #}
 
-<div id="statement-progress-container"
+<div class="statement-progress"
      hx-get="{% url 'wallet:statement_status' task_id %}"
      hx-trigger="every 2s"
-     hx-swap="outerHTML">
+     hx-target="#statement-section"
+     hx-swap="innerHTML">
 
-    <div class="statement-progress">
-        <div class="progress-header">
-            <i class="fas fa-circle-notch fa-spin"></i>
-            <span>Generating your statement...</span>
-        </div>
+    <div class="progress-header">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <span>Generating your statement...</span>
+    </div>
 
-        <div class="progress-bar-container">
-            <div class="progress-bar" style="width: {{ progress|default:0 }}%;"></div>
-        </div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" style="width: {{ progress|default:10 }}%;"></div>
+    </div>
 
-        <div class="progress-status">
-            <small>Please wait while we prepare your statement...</small>
-        </div>
+    <div class="progress-status">
+        <small>Please wait while we prepare your statement...</small>
     </div>
 
     <style>
@@ -81,9 +80,3 @@
         }
     </style>
 </div>
-
-{# Stop polling after receiving this response #}
-<script>
-    // HTMX will stop polling when it receives a response without hx-get
-    // The download button template doesn't have hx-trigger, so polling stops
-</script>
