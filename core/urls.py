@@ -24,5 +24,6 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("dashboard/", include("wallet.urls")),
     path("staff/", include("operations.urls")),
+    path("analytics/", include("analytics.urls")),
     path("", RedirectView.as_view(url="/dashboard/", permanent=False), name="home"),
 ]
