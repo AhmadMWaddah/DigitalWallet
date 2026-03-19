@@ -222,13 +222,16 @@ def transfer_funds(sender_wallet, receiver_wallet, amount, description="", refer
     receiver_wallet.balance = receiver_wallet.balance + amount
     receiver_wallet.save()
 
-    # -- Create transaction records (one for sender, one for receiver)
+    # -- Determine initial status (COMPLETED or FLAGGED based on fraud check)
+    from operations.fraud_engine import FraudEngine
+
+    # Create sender transaction first (needed for fraud check)
     sender_transaction = _create_transaction_record(
         wallet=sender_wallet,
         counterparty_wallet=receiver_wallet,
         amount=amount,
         transaction_type=TransactionType.TRANSFER,
-        status=TransactionStatus.COMPLETED,
+        status=TransactionStatus.COMPLETED,  # Temporary status
         description=description,
         reference_id=reference_id,
         metadata={
@@ -238,13 +241,28 @@ def transfer_funds(sender_wallet, receiver_wallet, amount, description="", refer
         },
     )
 
+    # -- Run fraud detection on the transaction
+    fraud_result = FraudEngine.check_transaction(sender_transaction)
+
+    # Update status if flagged
+    if fraud_result["is_flagged"]:
+        sender_transaction.status = TransactionStatus.FLAGGED
+        sender_transaction.metadata = {
+            **sender_transaction.metadata,
+            "flagged": True,
+            "flag_reason": "; ".join(fraud_result["reasons"]),
+            "flag_rules_triggered": fraud_result["rules_triggered"],
+            "flagged_at": timezone.now().isoformat(),
+        }
+        sender_transaction.save(update_fields=["status", "metadata"])
+
     # -- Create corresponding receiver transaction with same reference
-    _create_transaction_record(
+    receiver_transaction = _create_transaction_record(
         wallet=receiver_wallet,
         counterparty_wallet=sender_wallet,
         amount=amount,
         transaction_type=TransactionType.TRANSFER,
-        status=TransactionStatus.COMPLETED,
+        status=sender_transaction.status,  # Match sender's status
         description=f"Received from {sender_wallet.client_profile.user.email}",
         reference_id=f"{reference_id}-RECV",
         metadata={

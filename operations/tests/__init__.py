@@ -1,0 +1,3 @@
+"""
+Operations app tests.
+"""

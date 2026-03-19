@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     # -- Local Apps
     "accounts",
     "wallet",
+    "operations",
 ]
 
 MIDDLEWARE = [
