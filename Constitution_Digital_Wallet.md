@@ -15,11 +15,13 @@
   - **Remote-First Workflow:** Every branch (Phase or Fix) must be pushed to the remote repository (`origin`) immediately after creation or the first commit.
   - **Phase Branches:** Use `phase-n` for ongoing feature work.
   - **Fix Branches:** Use `fix-<description>` for bugs discovered in code already merged to `master`.
-  - **Master Merge Policy (The "Golden Rule"):**
-    - **Master is the Truth:** `master` must always be healthy. If a test fails, it does not belong in `master`. If a feature is half-finished, it stays in its branch.
-    - **Merge Fixes Immediately:** Merge `fix-` branches into `master` as soon as the bug is verified fixed and all tests pass.
-    - **Merge Phases at Milestones:** Do NOT merge `phase-n` branches partially. Only merge into `master` when the *entire* Phase is 100% complete, all deliverables are met, and the full test suite passes. This is treated as a "Release."
-    - **No "Per-Snippet" Merges:** Never merge into `master` after every individual response or small code change during a phase. Maintain isolation in the branch until the milestone is validated.
+  - **Master Merge Policy (The "Manager-Led Milestone"):**
+    - **Master is the Truth:** `master` is the production baseline. It must never contain failing tests or half-finished features.
+    - **Branch Iteration:** During a phase, generate code, test, and push to the `phase-n` branch as many times as needed (Initial code -> Error found -> Fix -> Push -> Modification -> Push). This keeps all "noise" and "fixing" off the master branch.
+    - **Merge only on Manager Approval:** Even when a phase is "done" in the branch, the merge to `master` only occurs after the Manager (Ahmad) confirms that all deliverables, fixes, and additional requirements are met.
+    - **Fix Branches:** For bugs found in code already on master, use a `fix-` branch. Merge this to `master` as soon as it is validated and the Manager approves.
+    - **Phase Merges are "Releases":** Treat the merge of a `phase-n` branch into `master` as a formal release of a completed feature set.
+
   - **Automation:** Use `scripts/git-phase-commit.sh` and `scripts/git-phase-merge.sh` for all work. These scripts must handle pushing to and cleaning up the remote.
 - **Views Architecture:** **CBVs** for structural views, **FBVs** for lightweight HTMX actions.
 - **Frontend Architecture:** CSS in `static/css/`, JS in `static/js/`, HTML snippets in `templates/components/`.

@@ -209,9 +209,9 @@ This project follows a strict phase-based development workflow with automated Gi
 #### **Master Merge Best Practices:**
 
 - **Master is the Truth:** The `master` branch is our production-ready source of truth. It must never contain failing tests or incomplete features.
-- **Merge Fixes Immediately:** Bug fixes should be merged to `master` as soon as they are verified and tested to maintain a healthy baseline.
-- **Milestone Merging:** Only merge full phases into `master` once every task in that phase is complete and verified. Avoid partial or "per-snippet" merges to prevent commit noise and instability.
-- **Branch Isolation:** Keep all work in `phase-n` or `fix-` branches until the final validation is complete.
+- **Branch Iteration:** Work iteratively within `phase-n` or `fix-` branches. Generate code, test, fix errors, and add modifications in the branch as many times as needed before proposing a merge.
+- **Manager-Led Approval:** Merging to `master` is **not automatic**. It occurs only after the Manager (Ahmad) confirms that all tasks, fixes, and additional requirements for the milestone are complete.
+- **Atomic Releases:** Treat the merge of a full phase as a formal release. Once merged, `master` should be fully functional and stable.
 
 ---
 
@@ -265,7 +265,7 @@ pytest --cov=. --cov-report=html
 
 ## 🤝 Contributing
 
-This is a private project. For questions or issues, contact **Ahmad**.
+This is a private project. For questions or issues, contact **Ahmad M. Waddah**.
 
 ---
 
