@@ -1,0 +1,229 @@
+<!-- --#-- Analytics Dashboard Template -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard - Digital Wallet{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/analytics_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- --#-- Page Header -->
+<div class="page-header analytics-header">
+    <h1 class="page-title">
+        <i class="fas fa-chart-line"></i> Analytics Dashboard
+    </h1>
+    <p class="page-subtitle">Transaction insights and spending trends</p>
+</div>
+
+<!-- --#-- Filter Controls -->
+<div class="card filter-card">
+    <div class="card-body">
+        <form id="analytics-filter-form"
+              hx-get="{% url 'analytics:analytics_dashboard_data' %}"
+              hx-target="#charts-container"
+              hx-swap="innerHTML"
+              hx-trigger="change from:body delay:300ms">
+            
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="days-filter">
+                        <i class="fas fa-calendar-alt"></i> Time Range
+                    </label>
+                    <select id="days-filter" name="days" class="form-select">
+                        <option value="7">Last 7 Days</option>
+                        <option value="30" selected>Last 30 Days</option>
+                        <option value="90">Last 90 Days</option>
+                        <option value="180">Last 6 Months</option>
+                        <option value="365">Last Year</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="year-filter">
+                        <i class="fas fa-clock"></i> Year
+                    </label>
+                    <select id="year-filter" name="year" class="form-select">
+                        {% for y in years %}
+                        <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>
+                            {{ y }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="type-filter">
+                        <i class="fas fa-filter"></i> Transaction Type
+                    </label>
+                    <select id="type-filter" name="type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="DEPOSIT">Deposits</option>
+                        <option value="WITHDRAWAL">Withdrawals</option>
+                        <option value="TRANSFER">Transfers</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- --#-- Charts Container -->
+<div id="charts-container"
+     hx-get="{% url 'analytics:analytics_dashboard_data' %}?days=30&year={{ current_year }}"
+     hx-trigger="load"
+     hx-swap="innerHTML">
+    
+    <!-- Loading State -->
+    <div class="charts-loading">
+        <div class="loading-spinner">
+            <i class="fas fa-circle-notch fa-spin"></i>
+        </div>
+        <p>Loading analytics data...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// --#-- Chart Configuration
+
+// Earth-Tone Color Palette
+const colors = {
+    olive: '#606c38',
+    forest: '#283618',
+    cornsilk: '#fefae0',
+    almond: '#c98951',
+    clay: '#dda15e',
+    copper: '#bc6c25',
+    red: '#c75d5d',
+};
+
+// Global chart defaults
+Chart.defaults.color = colors.cornsilk;
+Chart.defaults.borderColor = 'rgba(254, 250, 224, 0.1)';
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+// --#-- Initialize Charts Function
+
+function initializeCharts(data) {
+    // Destroy existing charts if they exist
+    if (window.categoryChart) {
+        window.categoryChart.destroy();
+    }
+    if (window.monthlyChart) {
+        window.monthlyChart.destroy();
+    }
+
+    // --#-- Category Bar Chart
+    const categoryCtx = document.getElementById('category-chart').getContext('2d');
+    window.categoryChart = new Chart(categoryCtx, {
+        type: 'bar',
+        data: data.category,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(40, 54, 24, 0.95)',
+                    titleColor: colors.cornsilk,
+                    bodyColor: colors.cornsilk,
+                    borderColor: colors.copper,
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString('en-US', {notation: 'compact'});
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // --#-- Monthly Line Chart
+    const monthlyCtx = document.getElementById('monthly-chart').getContext('2d');
+    window.monthlyChart = new Chart(monthlyCtx, {
+        type: 'line',
+        data: data.monthly,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(40, 54, 24, 0.95)',
+                    titleColor: colors.cornsilk,
+                    bodyColor: colors.cornsilk,
+                    borderColor: colors.copper,
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2});
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString('en-US', {notation: 'compact'});
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Update metadata display
+    if (data.metadata) {
+        document.getElementById('total-volume').textContent = 
+            '$' + data.metadata.total_volume.toLocaleString('en-US', {minimumFractionDigits: 2});
+        
+        if (data.metadata.average_monthly) {
+            document.getElementById('avg-monthly').textContent = 
+                '$' + data.metadata.average_monthly.toLocaleString('en-US', {minimumFractionDigits: 2});
+        }
+    }
+}
+
+// --#-- HTMX Event Handler for Chart Updates
+
+document.body.addEventListener('htmx:afterSwap', function(event) {
+    if (event.detail.target.id === 'charts-container') {
+        // Parse the data from the rendered template
+        const chartDataElement = document.getElementById('chart-data');
+        if (chartDataElement) {
+            try {
+                const chartData = JSON.parse(chartDataElement.textContent);
+                initializeCharts(chartData);
+            } catch (e) {
+                console.error('Error parsing chart data:', e);
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

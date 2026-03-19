@@ -11,9 +11,14 @@
 {% block content %}
 <!-- --#-- Page Header -->
 <div class="page-header staff-header">
-    <h1 class="page-title">
-        <i class="fas fa-shield-alt"></i> Staff Dashboard
-    </h1>
+    <div class="header-actions">
+        <h1 class="page-title">
+            <i class="fas fa-shield-alt"></i> Staff Dashboard
+        </h1>
+        <a href="{% url 'analytics:analytics_dashboard' %}" class="btn btn-analytics">
+            <i class="fas fa-chart-line"></i> Analytics
+        </a>
+    </div>
     <p class="page-subtitle">Monitor transactions and manage flagged activity</p>
 </div>
 
