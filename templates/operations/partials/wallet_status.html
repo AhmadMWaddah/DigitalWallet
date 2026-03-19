@@ -1,0 +1,20 @@
+<!-- --#-- Wallet Status Partial (for HTMX updates) -->
+<span class="wallet-status-badge {% if wallet.is_frozen %}frozen{% else %}active{% endif %}">
+    {% if wallet.is_frozen %}
+        <i class="fas fa-snowflake"></i> Frozen
+        <button class="btn btn-sm btn-outline"
+                hx-post="{% url 'operations:unfreeze_wallet' wallet.id %}"
+                hx-target="closest .wallet-status-badge"
+                hx-swap="outerHTML">
+            <i class="fas fa-unlock"></i> Unfreeze
+        </button>
+    {% else %}
+        <i class="fas fa-check-circle"></i> Active
+        <button class="btn btn-sm btn-outline"
+                hx-post="{% url 'operations:freeze_wallet' wallet.id %}"
+                hx-target="closest .wallet-status-badge"
+                hx-swap="outerHTML">
+            <i class="fas fa-lock"></i> Freeze
+        </button>
+    {% endif %}
+</span>

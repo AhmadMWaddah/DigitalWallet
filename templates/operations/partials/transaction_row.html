@@ -1,0 +1,28 @@
+<!-- --#-- Transaction Row Partial (for HTMX updates) -->
+<tr class="flagged-row" id="transaction-row-{{ transaction.id }}">
+    <td>#{{ transaction.id }}</td>
+    <td>{{ transaction.wallet.client_profile.user.email }}</td>
+    <td>
+        <span class="transaction-type type-{{ transaction.type|lower }}">
+            {{ transaction.get_type_display }}
+        </span>
+    </td>
+    <td class="amount">${{ transaction.amount|floatformat:2 }}</td>
+    <td>
+        {% if transaction.counterparty_wallet %}
+            {{ transaction.counterparty_wallet.client_profile.user.email }}
+        {% else %}
+            <span class="text-muted">External</span>
+        {% endif %}
+    </td>
+    <td class="flag-reason">
+        {{ transaction.metadata.flag_reason|default:"Under review" }}
+    </td>
+    <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+    <td class="actions">
+        <span class="status-badge status-{{ transaction.status|lower }}">
+            <i class="fas fa-{{ transaction.status|lower == 'completed'|yesno:'check,exclamation-circle' }}"></i>
+            {{ transaction.get_status_display }}
+        </span>
+    </td>
+</tr>

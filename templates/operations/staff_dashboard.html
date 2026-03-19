@@ -1,0 +1,172 @@
+<!-- --#-- Staff Dashboard Template -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Staff Dashboard - Digital Wallet{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/staff_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- --#-- Page Header -->
+<div class="page-header staff-header">
+    <h1 class="page-title">
+        <i class="fas fa-shield-alt"></i> Staff Dashboard
+    </h1>
+    <p class="page-subtitle">Monitor transactions and manage flagged activity</p>
+</div>
+
+<!-- --#-- System Statistics -->
+<div class="stats-grid">
+    <div class="stat-card stat-primary">
+        <div class="stat-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+            <h3 class="stat-value">{{ stats.total_users }}</h3>
+            <p class="stat-label">Total Users</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-success">
+        <div class="stat-icon">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="stat-content">
+            <h3 class="stat-value">${{ stats.total_volume|floatformat:2 }}</h3>
+            <p class="stat-label">Total Volume</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-danger {% if stats.flagged_count > 0 %}pulse{% endif %}">
+        <div class="stat-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+            <h3 class="stat-value">{{ stats.flagged_count }}</h3>
+            <p class="stat-label">Flagged Transactions</p>
+        </div>
+    </div>
+</div>
+
+<!-- --#-- High Alert Section (Flagged Transactions) -->
+{% if flagged_transactions %}
+<div class="card alert-card">
+    <div class="card-header alert-header">
+        <h2 class="card-title">
+            <i class="fas fa-exclamation-triangle"></i> High Alert - Flagged Transactions
+        </h2>
+        <span class="badge badge-danger">{{ flagged_transactions.count }}</span>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Counterparty</th>
+                        <th>Flag Reason</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in flagged_transactions %}
+                    <tr class="flagged-row" id="transaction-row-{{ transaction.id }}">
+                        <td>#{{ transaction.id }}</td>
+                        <td>{{ transaction.wallet.client_profile.user.email }}</td>
+                        <td>
+                            <span class="transaction-type type-{{ transaction.type|lower }}">
+                                {{ transaction.get_type_display }}
+                            </span>
+                        </td>
+                        <td class="amount">${{ transaction.amount|floatformat:2 }}</td>
+                        <td>
+                            {% if transaction.counterparty_wallet %}
+                                {{ transaction.counterparty_wallet.client_profile.user.email }}
+                            {% else %}
+                                <span class="text-muted">External</span>
+                            {% endif %}
+                        </td>
+                        <td class="flag-reason">
+                            {{ transaction.metadata.flag_reason|default:"Under review" }}
+                        </td>
+                        <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                        <td class="actions">
+                            <form hx-post="{% url 'operations:review_transaction' transaction.id %}"
+                                  hx-target="#transaction-row-{{ transaction.id }}"
+                                  hx-swap="outerHTML"
+                                  class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit" name="action" value="approve" class="btn btn-sm btn-success"
+                                        title="Approve transaction">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger"
+                                        title="Reject transaction">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- --#-- Recent Transactions -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Recent Transactions</h2>
+    </div>
+    <div class="card-body">
+        {% if recent_transactions %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in recent_transactions %}
+                    <tr>
+                        <td>#{{ transaction.id }}</td>
+                        <td>{{ transaction.wallet.client_profile.user.email }}</td>
+                        <td>
+                            <span class="transaction-type type-{{ transaction.type|lower }}">
+                                {{ transaction.get_type_display }}
+                            </span>
+                        </td>
+                        <td class="amount">${{ transaction.amount|floatformat:2 }}</td>
+                        <td>
+                            <span class="badge badge-{{ transaction.status|lower }}">
+                                {{ transaction.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="empty-text">No recent transactions</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
