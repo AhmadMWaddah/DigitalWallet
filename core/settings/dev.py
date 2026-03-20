@@ -43,3 +43,28 @@ CELERY_TASK_ALWAYS_EAGER = False
 
 SESSION_COOKIE_SECURE = False  # Allow HTTP for local development
 CSRF_COOKIE_SECURE = False  # Allow HTTP for local development
+
+# -- Django Debug Toolbar Configuration
+
+# Add debug toolbar to INSTALLED_APPS (only if not testing)
+import sys
+if 'pytest' not in sys.modules:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
+    
+    # Add debug toolbar middleware (must be first, only if not testing)
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+    
+    # Configure debug toolbar
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG,
+        "SHOW_COLLAPSED": False,
+        "SKIP_TEMPLATE_PREFIXES": (
+            "django/forms/widgets/",
+            "admin/widgets/",
+            "wallet/partials/",
+            "operations/partials/",
+            "analytics/partials/",
+        ),
+    }

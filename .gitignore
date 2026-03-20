@@ -93,6 +93,6 @@ celerybeat.pid
 
 # --- AMW Custom ---
 note.txt
-Constitution_Starter.md
+!Constitution_Starter.md
 PROJECT_STATUS.md
 ScreenShots/

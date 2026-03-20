@@ -48,6 +48,11 @@
     <!-- --#-- Modular JavaScript -->
     <script src="{% static 'js/utils.js' %}"></script>
 
+    <!-- --#-- Django Debug Toolbar (Development Only) -->
+    {% if debug %}
+        {% include '__snippets__/debug_toolbar.html' %}
+    {% endif %}
+
     <!-- --#-- Page Specific JavaScript -->
     {% block extra_js %}{% endblock %}
 </body>
