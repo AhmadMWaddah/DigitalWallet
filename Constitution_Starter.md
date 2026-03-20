@@ -75,6 +75,15 @@ Each phase must contain:
 - Execute tasks one by one.
 - Review each task before treating the phase as complete.
 
+### Task Splitting Inside Phases
+
+- Every phase must be divided into numbered tasks before implementation starts.
+- Tasks should be ordered in dependency sequence so the developer can work without guessing what comes next.
+- If a phase feels too large to review comfortably, it is too large and must be split further.
+- Each task should represent one focused deliverable such as setup, model creation, service logic, UI integration, testing, or verification.
+- A task may be split again into subtasks if the scope is still too broad, but the main task must remain understandable at a glance.
+- The Manager may decide the task order manually based on discussion with the Consultant and then assign implementation to the Developer.
+
 ### Recommended Task Size
 
 A task should be:
@@ -108,15 +117,13 @@ A task is complete only when:
 - Manual verification is done if needed
 - The reviewer finds no blocking issues
 
-### Task Handoff Rule
+### Coordination Rule
 
-When one AI tool hands off work to another, the handoff must state:
-- Current phase
-- Current task ID and name
-- What was completed
-- What remains
-- What verification already passed
-- Any known risks, blockers, or assumptions
+- Ahmad coordinates the workflow manually between AI tools.
+- The Consultant may help define or refine the plan.
+- The Developer executes the assigned task.
+- The Reviewer checks for bugs, regressions, missing tests, and architectural drift after implementation.
+- No automated AI-to-AI handoff format is required unless Ahmad chooses to add one later.
 
 ---
 
@@ -162,7 +169,6 @@ Use the following structure for every project-specific phase:
 # Example verification commands
 pytest
 python manage.py runserver
-```
 ```
 
 ---

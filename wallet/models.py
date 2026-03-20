@@ -136,6 +136,7 @@ class Transaction(models.Model):
         "Type",
         max_length=10,
         choices=TransactionType.choices,
+        db_index=True,
         help_text="Type of transaction.",
     )
 
@@ -144,6 +145,7 @@ class Transaction(models.Model):
         max_length=10,
         choices=TransactionStatus.choices,
         default=TransactionStatus.PENDING,
+        db_index=True,
         help_text="Current transaction status.",
     )
 

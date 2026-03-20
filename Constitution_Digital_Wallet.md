@@ -9,6 +9,7 @@
 ## How to Use This Plan
 
 - **Work sequentially** through each phase — do not skip ahead.
+- **Task-Level Execution (The "Qwen/Gem" Standard):** Break each Phase into its atomic tasks. Complete, test, and commit each task (or a small group of related tasks) individually. This prevents "instruction dilution" and ensures 100% precision.
 - **Testing Mandate:** Every feature must include corresponding `pytest` test cases. Run tests before every commit.
 - **Git Mandate:**
   - **No Direct Master Commits:** Never commit directly to `master`. All work, including small fixes, must happen in a branch.
