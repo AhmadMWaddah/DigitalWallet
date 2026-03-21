@@ -7,10 +7,13 @@ Implements Constitutional fraud detection rules:
 - Rule 3: Any TRANSFER > $1,000 for accounts created in the last 7 days
 """
 
+import logging
 from datetime import timedelta
 from decimal import Decimal
 
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 
 class FraudEngine:
@@ -64,6 +67,13 @@ class FraudEngine:
             result["reasons"].append(
                 f"Large transfer: ${transaction.amount:,.2f} exceeds ${cls.LARGE_TRANSFER_THRESHOLD:,.2f} threshold"
             )
+            logger.warning(
+                "FRAUD ALERT: Transaction #%d flagged - Rule 1 triggered (Large Transfer > $10,000). "
+                "Amount: $%s, User: %s",
+                transaction.id,
+                transaction.amount,
+                transaction.wallet.client_profile.user.email,
+            )
 
         # Rule 2: > 5 transfers in last hour
         if cls._check_frequent_transfers(transaction):
@@ -72,6 +82,13 @@ class FraudEngine:
             result["reasons"].append(
                 f"Frequent transfers: More than {cls.MAX_TRANSFERS_PER_HOUR} transfers in the last hour"
             )
+            logger.warning(
+                "FRAUD ALERT: Transaction #%d flagged - Rule 2 triggered (Frequent Transfers). "
+                "User: %s, Count: >%d/hour",
+                transaction.id,
+                transaction.wallet.client_profile.user.email,
+                cls.MAX_TRANSFERS_PER_HOUR,
+            )
 
         # Rule 3: New account with large transfer > $1,000
         if cls._check_new_account_transfer(transaction):
@@ -79,6 +96,22 @@ class FraudEngine:
             result["rules_triggered"].append("RULE_3")
             result["reasons"].append(
                 f"New account transfer: ${transaction.amount:,.2f} exceeds ${cls.NEW_ACCOUNT_TRANSFER_THRESHOLD:,.2f} threshold for accounts < {cls.NEW_ACCOUNT_DAYS} days old"
+            )
+            logger.warning(
+                "FRAUD ALERT: Transaction #%d flagged - Rule 3 triggered (New Account Large Transfer). "
+                "Amount: $%s, User: %s, Account Age: <%d days",
+                transaction.id,
+                transaction.amount,
+                transaction.wallet.client_profile.user.email,
+                cls.NEW_ACCOUNT_DAYS,
+            )
+
+        # Log if transaction was flagged
+        if result["is_flagged"]:
+            logger.info(
+                "Transaction #%d flagged with rules: %s",
+                transaction.id,
+                ", ".join(result["rules_triggered"]),
             )
 
         return result

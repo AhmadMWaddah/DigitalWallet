@@ -16,6 +16,7 @@
 - **No Implicit Completion:** A phase or task is not complete because code was written. It is complete only after verification passes.
 - **Manager Approval Rule:** A phase may be merged to `master` only after Ahmad explicitly approves it.
 - **Branch-Only Work:** All implementation, fixes, and experiments must happen in branches, never directly on `master`.
+- **Context Efficiency:** For complex tasks, the AI should utilize 'Plan Mode' or 'Sub-Agents' to research and design before touching the main codebase. This keeps the main session context lean and focused on execution.
 
 ---
 
@@ -45,15 +46,18 @@
   - `phase-<name>` for active feature phases
   - `fix-<description>` for bugs already present in `master`
   - `chore-<description>` for non-feature maintenance when explicitly approved
-- **Commit Standard:** Every commit must contain:
-  - A concise title
-  - A detailed body explaining why the change was made
+- **Commit Standard:** Every commit must follow these patterns:
+  - **Commit Titles:**
+    - **Parts:** `Part: {Phase # _ Phase Title} - {Part # _ Part Title}`
+    - **Error Fix:** `Fix: {Phase # _ Phase Title} - {Fix Title}`
+  - **Commit Body:** A detailed body explaining why the change was made.
 - **Branch Iteration Rule:** During a phase, it is acceptable to commit and push multiple times while fixing issues. Keep all incomplete work off `master`.
 - **Merge Rule:** A branch is merged only when:
   - The relevant tests pass
   - Manual verification is done when applicable
   - Ahmad approves the milestone
 - **Cleanup Rule:** Delete local and remote branches only after successful merge and confirmation that no follow-up changes remain.
+- **Workflow Automation:** Project-specific automation scripts (e.g., `scripts/git-task-commit.sh`) should be created early in Phase 1 to ensure consistent, error-free workflow execution.
 
 ---
 
@@ -221,6 +225,7 @@ python manage.py runserver
 - **Coverage Goal:** Target strong coverage on changed logic, especially business-critical flows
 - **Pre-Commit Quality Gate:** Use `Black`, `Flake8`, and `Isort` through `pre-commit`
 - **Verification Discipline:** Run the smallest relevant test set during iteration, then run broader verification before merge
+- **Clean Console Rule:** Verification is only successful if the console output is 100% clean (no warnings, no prints, no tracebacks) during test execution.
 
 ---
 
@@ -260,4 +265,4 @@ Use this checklist when starting a new project:
 
 ---
 
-*Constitution Version: 2.0 (Starter with Phase-Task Methodology)*
+*Constitution Version: 2.1 (Starter with Phase-Task Methodology)*

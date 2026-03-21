@@ -22,7 +22,9 @@
     - **Merge only on Manager Approval:** Even when a phase is "done" in the branch, the merge to `master` only occurs after the Manager (Ahmad) confirms that all deliverables, fixes, and additional requirements are met.
     - **Fix Branches:** For bugs found in code already on master, use a `fix-` branch. Merge this to `master` as soon as it is validated and the Manager approves.
     - **Phase Merges are "Releases":** Treat the merge of a `phase-n` branch into `master` as a formal release of a completed feature set.
-
+  - **Commit Title Format:** Titles must be human-readable and follow these patterns:
+    - **Parts:** `Part: {Phase # _ Phase Title} - {Part # _ Part Title}`
+    - **Error Fix:** `Fix: {Phase # _ Phase Title} - {Fix Title}`
   - **Automation:** Use `scripts/git-phase-commit.sh` and `scripts/git-phase-merge.sh` for all work. These scripts must handle pushing to and cleaning up the remote.
 - **Views Architecture:** **CBVs** for structural views, **FBVs** for lightweight HTMX actions.
 - **Frontend Architecture:** CSS in `static/css/`, JS in `static/js/`, HTML snippets in `templates/components/`.

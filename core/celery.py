@@ -4,6 +4,7 @@ Celery configuration for Digital Wallet project.
 This module initializes the Celery application and loads tasks from installed apps.
 """
 
+import logging
 import os
 
 from celery import Celery
@@ -22,9 +23,12 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 # This will look for tasks.py in each app directory
 app.autodiscover_tasks()
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
 
 @app.task(bind=True)
 def debug_task(self):
     """Test task to verify Celery is working correctly."""
-    print(f"Request: {self.request!r}")
+    logger.info("Request: %s", self.request)
     return "Debug task completed successfully"
