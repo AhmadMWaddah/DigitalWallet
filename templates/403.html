@@ -1,0 +1,173 @@
+<!-- --#-- 403 Permission Denied Error Page -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied - Digital Wallet</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --#-- 403 Page Styles - Earth-Tone Luxury Design */
+        
+        :root {
+            --olive-leaf: #606c38;
+            --black-forest: #283618;
+            --cornsilk: #fefae0;
+            --toasted-almond: #c98951;
+            --sunlit-clay: #dda15e;
+            --copperwood: #bc6c25;
+            --color-danger: #c75d5d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--black-forest) 0%, var(--olive-leaf) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .error-card {
+            max-width: 600px;
+            text-align: center;
+            padding: 3rem;
+            background: rgba(40, 54, 24, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            border: 1px solid rgba(254, 250, 224, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 60px rgba(188, 108, 37, 0.2);
+        }
+
+        .error-icon {
+            font-size: 6rem;
+            color: var(--color-danger);
+            margin-bottom: 1.5rem;
+            animation: pulse-error 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-error {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--copperwood) 0%, var(--toasted-almond) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--cornsilk);
+            margin-bottom: 0.5rem;
+        }
+
+        .error-message {
+            font-size: 1.125rem;
+            color: rgba(254, 250, 224, 0.8);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .error-details {
+            background: rgba(45, 56, 32, 0.5);
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(254, 250, 224, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .error-details p {
+            color: rgba(254, 250, 224, 0.6);
+            font-size: 0.875rem;
+            margin: 0;
+        }
+
+        .btn-return {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--copperwood) 0%, var(--toasted-almond) 100%);
+            color: var(--cornsilk);
+            text-decoration: none;
+            border-radius: 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(188, 108, 37, 0.3);
+        }
+
+        .btn-return:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(188, 108, 37, 0.4);
+        }
+
+        .btn-return i {
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="error-card">
+        <div class="error-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+
+        <div class="error-code">403</div>
+
+        <h1 class="error-title">Access Denied</h1>
+
+        <p class="error-message">
+            {{ exception|default:"This portal is for authorized users only." }}
+        </p>
+
+        <div class="error-details">
+            <p>
+                <i class="fas fa-shield-alt"></i>
+                {% if user.is_authenticated %}
+                    {% if user.user_type == "STAFF" or user.is_staff %}
+                        Staff Portal Access Only
+                    {% elif user.is_superuser %}
+                        Administrator Access Required
+                    {% else %}
+                        Client Portal Access Only
+                    {% endif %}
+                {% else %}
+                    Authentication Required
+                {% endif %}
+            </p>
+        </div>
+
+        <a href="{{ redirect_url }}" class="btn-return">
+            <i class="fas fa-home"></i>
+            Return to my Dashboard
+        </a>
+    </div>
+</body>
+</html>

@@ -148,7 +148,8 @@ class TestLoginRedirectView:
         response = client.get(reverse("accounts:login_redirect"))
 
         assert response.status_code == 302
-        assert "/admin/" in response.url
+        # Staff users now go to Staff Dashboard (not admin)
+        assert "/staff/dashboard/" in response.url
 
     def test_redirect_unauthenticated_user_to_login(self, client):
         """Test unauthenticated user is redirected to login."""

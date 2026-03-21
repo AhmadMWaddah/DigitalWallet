@@ -207,3 +207,9 @@ LOGGING = {
         },
     },
 }
+
+# -- Custom Error Handlers
+
+HANDLERS = {
+    "403": "accounts.views.custom_permission_denied",
+}

@@ -170,7 +170,11 @@ class LoginRedirectView(View):
     """
     Intermediate redirect view after login.
 
-    Redirects users based on their user type.
+    Redirects users based on their user type:
+    - SuperUser: /admin/ (Django Admin)
+    - Staff: /staff/dashboard/ (Staff operations)
+    - Client: /dashboard/ (Client wallet)
+    - Anonymous: /accounts/login/
     """
 
     def get(self, request):
@@ -180,15 +184,87 @@ class LoginRedirectView(View):
 
         user = request.user
 
-        # Staff users go to admin panel
-        if user.user_type == UserType.STAFF or user.is_staff:
+        # SuperUsers go to Django Admin (full system control)
+        if user.is_superuser:
             return redirect("/admin/")
 
-        # Client users go to dashboard
+        # Staff users go to Staff Dashboard (business operations)
+        if user.user_type == UserType.STAFF or user.is_staff:
+            return redirect("operations:staff_dashboard")
+
+        # Client users go to Wallet Dashboard
         if user.user_type == UserType.CLIENT:
             return redirect("wallet:dashboard")
 
+        # Fallback
         return redirect("wallet:dashboard")
+
+    @staticmethod
+    def get_redirect_url(user):
+        """
+        Get redirect URL for a user (static helper for 403 page).
+
+        Args:
+            user: User instance
+
+        Returns:
+            str: Redirect URL based on user type
+        """
+        if not user or not user.is_authenticated:
+            return "accounts:login"
+
+        if user.is_superuser:
+            return "/admin/"
+
+        if user.user_type == UserType.STAFF or user.is_staff:
+            return "operations:staff_dashboard"
+
+        if user.user_type == UserType.CLIENT:
+            return "wallet:dashboard"
+
+        return "wallet:dashboard"
+
+
+def custom_permission_denied(request, exception=None):
+    """
+    Custom 403 error handler with smart redirect.
+
+    Args:
+        request: HTTP request
+        exception: Exception object (optional)
+
+    Returns:
+        HttpResponse: Rendered 403 template with context
+    """
+    from django.shortcuts import render
+    from django.urls import reverse
+
+    # Get smart redirect URL based on user type (resolve to actual URL)
+    redirect_url_name = LoginRedirectView.get_redirect_url(request.user)
+    
+    # Resolve URL name to actual path
+    try:
+        redirect_url = reverse(redirect_url_name)
+    except:
+        redirect_url = "/dashboard/"  # Fallback
+
+    # Custom message based on user type
+    message = None
+    if request.user.is_authenticated:
+        if request.user.user_type == UserType.STAFF or request.user.is_staff:
+            message = "Staff users should access the Staff Dashboard, not the Client Portal."
+        elif request.user.is_superuser:
+            message = "Administrators should access Django Admin for system management."
+        else:
+            message = "This area is restricted to authorized users only."
+
+    context = {
+        'exception': message or exception,
+        'redirect_url': redirect_url,
+        'user': request.user,
+    }
+
+    return render(request, '403.html', context, status=403)
 
 
 class ClientRegistrationView(CreateView):

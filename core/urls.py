@@ -18,7 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.conf import settings
 from django.urls import include, path
-from django.views.generic import RedirectView
+from accounts.views import LoginRedirectView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -26,7 +26,8 @@ urlpatterns = [
     path("dashboard/", include("wallet.urls")),
     path("staff/", include("operations.urls")),
     path("analytics/", include("analytics.urls")),
-    path("", RedirectView.as_view(url="/dashboard/", permanent=False), name="home"),
+    # Role-aware home redirect (replaces hardcoded RedirectView)
+    path("", LoginRedirectView.as_view(), name="home"),
 ]
 
 # Debug Toolbar URLs (only in debug mode)
