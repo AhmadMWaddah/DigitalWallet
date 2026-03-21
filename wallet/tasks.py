@@ -40,20 +40,32 @@ def generate_statement_pdf(self, wallet_id: int, start_date_str: str, end_date_s
     # Generate unique task ID
     task_id = self.request.id if hasattr(self, "request") and self.request else str(uuid.uuid4())
 
+    # SECURITY: Get wallet early to bind task to owner
+    try:
+        wallet = Wallet.objects.select_related("client_profile__user").get(pk=wallet_id)
+        task_owner_id = wallet.client_profile.user_id
+    except Wallet.DoesNotExist:
+        result = {
+            "success": False,
+            "error": f"Wallet {wallet_id} not found",
+            "wallet_id": wallet_id,
+        }
+        cache.set(f"task_result_{task_id}", result, timeout=3600)
+        cache.set(f"task_status_{task_id}", {"status": "FAILURE", "error": result["error"]}, timeout=3600)
+        return result
+
     try:
         # Update task state to STARTED
         if hasattr(self, "update_state"):
             self.update_state(state="STARTED", meta={"progress": 10})
 
-        # Store task status in cache (more reliable than Redis result backend)
-        cache.set(f"task_status_{task_id}", {"status": "STARTED", "progress": 10}, timeout=3600)
-
-        # Get wallet
-        wallet = Wallet.objects.select_related("client_profile__user").get(pk=wallet_id)
-
-        if hasattr(self, "update_state"):
-            self.update_state(state="STARTED", meta={"progress": 50})
-        cache.set(f"task_status_{task_id}", {"status": "STARTED", "progress": 50}, timeout=3600)
+        # Store task status in cache with OWNER BINDING
+        # This ensures only the task creator can access status
+        cache.set(f"task_status_{task_id}", {
+            "status": "STARTED",
+            "progress": 10,
+            "task_owner_id": task_owner_id,  # SECURITY: Bind task to owner
+        }, timeout=3600)
 
         # Parse dates
         start_date = datetime.fromisoformat(start_date_str)

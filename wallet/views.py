@@ -519,31 +519,23 @@ class TaskStatusView(LoginRequiredMixin, View):
         if not status_data:
             status_data = get_task_status(task_id)
 
-        # SECURITY: Verify task ownership
-        # Only the user who requested the PDF can see the status
-        result = status_data.get("result", {})
-        if result:
-            wallet_id = result.get("wallet_id")
-            if wallet_id:
-                try:
-                    from wallet.models import Wallet
-                    wallet = Wallet.objects.get(pk=wallet_id)
-                    if wallet.client_profile.user != request.user:
-                        # User is trying to access another user's task status
-                        html = render_to_string(
-                            "wallet/partials/statement_error.html",
-                            {"task_id": task_id, "error": "Access denied. This is not your statement request."},
-                            request=request,
-                        )
-                        return HttpResponse(html)
-                except Wallet.DoesNotExist:
-                    pass
+        # SECURITY: Verify task ownership BEFORE returning any status
+        # Check ownership binding from cache (works for PENDING/STARTED/SUCCESS/FAILURE)
+        if status_data and "task_owner_id" in status_data:
+            if status_data["task_owner_id"] != request.user.id:
+                # User is trying to access another user's task status
+                html = render_to_string(
+                    "wallet/partials/statement_error.html",
+                    {"task_id": task_id, "error": "Access denied. This is not your statement request."},
+                    request=request,
+                )
+                return HttpResponse(html)
 
         status = status_data.get("status", "PENDING")
 
         if status in ["PENDING", "STARTED"]:
             # Return progress bar with continued polling
-            progress = status_data.get("progress", 0) or status_data.get("info", {}).get("progress", 0)
+            progress = status_data.get("progress", 0)
             html = render_to_string(
                 "wallet/partials/statement_progress.html",
                 {"task_id": task_id, "progress": progress},
@@ -608,11 +600,11 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
 
         # First try to get result from Celery AsyncResult
         result = AsyncResult(task_id)
-        
+
         task_result = None
         if result.status == 'SUCCESS' and result.result:
             task_result = result.result
-        
+
         # Fallback to cache if AsyncResult doesn't have the result
         if not task_result:
             from django.core.cache import cache
