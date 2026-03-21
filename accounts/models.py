@@ -33,7 +33,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     # -- Core Fields
 
     email = models.EmailField(
-        "Email Address", unique=True, max_length=255, db_index=True, help_text="Required. A valid email address."
+        "Email Address", unique=True, max_length=255, help_text="Required. A valid email address."
     )
 
     user_type = models.CharField(
