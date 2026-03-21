@@ -68,26 +68,6 @@
     <!-- --#-- Right Column -->
     <div class="dashboard-column dashboard-column-wide">
 
-        <!-- --#-- Statement Generation (State Machine UI) -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-file-pdf"></i>
-                    Download Statement
-                </h2>
-            </div>
-            <div class="card-body">
-                <p class="card-description">Generate and download your account statement as a PDF.</p>
-                {# Single container for all states - Form, Progress, or Download #}
-                <div id="statement-section"
-                     hx-target="#statement-section"
-                     hx-swap="innerHTML">
-                    {# Initial state: Show form #}
-                    {% include 'wallet/partials/statement_form.html' %}
-                </div>
-            </div>
-        </div>
-
         <!-- --#-- Recent Transactions (Limited to 5) -->
         <div class="card">
             <div class="card-header">

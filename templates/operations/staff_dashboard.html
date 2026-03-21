@@ -23,10 +23,16 @@
 
     .ops-hero {
         display: grid;
-        grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+        grid-template-columns: 1fr;
         gap: var(--spacing-lg);
-        padding: var(--spacing-2xl);
+        padding: var(--spacing-xl);
         background: linear-gradient(145deg, rgba(25, 33, 15, 0.92), rgba(96, 108, 56, 0.34));
+    }
+
+    @media (min-width: 1024px) {
+        .ops-hero {
+            grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+        }
     }
 
     .ops-hero-copy {
