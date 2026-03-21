@@ -2,12 +2,14 @@
 Wallet service layer.
 
 Implements atomic financial operations with full validation.
+Concurrency-safe with database locking and F() expressions.
 """
 
 import uuid
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
+from django.db.models import F
 from django.utils import timezone
 
 from .exceptions import (
@@ -17,7 +19,7 @@ from .exceptions import (
     InvalidAmountError,
     SelfTransferError,
 )
-from .models import Transaction, TransactionStatus, TransactionType
+from .models import Transaction, TransactionStatus, TransactionType, Wallet
 
 # -- Helper Functions
 
@@ -70,6 +72,10 @@ def deposit_funds(wallet, amount, description="", reference_id=None):
     """
     Deposit funds into a wallet.
 
+    Concurrency-safe: Uses select_for_update() to lock wallet row.
+    Uses F() expressions to avoid stale data overwrites.
+    Implements robust idempotency via database UNIQUE constraint.
+
     Args:
         wallet: Wallet instance to deposit into
         amount: Decimal amount to deposit
@@ -92,25 +98,30 @@ def deposit_funds(wallet, amount, description="", reference_id=None):
     if reference_id is None:
         reference_id = f"DEP-{wallet.id}-{uuid.uuid4().hex[:12]}"
 
-    # -- Check idempotency
-    if _check_reference_id_exists(reference_id):
-        raise DuplicateTransactionError(reference_id)
+    # -- Lock wallet row for update (prevents concurrent modifications)
+    wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
 
-    # -- Update balance
-    wallet.balance = wallet.balance + amount
-    wallet.save()
+    # -- Update balance using F() expression (avoids race conditions)
+    Wallet.objects.filter(pk=wallet.pk).update(balance=F("balance") + amount)
 
-    # -- Create transaction record
-    transaction_record = _create_transaction_record(
-        wallet=wallet,
-        counterparty_wallet=None,
-        amount=amount,
-        transaction_type=TransactionType.DEPOSIT,
-        status=TransactionStatus.COMPLETED,
-        description=description,
-        reference_id=reference_id,
-        metadata={"operation": "deposit", "timestamp": timezone.now().isoformat()},
-    )
+    # -- Refresh wallet from database to get updated balance
+    wallet.refresh_from_db()
+
+    # -- Create transaction record with idempotency protection
+    try:
+        transaction_record = Transaction.objects.create(
+            wallet=wallet,
+            counterparty_wallet=None,
+            amount=amount,
+            type=TransactionType.DEPOSIT,
+            status=TransactionStatus.COMPLETED,
+            description=description,
+            reference_id=reference_id,
+            metadata={"operation": "deposit", "timestamp": timezone.now().isoformat()},
+        )
+    except IntegrityError as e:
+        # Reference ID already exists - this is a duplicate request
+        raise DuplicateTransactionError(reference_id) from e
 
     return transaction_record
 
@@ -119,6 +130,10 @@ def deposit_funds(wallet, amount, description="", reference_id=None):
 def withdraw_funds(wallet, amount, description="", reference_id=None):
     """
     Withdraw funds from a wallet.
+
+    Concurrency-safe: Uses select_for_update() to lock wallet row.
+    Uses F() expressions to avoid stale data overwrites.
+    Implements robust idempotency via database UNIQUE constraint.
 
     Args:
         wallet: Wallet instance to withdraw from
@@ -139,33 +154,38 @@ def withdraw_funds(wallet, amount, description="", reference_id=None):
     _validate_amount(amount)
     _validate_wallet_not_frozen(wallet)
 
-    # -- Check sufficient funds
-    if wallet.balance < amount:
-        raise InsufficientFundsError(wallet.balance, amount)
-
     # -- Generate reference_id if not provided
     if reference_id is None:
         reference_id = f"WDR-{wallet.id}-{uuid.uuid4().hex[:12]}"
 
-    # -- Check idempotency
-    if _check_reference_id_exists(reference_id):
-        raise DuplicateTransactionError(reference_id)
+    # -- Lock wallet row for update (prevents concurrent modifications)
+    wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
 
-    # -- Update balance
-    wallet.balance = wallet.balance - amount
-    wallet.save()
+    # -- Check sufficient funds (after lock, balance is current)
+    if wallet.balance < amount:
+        raise InsufficientFundsError(wallet.balance, amount)
 
-    # -- Create transaction record
-    transaction_record = _create_transaction_record(
-        wallet=wallet,
-        counterparty_wallet=None,
-        amount=amount,
-        transaction_type=TransactionType.WITHDRAWAL,
-        status=TransactionStatus.COMPLETED,
-        description=description,
-        reference_id=reference_id,
-        metadata={"operation": "withdrawal", "timestamp": timezone.now().isoformat()},
-    )
+    # -- Update balance using F() expression (avoids race conditions)
+    Wallet.objects.filter(pk=wallet.pk).update(balance=F("balance") - amount)
+
+    # -- Refresh wallet from database to get updated balance
+    wallet.refresh_from_db()
+
+    # -- Create transaction record with idempotency protection
+    try:
+        transaction_record = Transaction.objects.create(
+            wallet=wallet,
+            counterparty_wallet=None,
+            amount=amount,
+            type=TransactionType.WITHDRAWAL,
+            status=TransactionStatus.COMPLETED,
+            description=description,
+            reference_id=reference_id,
+            metadata={"operation": "withdrawal", "timestamp": timezone.now().isoformat()},
+        )
+    except IntegrityError as e:
+        # Reference ID already exists - this is a duplicate request
+        raise DuplicateTransactionError(reference_id) from e
 
     return transaction_record
 
@@ -174,6 +194,10 @@ def withdraw_funds(wallet, amount, description="", reference_id=None):
 def transfer_funds(sender_wallet, receiver_wallet, amount, description="", reference_id=None):
     """
     Transfer funds between wallets.
+
+    Concurrency-safe: Uses select_for_update() to lock BOTH wallet rows.
+    Uses F() expressions to avoid stale data overwrites.
+    Implements robust idempotency via database UNIQUE constraint.
 
     Args:
         sender_wallet: Wallet to send from
@@ -203,43 +227,53 @@ def transfer_funds(sender_wallet, receiver_wallet, amount, description="", refer
     if sender_wallet.id == receiver_wallet.id:
         raise SelfTransferError()
 
-    # -- Check sufficient funds
-    if sender_wallet.balance < amount:
-        raise InsufficientFundsError(sender_wallet.balance, amount)
-
     # -- Generate reference_id if not provided
     if reference_id is None:
         reference_id = f"TRF-{sender_wallet.id}-{receiver_wallet.id}-{uuid.uuid4().hex[:12]}"
 
-    # -- Check idempotency
-    if _check_reference_id_exists(reference_id):
-        raise DuplicateTransactionError(reference_id)
+    # -- CRITICAL: Lock BOTH wallet rows for update (order by ID to prevent deadlocks)
+    # Lock in consistent order (lower ID first) to prevent deadlocks
+    if sender_wallet.id < receiver_wallet.id:
+        sender_wallet = Wallet.objects.select_for_update().get(pk=sender_wallet.pk)
+        receiver_wallet = Wallet.objects.select_for_update().get(pk=receiver_wallet.pk)
+    else:
+        receiver_wallet = Wallet.objects.select_for_update().get(pk=receiver_wallet.pk)
+        sender_wallet = Wallet.objects.select_for_update().get(pk=sender_wallet.pk)
 
-    # -- Update balances atomically
-    sender_wallet.balance = sender_wallet.balance - amount
-    sender_wallet.save()
+    # -- Check sufficient funds (after lock, balance is current)
+    if sender_wallet.balance < amount:
+        raise InsufficientFundsError(sender_wallet.balance, amount)
 
-    receiver_wallet.balance = receiver_wallet.balance + amount
-    receiver_wallet.save()
+    # -- Update balances using F() expressions (avoids race conditions)
+    Wallet.objects.filter(pk=sender_wallet.pk).update(balance=F("balance") - amount)
+    Wallet.objects.filter(pk=receiver_wallet.pk).update(balance=F("balance") + amount)
+
+    # -- Refresh wallets from database to get updated balances
+    sender_wallet.refresh_from_db()
+    receiver_wallet.refresh_from_db()
 
     # -- Determine initial status (COMPLETED or FLAGGED based on fraud check)
     from operations.fraud_engine import FraudEngine
 
-    # Create sender transaction first (needed for fraud check)
-    sender_transaction = _create_transaction_record(
-        wallet=sender_wallet,
-        counterparty_wallet=receiver_wallet,
-        amount=amount,
-        transaction_type=TransactionType.TRANSFER,
-        status=TransactionStatus.COMPLETED,  # Temporary status
-        description=description,
-        reference_id=reference_id,
-        metadata={
-            "operation": "transfer_send",
-            "counterparty": receiver_wallet.id,
-            "timestamp": timezone.now().isoformat(),
-        },
-    )
+    # -- Create sender transaction with idempotency protection
+    try:
+        sender_transaction = Transaction.objects.create(
+            wallet=sender_wallet,
+            counterparty_wallet=receiver_wallet,
+            amount=amount,
+            type=TransactionType.TRANSFER,
+            status=TransactionStatus.COMPLETED,  # Temporary status
+            description=description,
+            reference_id=reference_id,
+            metadata={
+                "operation": "transfer_send",
+                "counterparty": receiver_wallet.id,
+                "timestamp": timezone.now().isoformat(),
+            },
+        )
+    except IntegrityError as e:
+        # Reference ID already exists - this is a duplicate request
+        raise DuplicateTransactionError(reference_id) from e
 
     # -- Run fraud detection on the transaction
     fraud_result = FraudEngine.check_transaction(sender_transaction)
@@ -257,21 +291,25 @@ def transfer_funds(sender_wallet, receiver_wallet, amount, description="", refer
         sender_transaction.save(update_fields=["status", "metadata"])
 
     # -- Create corresponding receiver transaction with same reference
-    receiver_transaction = _create_transaction_record(
-        wallet=receiver_wallet,
-        counterparty_wallet=sender_wallet,
-        amount=amount,
-        transaction_type=TransactionType.TRANSFER,
-        status=sender_transaction.status,  # Match sender's status
-        description=f"Received from {sender_wallet.client_profile.user.email}",
-        reference_id=f"{reference_id}-RECV",
-        metadata={
-            "operation": "transfer_receive",
-            "counterparty": sender_wallet.id,
-            "original_reference": reference_id,
-            "timestamp": timezone.now().isoformat(),
-        },
-    )
+    try:
+        receiver_transaction = Transaction.objects.create(
+            wallet=receiver_wallet,
+            counterparty_wallet=sender_wallet,
+            amount=amount,
+            type=TransactionType.TRANSFER,
+            status=sender_transaction.status,  # Match sender's status
+            description=f"Received from {sender_wallet.client_profile.user.email}",
+            reference_id=f"{reference_id}-RECV",
+            metadata={
+                "operation": "transfer_receive",
+                "counterparty": sender_wallet.id,
+                "original_reference": reference_id,
+                "timestamp": timezone.now().isoformat(),
+            },
+        )
+    except IntegrityError as e:
+        # This shouldn't happen for receiver transaction, but handle it
+        raise DuplicateTransactionError(f"{reference_id}-RECV") from e
 
     return sender_transaction
 
