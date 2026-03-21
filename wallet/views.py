@@ -9,20 +9,19 @@ import uuid
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator
-from django.http import FileResponse, HttpResponse, JsonResponse
+from django.db import models
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils import timezone
 from django.views import View
 from django.views.generic import ListView, TemplateView
 
-from accounts.models import ClientProfile
+from accounts.models import ClientProfile, UserType
 from accounts.views import ClientOnlyMixin
 
 from .forms import DepositForm, TransferForm, WithdrawForm
-from .models import Transaction, Wallet
+from .models import Transaction, TransactionStatus, TransactionType, Wallet
 from .services import deposit_funds, transfer_funds, withdraw_funds
 from .tasks import generate_statement_pdf, get_task_status
 
@@ -96,7 +95,7 @@ class TransactionHistoryView(LoginRequiredMixin, ClientOnlyMixin, View):
             "counterparty_wallet__client_profile__user"
         ).order_by("-created_at")
 
-        transactions = list(all_transactions[offset:offset + limit])
+        transactions = list(all_transactions[offset : offset + limit])
 
         # Check if there are more transactions
         has_more = (offset + limit) < all_transactions.count()
@@ -188,7 +187,7 @@ class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
                         {
                             "message": {
                                 "tags": "success",
-                                "message": f"Successfully deposited ${transaction.amount:,.2f} to your wallet!"
+                                "message": f"Successfully deposited ${transaction.amount:,.2f} to your wallet!",
                             }
                         },
                         request=request,
@@ -196,17 +195,14 @@ class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
                     return HttpResponse(message_html)
 
                 # For regular requests, return JSON
-                return JsonResponse({"success": True, "message": f"Deposited ${transaction.amount:,.2f}"})
+                return JsonResponse(
+                    {"success": True, "message": f"Deposited ${transaction.amount:,.2f}"}
+                )
 
             except Exception as e:
                 error_html = render_to_string(
                     "components/alert.html",
-                    {
-                        "message": {
-                            "tags": "danger",
-                            "message": f"Deposit failed: {str(e)}"
-                        }
-                    },
+                    {"message": {"tags": "danger", "message": f"Deposit failed: {str(e)}"}},
                     request=request,
                 )
                 if request.headers.get("HX-Request"):
@@ -221,7 +217,7 @@ class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
                     request=request,
                 )
                 return HttpResponse(form_html)
-            
+
             # For regular requests, return JSON with errors
             return JsonResponse({"success": False, "errors": form.errors})
 
@@ -261,7 +257,7 @@ class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
                         {
                             "message": {
                                 "tags": "success",
-                                "message": f"Successfully withdrew ${transaction.amount:,.2f} from your wallet!"
+                                "message": f"Successfully withdrew ${transaction.amount:,.2f} from your wallet!",
                             }
                         },
                         request=request,
@@ -269,17 +265,14 @@ class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
                     return HttpResponse(message_html)
 
                 # For regular requests, return JSON
-                return JsonResponse({"success": True, "message": f"Withdrew ${transaction.amount:,.2f}"})
+                return JsonResponse(
+                    {"success": True, "message": f"Withdrew ${transaction.amount:,.2f}"}
+                )
 
             except Exception as e:
                 error_html = render_to_string(
                     "components/alert.html",
-                    {
-                        "message": {
-                            "tags": "danger",
-                            "message": f"Withdrawal failed: {str(e)}"
-                        }
-                    },
+                    {"message": {"tags": "danger", "message": f"Withdrawal failed: {str(e)}"}},
                     request=request,
                 )
                 if request.headers.get("HX-Request"):
@@ -294,7 +287,7 @@ class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
                     request=request,
                 )
                 return HttpResponse(form_html)
-            
+
             # For regular requests, return JSON with errors
             return JsonResponse({"success": False, "errors": form.errors})
 
@@ -374,7 +367,7 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                         {
                             "message": {
                                 "tags": "success",
-                                "message": f"Successfully transferred ${transaction.amount:,.2f} to {recipient_profile.user.email}!"
+                                "message": f"Successfully transferred ${transaction.amount:,.2f} to {recipient_profile.user.email}!",
                             }
                         },
                         request=request,
@@ -382,7 +375,9 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                     return HttpResponse(message_html)
 
                 # For regular requests, return JSON
-                return JsonResponse({"success": True, "message": f"Transferred ${transaction.amount:,.2f}"})
+                return JsonResponse(
+                    {"success": True, "message": f"Transferred ${transaction.amount:,.2f}"}
+                )
 
             except ClientProfile.DoesNotExist:
                 error_html = render_to_string(
@@ -390,7 +385,7 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                     {
                         "message": {
                             "tags": "danger",
-                            "message": "Recipient not found. Please check the email address."
+                            "message": "Recipient not found. Please check the email address.",
                         }
                     },
                     request=request,
@@ -401,12 +396,7 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
             except Exception as e:
                 error_html = render_to_string(
                     "components/alert.html",
-                    {
-                        "message": {
-                            "tags": "danger",
-                            "message": f"Transfer failed: {str(e)}"
-                        }
-                    },
+                    {"message": {"tags": "danger", "message": f"Transfer failed: {str(e)}"}},
                     request=request,
                 )
                 if request.headers.get("HX-Request"):
@@ -421,7 +411,7 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
                     request=request,
                 )
                 return HttpResponse(form_html)
-            
+
             # For regular requests, return JSON with errors
             return JsonResponse({"success": False, "errors": form.errors})
 
@@ -526,7 +516,10 @@ class TaskStatusView(LoginRequiredMixin, View):
                 # User is trying to access another user's task status
                 html = render_to_string(
                     "wallet/partials/statement_error.html",
-                    {"task_id": task_id, "error": "Access denied. This is not your statement request."},
+                    {
+                        "task_id": task_id,
+                        "error": "Access denied. This is not your statement request.",
+                    },
                     request=request,
                 )
                 return HttpResponse(html)
@@ -592,8 +585,8 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
 
         Security: Verifies that the statement belongs to the requesting user.
         """
-        import os
         import glob
+        import os
 
         from celery.result import AsyncResult
         from django.http import FileResponse
@@ -602,19 +595,27 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
         result = AsyncResult(task_id)
 
         task_result = None
-        if result.status == 'SUCCESS' and result.result:
+        if result.status == "SUCCESS" and result.result:
             task_result = result.result
 
         # Fallback to cache if AsyncResult doesn't have the result
         if not task_result:
             from django.core.cache import cache
+
             task_result = cache.get(f"task_result_{task_id}")
 
         if not task_result or not isinstance(task_result, dict):
-            return JsonResponse({"success": False, "error": "Statement not found. Please generate a new statement."})
+            return JsonResponse(
+                {"success": False, "error": "Statement not found. Please generate a new statement."}
+            )
 
         if not task_result.get("success"):
-            return JsonResponse({"success": False, "error": task_result.get("error", "Statement generation failed.")})
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": task_result.get("error", "Statement generation failed."),
+                }
+            )
 
         # Security check: Verify wallet ownership
         wallet_id = task_result.get("wallet_id")
@@ -636,7 +637,7 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
 
         # Get file path from result
         file_path = task_result.get("file_path")
-        
+
         # If file_path not in result, try to find the file in statements directory
         if not file_path:
             statements_dir = os.path.join(settings.MEDIA_ROOT, "statements")
@@ -655,16 +656,19 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
             return JsonResponse({"success": False, "error": "File not found on server."})
 
         # Serve the file as attachment
-        response = FileResponse(open(full_path, "rb"), content_type="application/pdf", as_attachment=True)
+        response = FileResponse(
+            open(full_path, "rb"), content_type="application/pdf", as_attachment=True
+        )
         response["Content-Disposition"] = f'attachment; filename="{os.path.basename(file_path)}"'
         return response
 
 
-class TransactionListView(LoginRequiredMixin, ClientOnlyMixin, ListView):
+class TransactionListView(LoginRequiredMixin, ListView):
     """
     Full transaction history page with pagination.
 
-    Displays all user transactions with standard pagination.
+    For Clients: Displays their own transactions
+    For Staff: Displays all transactions with filtering
     """
 
     model = Transaction
@@ -673,22 +677,69 @@ class TransactionListView(LoginRequiredMixin, ClientOnlyMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        """Get user's transactions ordered by date."""
+        """Get transactions based on user type."""
+        user = self.request.user
+
+        # Staff and SuperUsers see ALL transactions
+        if user.is_superuser or user.user_type == UserType.STAFF:
+            queryset = (
+                Transaction.objects.all()
+                .select_related(
+                    "wallet__client_profile__user", "counterparty_wallet__client_profile__user"
+                )
+                .order_by("-created_at")
+            )
+
+            # Apply filters
+            transaction_type = self.request.GET.get("type")
+            status = self.request.GET.get("status")
+            search = self.request.GET.get("search")
+
+            if transaction_type:
+                queryset = queryset.filter(type=transaction_type)
+            if status:
+                queryset = queryset.filter(status=status)
+            if search:
+                queryset = queryset.filter(
+                    models.Q(wallet__client_profile__user__email__icontains=search)
+                    | models.Q(description__icontains=search)
+                    | models.Q(reference_id__icontains=search)
+                )
+
+            return queryset
+
+        # Clients see only their own transactions
         try:
-            wallet = self.request.user.client_profile.wallet
-            return Transaction.objects.filter(
-                wallet=wallet
-            ).select_related(
-                "counterparty_wallet__client_profile__user"
-            ).order_by("-created_at")
+            wallet = user.client_profile.wallet
+            return (
+                Transaction.objects.filter(wallet=wallet)
+                .select_related("counterparty_wallet__client_profile__user")
+                .order_by("-created_at")
+            )
         except Wallet.DoesNotExist:
             return Transaction.objects.none()
 
     def get_context_data(self, **kwargs):
-        """Add wallet to context."""
+        """Add wallet and filters to context."""
         context = super().get_context_data(**kwargs)
-        try:
-            context["wallet"] = self.request.user.client_profile.wallet
-        except Wallet.DoesNotExist:
-            context["wallet"] = None
+        user = self.request.user
+
+        # Add wallet for clients
+        if user.user_type == UserType.CLIENT:
+            try:
+                context["wallet"] = user.client_profile.wallet
+            except Wallet.DoesNotExist:
+                context["wallet"] = None
+
+        # Add filter options for staff
+        if user.is_superuser or user.user_type == UserType.STAFF:
+            context["is_staff_view"] = True
+            context["current_type"] = self.request.GET.get("type", "")
+            context["current_status"] = self.request.GET.get("status", "")
+            context["current_search"] = self.request.GET.get("search", "")
+            context["transaction_types"] = TransactionType.choices
+            context["transaction_statuses"] = TransactionStatus.choices
+        else:
+            context["is_staff_view"] = False
+
         return context

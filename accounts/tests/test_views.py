@@ -53,7 +53,7 @@ class TestLoginView:
         )
 
         assert response.status_code == 302
-        assert "/admin/" in response.url
+        assert "/staff/dashboard/" in response.url
 
     def test_login_invalid_credentials(self, client):
         """Test login with invalid credentials shows error."""
@@ -278,7 +278,7 @@ class TestAuthenticationFlow:
         )
 
         assert staff_login.status_code == 302
-        assert "/admin/" in staff_login.url
+        assert "/staff/dashboard/" in staff_login.url
 
         # Logout
         client.get(reverse("accounts:logout"))

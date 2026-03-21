@@ -197,9 +197,13 @@ class CustomLoginView(BaseLoginView):
         """
         user = self.request.user
 
-        # Staff users go to admin panel
-        if user.user_type == UserType.STAFF or user.is_staff:
+        # SuperUsers go to Django Admin
+        if user.is_superuser:
             return "/admin/"
+
+        # Staff users go to Staff Dashboard (NOT admin)
+        if user.user_type == UserType.STAFF or user.is_staff:
+            return "/staff/dashboard/"
 
         # Client users go to dashboard
         if user.user_type == UserType.CLIENT:
