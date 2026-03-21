@@ -6,6 +6,7 @@ Custom forms for authentication and password reset.
 
 from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.forms import PasswordResetForm as BasePasswordResetForm
 from django.core.exceptions import ValidationError
 
@@ -110,6 +111,38 @@ class ClientPasswordResetForm(BasePasswordResetForm):
             pass
 
         return email
+
+
+class ClientPasswordChangeForm(PasswordChangeForm):
+    """
+    Password change form styled for the client security page.
+    """
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(user, *args, **kwargs)
+
+        field_config = {
+            "old_password": {
+                "placeholder": "Enter your current password",
+                "autocomplete": "current-password",
+            },
+            "new_password1": {
+                "placeholder": "Choose a new password",
+                "autocomplete": "new-password",
+            },
+            "new_password2": {
+                "placeholder": "Confirm your new password",
+                "autocomplete": "new-password",
+            },
+        }
+
+        for field_name, attrs in field_config.items():
+            self.fields[field_name].widget.attrs.update(
+                {
+                    "class": "form-input",
+                    **attrs,
+                }
+            )
 
 
 class ClientSetPasswordForm(forms.Form):

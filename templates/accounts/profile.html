@@ -1,0 +1,407 @@
+<!-- --#-- Client Profile Template - Spacious Account Overview -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Digital Wallet{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<style>
+    .profile-shell {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+
+    .profile-hero,
+    .profile-card {
+        border-radius: var(--radius-2xl);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .profile-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+        gap: var(--spacing-lg);
+        padding: var(--spacing-2xl);
+        background: linear-gradient(145deg, rgba(40, 54, 24, 0.78), rgba(96, 108, 56, 0.3));
+    }
+
+    .hero-copy {
+        display: flex;
+        gap: var(--spacing-lg);
+        align-items: center;
+    }
+
+    .profile-avatar {
+        width: 104px;
+        height: 104px;
+        border-radius: var(--radius-full);
+        background: linear-gradient(135deg, var(--copperwood), var(--toasted-almond));
+        color: var(--cornsilk);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--text-4xl);
+        font-weight: var(--font-bold);
+        box-shadow: var(--shadow-xl);
+        flex-shrink: 0;
+    }
+
+    .hero-title {
+        margin: 0 0 var(--spacing-sm) 0;
+        color: var(--cornsilk);
+        font-size: clamp(2rem, 4vw, 3rem);
+    }
+
+    .hero-subtitle,
+    .hero-email {
+        margin: 0;
+        color: var(--text-secondary);
+    }
+
+    .hero-email {
+        margin-top: var(--spacing-xs);
+        font-size: var(--text-base);
+    }
+
+    .hero-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-lg);
+    }
+
+    .hero-summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-lg);
+    }
+
+    .summary-pill {
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-2xl);
+        background: rgba(254, 250, 224, 0.06);
+        border: 1px solid rgba(254, 250, 224, 0.08);
+    }
+
+    .summary-label {
+        margin: 0 0 var(--spacing-xs) 0;
+        color: var(--text-tertiary);
+        font-size: var(--text-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .summary-value {
+        margin: 0;
+        color: var(--cornsilk);
+        font-size: var(--text-lg);
+        font-weight: var(--font-semibold);
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+        gap: var(--spacing-lg);
+        align-items: start;
+    }
+
+    .profile-main,
+    .profile-side {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .profile-card {
+        padding: var(--spacing-2xl);
+        background: rgba(40, 54, 24, 0.46);
+        backdrop-filter: blur(12px);
+    }
+
+    .card-title {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin: 0 0 var(--spacing-lg) 0;
+        color: var(--cornsilk);
+        font-size: var(--text-xl);
+    }
+
+    .card-title i {
+        color: var(--toasted-almond);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--spacing-lg);
+    }
+
+    .info-item,
+    .status-item {
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-2xl);
+        background: rgba(254, 250, 224, 0.04);
+        border: 1px solid rgba(254, 250, 224, 0.06);
+    }
+
+    .info-item.info-item-full {
+        grid-column: 1 / -1;
+    }
+
+    .info-label,
+    .status-label {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        margin: 0 0 var(--spacing-sm) 0;
+        color: var(--text-tertiary);
+        font-size: var(--text-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .info-value,
+    .status-value {
+        margin: 0;
+        color: var(--cornsilk);
+        font-size: var(--text-base);
+        font-weight: var(--font-medium);
+        line-height: 1.6;
+        word-break: break-word;
+    }
+
+    .empty-value {
+        color: var(--text-tertiary);
+        font-style: italic;
+    }
+
+    .status-stack {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .quick-action {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-2xl);
+        background: rgba(254, 250, 224, 0.04);
+        border: 1px solid rgba(254, 250, 224, 0.06);
+        color: var(--cornsilk);
+        text-decoration: none;
+        transition: transform var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .quick-action:hover {
+        transform: translateY(-2px);
+        border-color: rgba(188, 108, 37, 0.32);
+    }
+
+    .quick-action-copy {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .quick-action-title {
+        font-weight: var(--font-semibold);
+    }
+
+    .quick-action-text {
+        color: var(--text-secondary);
+        font-size: var(--text-sm);
+    }
+
+    @media (max-width: 1024px) {
+        .profile-hero,
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-summary {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .profile-hero,
+        .profile-card {
+            padding: var(--spacing-lg);
+        }
+
+        .hero-copy {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-item.info-item-full {
+            grid-column: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-shell">
+    <section class="profile-hero">
+        <div class="hero-copy">
+            <div class="profile-avatar">{{ user.email|first|upper }}</div>
+            <div>
+                <h1 class="hero-title">{{ profile.full_name|default:"Account Holder" }}</h1>
+                <p class="hero-subtitle">Your account overview, identity details, and security posture in one place.</p>
+                <p class="hero-email">{{ user.email }}</p>
+                <div class="hero-badges">
+                    <span class="badge badge-primary">
+                        <i class="fas fa-user"></i> {{ user.get_user_type_display }}
+                    </span>
+                    {% if profile.kyc_verified %}
+                    <span class="badge badge-success">
+                        <i class="fas fa-badge-check"></i> KYC Verified
+                    </span>
+                    {% else %}
+                    <span class="badge badge-warning">
+                        <i class="fas fa-clock"></i> KYC Pending
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-summary">
+            <div class="summary-pill">
+                <p class="summary-label">Member Since</p>
+                <p class="summary-value">{{ user.date_joined|date:"F Y" }}</p>
+            </div>
+            <div class="summary-pill">
+                <p class="summary-label">Last Login</p>
+                <p class="summary-value">
+                    {% if user.last_login %}
+                        {{ user.last_login|date:"M d, Y" }}
+                    {% else %}
+                        First session
+                    {% endif %}
+                </p>
+            </div>
+            <div class="summary-pill">
+                <p class="summary-label">Account Status</p>
+                <p class="summary-value" style="color: var(--color-success);">Active</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="profile-grid">
+        <div class="profile-main">
+            <article class="profile-card">
+                <h2 class="card-title"><i class="fas fa-id-card"></i> Personal Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <p class="info-label"><i class="fas fa-user"></i> Full Name</p>
+                        <p class="info-value {% if not profile.full_name %}empty-value{% endif %}">
+                            {{ profile.full_name|default:"Not provided" }}
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <p class="info-label"><i class="fas fa-building"></i> Company</p>
+                        <p class="info-value {% if not profile.company %}empty-value{% endif %}">
+                            {{ profile.company|default:"Not provided" }}
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <p class="info-label"><i class="fas fa-briefcase"></i> Job Title</p>
+                        <p class="info-value {% if not profile.job_title %}empty-value{% endif %}">
+                            {{ profile.job_title|default:"Not provided" }}
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <p class="info-label"><i class="fas fa-phone"></i> Phone Number</p>
+                        <p class="info-value {% if not profile.phone %}empty-value{% endif %}">
+                            {{ profile.phone|default:"Not provided" }}
+                        </p>
+                    </div>
+                    <div class="info-item info-item-full">
+                        <p class="info-label"><i class="fas fa-location-dot"></i> Address</p>
+                        <p class="info-value {% if not profile.address %}empty-value{% endif %}">
+                            {{ profile.address|default:"Not provided" }}
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="profile-card">
+                <h2 class="card-title"><i class="fas fa-envelope-circle-check"></i> Account Access</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <p class="info-label"><i class="fas fa-envelope"></i> Email Address</p>
+                        <p class="info-value">{{ user.email }}</p>
+                    </div>
+                    <div class="info-item">
+                        <p class="info-label"><i class="fas fa-circle-check"></i> Email Verified</p>
+                        <p class="info-value" style="color: var(--color-success);">Yes</p>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <aside class="profile-side">
+            <article class="profile-card">
+                <h2 class="card-title"><i class="fas fa-shield-halved"></i> Security Status</h2>
+                <div class="status-stack">
+                    <div class="status-item">
+                        <p class="status-label"><i class="fas fa-user-shield"></i> Password</p>
+                        <p class="status-value">Protected by your account password.</p>
+                    </div>
+                    <div class="status-item">
+                        <p class="status-label"><i class="fas fa-file-circle-check"></i> KYC Review</p>
+                        <p class="status-value">
+                            {% if profile.kyc_verified %}
+                                Your identity verification has been approved.
+                            {% else %}
+                                Verification is still pending additional review.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="profile-card">
+                <h2 class="card-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
+                <div class="quick-actions">
+                    <a href="{% url 'accounts:security' %}" class="quick-action">
+                        <span class="quick-action-copy">
+                            <span class="quick-action-title">Security Settings</span>
+                            <span class="quick-action-text">Change your password and review recent sign-ins.</span>
+                        </span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="{% url 'wallet:transaction_list' %}" class="quick-action">
+                        <span class="quick-action-copy">
+                            <span class="quick-action-title">Transaction History</span>
+                            <span class="quick-action-text">Review your latest wallet activity.</span>
+                        </span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+        </aside>
+    </section>
+</div>
+{% endblock %}

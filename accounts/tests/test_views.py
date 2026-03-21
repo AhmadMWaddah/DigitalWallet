@@ -29,7 +29,7 @@ class TestLoginView:
 
     def test_login_valid_credentials_client(self, client):
         """Test login with valid client credentials redirects to dashboard."""
-        user = CustomUser.objects.create_user(
+        CustomUser.objects.create_user(
             email="clientlogin@example.com", password="testpass123", user_type=UserType.CLIENT
         )
 
@@ -43,7 +43,7 @@ class TestLoginView:
 
     def test_login_valid_credentials_staff(self, client):
         """Test login with valid staff credentials redirects to admin."""
-        user = CustomUser.objects.create_user(
+        CustomUser.objects.create_user(
             email="stafflogin@example.com", password="testpass123", user_type=UserType.STAFF
         )
 
@@ -93,9 +93,7 @@ class TestLogoutView:
 
     def test_logout_get_success(self, client):
         """Test logout via GET request."""
-        user = CustomUser.objects.create_user(
-            email="logoutuser@example.com", password="testpass123"
-        )
+        CustomUser.objects.create_user(email="logoutuser@example.com", password="testpass123")
 
         client.login(email="logoutuser@example.com", password="testpass123")
         assert client.session.get("_auth_user_id") is not None
@@ -107,9 +105,7 @@ class TestLogoutView:
 
     def test_logout_post_success(self, client):
         """Test logout via POST request."""
-        user = CustomUser.objects.create_user(
-            email="logoutpost@example.com", password="testpass123"
-        )
+        CustomUser.objects.create_user(email="logoutpost@example.com", password="testpass123")
 
         client.login(email="logoutpost@example.com", password="testpass123")
 
@@ -128,7 +124,7 @@ class TestLoginRedirectView:
 
     def test_redirect_client_to_dashboard(self, client):
         """Test client user is redirected to dashboard."""
-        user = CustomUser.objects.create_user(
+        CustomUser.objects.create_user(
             email="redirectclient@example.com", password="testpass123", user_type=UserType.CLIENT
         )
 
@@ -140,7 +136,7 @@ class TestLoginRedirectView:
 
     def test_redirect_staff_to_admin(self, client):
         """Test staff user is redirected to admin."""
-        user = CustomUser.objects.create_user(
+        CustomUser.objects.create_user(
             email="redirectstaff@example.com", password="testpass123", user_type=UserType.STAFF
         )
 
@@ -242,7 +238,7 @@ class TestAuthenticationFlow:
     def test_full_login_logout_cycle(self, client):
         """Test complete login and logout cycle."""
         # Create user
-        user = CustomUser.objects.create_user(
+        CustomUser.objects.create_user(
             email="cycle@example.com", password="testpass123", user_type=UserType.CLIENT
         )
 
@@ -267,11 +263,11 @@ class TestAuthenticationFlow:
     def test_staff_portal_separation(self, client):
         """Test that staff and client portals are separated."""
         # Create both user types
-        staff = CustomUser.objects.create_user(
+        CustomUser.objects.create_user(
             email="portalseparation@example.com", password="testpass123", user_type=UserType.STAFF
         )
 
-        client_user = CustomUser.objects.create_user(
+        CustomUser.objects.create_user(
             email="portalclient@example.com", password="testpass123", user_type=UserType.CLIENT
         )
 
@@ -295,3 +291,119 @@ class TestAuthenticationFlow:
 
         assert client_login.status_code == 302
         assert "/dashboard/" in client_login.url
+
+
+@pytest.mark.django_db
+class TestSecurityView:
+    """Test security page access and password change flow."""
+
+    def test_security_page_renders_for_client(self, client):
+        CustomUser.objects.create_user(
+            email="security-client@example.com",
+            password="testpass123",
+            user_type=UserType.CLIENT,
+        )
+
+        client.login(email="security-client@example.com", password="testpass123")
+        response = client.get(
+            reverse("accounts:security"),
+            HTTP_USER_AGENT="Mozilla/5.0 Chrome/122.0",
+            REMOTE_ADDR="203.0.113.9",
+        )
+
+        assert response.status_code == 200
+        assert response.context["current_session"]["browser"] == "Google Chrome"
+        assert response.context["current_session"]["ip_address"] == "203.0.113.9"
+
+    def test_security_page_denies_staff_user(self, client):
+        CustomUser.objects.create_user(
+            email="security-staff@example.com",
+            password="testpass123",
+            user_type=UserType.STAFF,
+        )
+
+        client.login(email="security-staff@example.com", password="testpass123")
+        response = client.get(reverse("accounts:security"))
+
+        assert response.status_code == 403
+
+    def test_password_change_updates_credentials(self, client):
+        user = CustomUser.objects.create_user(
+            email="password-change@example.com",
+            password="oldpass123",
+            user_type=UserType.CLIENT,
+        )
+
+        client.login(email="password-change@example.com", password="oldpass123")
+        response = client.post(
+            reverse("accounts:security"),
+            {
+                "old_password": "oldpass123",
+                "new_password1": "newpass456Strong",
+                "new_password2": "newpass456Strong",
+            },
+            follow=True,
+        )
+
+        assert response.status_code == 200
+        user.refresh_from_db()
+        assert user.check_password("newpass456Strong") is True
+
+        client.post(reverse("accounts:logout"))
+        login_response = client.post(
+            reverse("accounts:login"),
+            {"email": "password-change@example.com", "password": "newpass456Strong"},
+        )
+        assert login_response.status_code == 302
+        assert "/dashboard/" in login_response.url
+
+    def test_password_change_rejects_invalid_current_password(self, client):
+        user = CustomUser.objects.create_user(
+            email="password-invalid@example.com",
+            password="oldpass123",
+            user_type=UserType.CLIENT,
+        )
+
+        client.login(email="password-invalid@example.com", password="oldpass123")
+        response = client.post(
+            reverse("accounts:security"),
+            {
+                "old_password": "wrongpass123",
+                "new_password1": "newpass456Strong",
+                "new_password2": "newpass456Strong",
+            },
+        )
+
+        assert response.status_code == 200
+        user.refresh_from_db()
+        assert user.check_password("oldpass123") is True
+
+
+@pytest.mark.django_db
+class TestNavigationAccessControl:
+    """Test admin navigation visibility."""
+
+    def test_admin_link_hidden_for_client_user(self, client):
+        CustomUser.objects.create_user(
+            email="nav-client@example.com",
+            password="testpass123",
+            user_type=UserType.CLIENT,
+        )
+
+        client.login(email="nav-client@example.com", password="testpass123")
+        response = client.get(reverse("accounts:profile"))
+
+        assert response.status_code == 200
+        assert b'href="/admin/"' not in response.content
+
+    def test_admin_link_visible_for_superuser(self, client):
+        CustomUser.objects.create_superuser(
+            email="nav-admin@example.com",
+            password="testpass123",
+        )
+
+        client.login(email="nav-admin@example.com", password="testpass123")
+        response = client.get(reverse("operations:staff_dashboard"))
+
+        assert response.status_code == 200
+        assert b'href="/admin/"' in response.content

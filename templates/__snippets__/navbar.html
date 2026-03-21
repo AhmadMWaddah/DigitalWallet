@@ -1,4 +1,4 @@
-<!-- --#-- Navbar Component -->
+<!-- --#-- Navbar Component - Luxury Earth-Tone Design -->
 {% load static %}
 
 <nav class="navbar">
@@ -26,13 +26,38 @@
                     <span class="user-email">{{ user.email }}</span>
                 </button>
                 <div class="user-menu-dropdown">
-                    <a href="{% url 'wallet:dashboard' %}" class="dropdown-item">
-                        <i class="fas fa-chart-pie"></i> Dashboard
-                    </a>
-                    <a href="#" class="dropdown-item">
-                        <i class="fas fa-cog"></i> Settings
-                    </a>
+                    <!-- --#-- Dropdown Header with User Info -->
+                    <div class="dropdown-header">
+                        <div class="header-avatar">{{ user.email|first|upper }}</div>
+                        <div class="header-info">
+                            <span class="header-name">{{ user.get_full_name|default:user.email }}</span>
+                            <span class="header-email">{{ user.email }}</span>
+                            <span class="header-role">{{ user.get_user_type_display }}</span>
+                        </div>
+                    </div>
+
                     <div class="dropdown-divider"></div>
+
+                    <!-- --#-- Client Menu Items -->
+                    {% if user.is_client %}
+                    <a href="{% url 'accounts:profile' %}" class="dropdown-item">
+                        <i class="fas fa-user"></i> My Profile
+                    </a>
+                    <a href="{% url 'accounts:security' %}" class="dropdown-item">
+                        <i class="fas fa-shield-halved"></i> Security
+                    </a>
+                    {% endif %}
+
+                    <!-- --#-- SuperUser Only: Admin Panel -->
+                    {% if user.is_superuser %}
+                    <a href="{% url 'admin:index' %}" class="dropdown-item">
+                        <i class="fas fa-cog"></i> Admin Panel
+                    </a>
+                    {% endif %}
+
+                    <div class="dropdown-divider"></div>
+
+                    <!-- --#-- Logout -->
                     <form method="post" action="{% url 'accounts:logout' %}">
                         {% csrf_token %}
                         <button type="submit" class="dropdown-item dropdown-logout">
@@ -45,6 +70,7 @@
             <!-- --#-- Auth Links -->
             <div class="auth-links">
                 <a href="{% url 'accounts:login' %}" class="btn btn-outline">Login</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary">Register</a>
             </div>
             {% endif %}
         </div>
