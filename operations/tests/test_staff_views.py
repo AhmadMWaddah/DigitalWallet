@@ -192,8 +192,9 @@ class TestReviewTransactionView:
 
         assert response.status_code == 200
         assert flagged_transaction.status == TransactionStatus.FAILED
-        assert flagged_transaction.metadata["reviewed_by"] == "staff@test.com"
-        assert flagged_transaction.metadata["review_action"] == "rejected"
+        # After reversal, metadata has 'reversed' key instead of 'review_action'
+        assert flagged_transaction.metadata.get("reversed") is True
+        assert flagged_transaction.metadata.get("reversed_by") == "staff@test.com"
 
     def test_review_transaction_invalid_action(self, client, staff_user, flagged_transaction):
         """Test review transaction with invalid action."""

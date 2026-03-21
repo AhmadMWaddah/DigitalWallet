@@ -381,3 +381,187 @@ def unfreeze_wallet(wallet):
         wallet.save(update_fields=["is_frozen"])
 
     return wallet
+
+
+@transaction.atomic
+def reverse_transfer(transaction_id, staff_user):
+    """
+    Reverse a flagged transfer and restore funds to sender.
+
+    This function is called when a staff member rejects a flagged transfer.
+    It creates a reversal transaction and updates both wallets.
+
+    Args:
+        transaction_id: ID of the flagged transfer to reverse
+        staff_user: Staff user performing the reversal
+
+    Returns:
+        dict: Result containing success status and reversal transaction
+
+    Raises:
+        ValueError: If transaction is not flagged or not a transfer
+    """
+    from .models import Transaction
+
+    # Get the original transaction with lock
+    original_txn = Transaction.objects.select_for_update().get(pk=transaction_id)
+
+    # Verify it's a flagged transfer
+    if original_txn.type != TransactionType.TRANSFER:
+        raise ValueError(f"Transaction {transaction_id} is not a transfer")
+
+    if original_txn.status != TransactionStatus.FLAGGED:
+        raise ValueError(f"Transaction {transaction_id} is not flagged")
+
+    # Get wallets with lock
+    sender_wallet = Wallet.objects.select_for_update().get(
+        pk=original_txn.wallet.pk
+    )
+    receiver_wallet = Wallet.objects.select_for_update().get(
+        pk=original_txn.counterparty_wallet.pk
+    )
+
+    # Restore funds to sender
+    Wallet.objects.filter(pk=sender_wallet.pk).update(
+        balance=F("balance") + original_txn.amount
+    )
+    Wallet.objects.filter(pk=receiver_wallet.pk).update(
+        balance=F("balance") - original_txn.amount
+    )
+
+    # Refresh wallets
+    sender_wallet.refresh_from_db()
+    receiver_wallet.refresh_from_db()
+
+    # Create reversal transaction record
+    reversal_txn = Transaction.objects.create(
+        wallet=receiver_wallet,
+        counterparty_wallet=sender_wallet,
+        amount=original_txn.amount,
+        type=TransactionType.TRANSFER,
+        status=TransactionStatus.FAILED,
+        description=f"Reversal by staff: {original_txn.description}",
+        reference_id=f"{original_txn.reference_id}-REVERSAL",
+        metadata={
+            "operation": "reversal",
+            "original_transaction_id": transaction_id,
+            "reversed_by": staff_user.email,
+            "reversed_at": timezone.now().isoformat(),
+            "reason": "Staff review - transfer rejected",
+        },
+    )
+
+    # Update original transaction status to FAILED
+    original_txn.status = TransactionStatus.FAILED
+    original_txn.metadata = {
+        **original_txn.metadata,
+        "reversed": True,
+        "reversed_by": staff_user.email,
+        "reversed_at": timezone.now().isoformat(),
+        "reversal_transaction_id": reversal_txn.id,
+    }
+    original_txn.save(update_fields=["status", "metadata"])
+
+    # Update receiver's counterparty transaction
+    receiver_txn = Transaction.objects.filter(
+        reference_id=f"{original_txn.reference_id}-RECV"
+    ).first()
+    if receiver_txn:
+        receiver_txn.status = TransactionStatus.FAILED
+        receiver_txn.metadata = {
+            **receiver_txn.metadata,
+            "reversed": True,
+            "reversed_by": staff_user.email,
+            "reversed_at": timezone.now().isoformat(),
+        }
+        receiver_txn.save(update_fields=["status", "metadata"])
+
+    return {
+        "success": True,
+        "message": f"Transfer reversed. ${original_txn.amount} restored to sender.",
+        "reversal_transaction": reversal_txn,
+        "original_transaction": original_txn,
+    }
+
+
+@transaction.atomic
+def process_fraud_review(transaction_id, action, staff_user):
+    """
+    Process staff fraud review decision.
+
+    This function handles both approve and reject actions for flagged transactions.
+
+    Args:
+        transaction_id: ID of the flagged transaction
+        action: 'approve' or 'reject'
+        staff_user: Staff user making the decision
+
+    Returns:
+        dict: Result containing success status and details
+
+    Raises:
+        ValueError: If transaction is not flagged or invalid action
+    """
+    from .models import Transaction
+
+    # Get transaction with lock
+    transaction = Transaction.objects.select_for_update().get(pk=transaction_id)
+
+    # Verify it's flagged
+    if transaction.status != TransactionStatus.FLAGGED:
+        raise ValueError(f"Transaction {transaction_id} is not flagged")
+
+    if action == "approve":
+        # Mark as completed
+        transaction.status = TransactionStatus.COMPLETED
+        transaction.metadata = {
+            **transaction.metadata,
+            "reviewed_by": staff_user.email,
+            "reviewed_at": timezone.now().isoformat(),
+            "review_action": "approved",
+        }
+        transaction.save(update_fields=["status", "metadata"])
+
+        # Update receiver's transaction if exists
+        receiver_txn = Transaction.objects.filter(
+            reference_id=f"{transaction.reference_id}-RECV"
+        ).first()
+        if receiver_txn:
+            receiver_txn.status = TransactionStatus.COMPLETED
+            receiver_txn.metadata = {
+                **receiver_txn.metadata,
+                "reviewed_by": staff_user.email,
+                "reviewed_at": timezone.now().isoformat(),
+                "review_action": "approved",
+            }
+            receiver_txn.save(update_fields=["status", "metadata"])
+
+        return {
+            "success": True,
+            "message": f"Transaction {transaction_id} approved and marked as COMPLETED.",
+            "transaction": transaction,
+        }
+
+    elif action == "reject":
+        # For transfers, reverse the transaction
+        if transaction.type == TransactionType.TRANSFER:
+            return reverse_transfer(transaction_id, staff_user)
+
+        # For non-transfers (deposit/withdrawal), just mark as failed
+        transaction.status = TransactionStatus.FAILED
+        transaction.metadata = {
+            **transaction.metadata,
+            "reviewed_by": staff_user.email,
+            "reviewed_at": timezone.now().isoformat(),
+            "review_action": "rejected",
+        }
+        transaction.save(update_fields=["status", "metadata"])
+
+        return {
+            "success": True,
+            "message": f"Transaction {transaction_id} rejected and marked as FAILED.",
+            "transaction": transaction,
+        }
+
+    else:
+        raise ValueError(f"Invalid action: {action}. Use 'approve' or 'reject'.")

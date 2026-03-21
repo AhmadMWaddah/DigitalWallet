@@ -496,6 +496,7 @@ class TaskStatusView(LoginRequiredMixin, View):
     Task status view for HTMX polling.
 
     Returns HTML fragment based on task state (PENDING/STARTED/SUCCESS/FAILURE).
+    Security: Only the user who requested the PDF can see the task status.
     """
 
     def get(self, request, task_id):
@@ -506,6 +507,8 @@ class TaskStatusView(LoginRequiredMixin, View):
         - PENDING/STARTED: Progress bar with polling
         - SUCCESS: Download button
         - FAILURE: Error message with retry option
+
+        Security: Verifies task ownership before returning status.
         """
         # Get status from cache directly (more reliable)
         from django.core.cache import cache
@@ -515,6 +518,26 @@ class TaskStatusView(LoginRequiredMixin, View):
         # Fallback to task function if cache miss
         if not status_data:
             status_data = get_task_status(task_id)
+
+        # SECURITY: Verify task ownership
+        # Only the user who requested the PDF can see the status
+        result = status_data.get("result", {})
+        if result:
+            wallet_id = result.get("wallet_id")
+            if wallet_id:
+                try:
+                    from wallet.models import Wallet
+                    wallet = Wallet.objects.get(pk=wallet_id)
+                    if wallet.client_profile.user != request.user:
+                        # User is trying to access another user's task status
+                        html = render_to_string(
+                            "wallet/partials/statement_error.html",
+                            {"task_id": task_id, "error": "Access denied. This is not your statement request."},
+                            request=request,
+                        )
+                        return HttpResponse(html)
+                except Wallet.DoesNotExist:
+                    pass
 
         status = status_data.get("status", "PENDING")
 
