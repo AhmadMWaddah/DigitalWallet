@@ -24,9 +24,9 @@
                 <h2 class="card-title">Withdraw Form</h2>
             </div>
             <div class="card-body">
-                <form method="post" 
-                      hx-post="{% url 'wallet:withdraw' %}" 
-                      hx-target="#messages-container" 
+                <form method="post"
+                      hx-post="{% url 'wallet:withdraw' %}"
+                      hx-target="#messages-container"
                       hx-swap="innerHTML"
                       hx-indicator=".htmx-indicator"
                       hx-on::after-request="if(event.detail.successful) this.reset()">

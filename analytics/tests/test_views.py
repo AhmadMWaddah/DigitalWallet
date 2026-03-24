@@ -58,8 +58,7 @@ def transactions_for_analytics(client_user_with_wallet):
         user_type=UserType.CLIENT,
     )
     receiver_wallet = Wallet.objects.create(
-        client_profile=receiver_user.client_profile,
-        balance=Decimal("1000.00")
+        client_profile=receiver_user.client_profile, balance=Decimal("1000.00")
     )
 
     now = timezone.now()
@@ -68,73 +67,87 @@ def transactions_for_analytics(client_user_with_wallet):
     transactions = []
 
     # Deposits
-    transactions.append(Transaction.objects.create(
-        wallet=sender_wallet,
-        amount=Decimal("5000.00"),
-        type="DEPOSIT",
-        status=TransactionStatus.COMPLETED,
-        reference_id="ANALYTICS-DEP-001",
-        created_at=now - timedelta(days=5),
-    ))
+    transactions.append(
+        Transaction.objects.create(
+            wallet=sender_wallet,
+            amount=Decimal("5000.00"),
+            type="DEPOSIT",
+            status=TransactionStatus.COMPLETED,
+            reference_id="ANALYTICS-DEP-001",
+            created_at=now - timedelta(days=5),
+        )
+    )
 
-    transactions.append(Transaction.objects.create(
-        wallet=sender_wallet,
-        amount=Decimal("3000.00"),
-        type="DEPOSIT",
-        status=TransactionStatus.COMPLETED,
-        reference_id="ANALYTICS-DEP-002",
-        created_at=now - timedelta(days=15),
-    ))
+    transactions.append(
+        Transaction.objects.create(
+            wallet=sender_wallet,
+            amount=Decimal("3000.00"),
+            type="DEPOSIT",
+            status=TransactionStatus.COMPLETED,
+            reference_id="ANALYTICS-DEP-002",
+            created_at=now - timedelta(days=15),
+        )
+    )
 
     # Withdrawals
-    transactions.append(Transaction.objects.create(
-        wallet=sender_wallet,
-        amount=Decimal("1000.00"),
-        type="WITHDRAWAL",
-        status=TransactionStatus.COMPLETED,
-        reference_id="ANALYTICS-WDR-001",
-        created_at=now - timedelta(days=10),
-    ))
+    transactions.append(
+        Transaction.objects.create(
+            wallet=sender_wallet,
+            amount=Decimal("1000.00"),
+            type="WITHDRAWAL",
+            status=TransactionStatus.COMPLETED,
+            reference_id="ANALYTICS-WDR-001",
+            created_at=now - timedelta(days=10),
+        )
+    )
 
-    transactions.append(Transaction.objects.create(
-        wallet=sender_wallet,
-        amount=Decimal("500.00"),
-        type="WITHDRAWAL",
-        status=TransactionStatus.COMPLETED,
-        reference_id="ANALYTICS-WDR-002",
-        created_at=now - timedelta(days=20),
-    ))
+    transactions.append(
+        Transaction.objects.create(
+            wallet=sender_wallet,
+            amount=Decimal("500.00"),
+            type="WITHDRAWAL",
+            status=TransactionStatus.COMPLETED,
+            reference_id="ANALYTICS-WDR-002",
+            created_at=now - timedelta(days=20),
+        )
+    )
 
     # Transfers
-    transactions.append(Transaction.objects.create(
-        wallet=sender_wallet,
-        counterparty_wallet=receiver_wallet,
-        amount=Decimal("2000.00"),
-        type="TRANSFER",
-        status=TransactionStatus.COMPLETED,
-        reference_id="ANALYTICS-TRF-001",
-        created_at=now - timedelta(days=7),
-    ))
+    transactions.append(
+        Transaction.objects.create(
+            wallet=sender_wallet,
+            counterparty_wallet=receiver_wallet,
+            amount=Decimal("2000.00"),
+            type="TRANSFER",
+            status=TransactionStatus.COMPLETED,
+            reference_id="ANALYTICS-TRF-001",
+            created_at=now - timedelta(days=7),
+        )
+    )
 
-    transactions.append(Transaction.objects.create(
-        wallet=sender_wallet,
-        counterparty_wallet=receiver_wallet,
-        amount=Decimal("1500.00"),
-        type="TRANSFER",
-        status=TransactionStatus.COMPLETED,
-        reference_id="ANALYTICS-TRF-002",
-        created_at=now - timedelta(days=25),
-    ))
+    transactions.append(
+        Transaction.objects.create(
+            wallet=sender_wallet,
+            counterparty_wallet=receiver_wallet,
+            amount=Decimal("1500.00"),
+            type="TRANSFER",
+            status=TransactionStatus.COMPLETED,
+            reference_id="ANALYTICS-TRF-002",
+            created_at=now - timedelta(days=25),
+        )
+    )
 
     # Create a transaction in a different month (for month aggregation test)
-    transactions.append(Transaction.objects.create(
-        wallet=sender_wallet,
-        amount=Decimal("4000.00"),
-        type="DEPOSIT",
-        status=TransactionStatus.COMPLETED,
-        reference_id="ANALYTICS-DEP-003",
-        created_at=now - timedelta(days=60),  # 2 months ago
-    ))
+    transactions.append(
+        Transaction.objects.create(
+            wallet=sender_wallet,
+            amount=Decimal("4000.00"),
+            type="DEPOSIT",
+            status=TransactionStatus.COMPLETED,
+            reference_id="ANALYTICS-DEP-003",
+            created_at=now - timedelta(days=60),  # 2 months ago
+        )
+    )
 
     return transactions
 
@@ -193,7 +206,9 @@ class TestSpendingByCategoryView:
         assert "total_volume" in data["metadata"]
         assert "period_days" in data["metadata"]
 
-    def test_spending_by_category_aggregation_accuracy(self, client, staff_user, transactions_for_analytics):
+    def test_spending_by_category_aggregation_accuracy(
+        self, client, staff_user, transactions_for_analytics
+    ):
         """Test aggregation calculations are accurate."""
         client.login(email="staff@test.com", password="testpass123")
 
@@ -237,7 +252,9 @@ class TestSpendingByCategoryView:
         assert data["datasets"][0]["data"][transfers_idx] >= 2000.00
         assert data["metadata"]["period_days"] == 10
 
-    def test_spending_by_category_excludes_flagged(self, client, staff_user, client_user_with_wallet):
+    def test_spending_by_category_excludes_flagged(
+        self, client, staff_user, client_user_with_wallet
+    ):
         """Test that flagged transactions are excluded."""
         client.login(email="staff@test.com", password="testpass123")
         user, sender_wallet = client_user_with_wallet
@@ -342,7 +359,9 @@ class TestSpendingByMonthView:
         assert all(value == 0.0 for value in data["datasets"][0]["data"])
         assert data["metadata"]["year"] == previous_year
 
-    def test_spending_by_month_with_type_filter(self, client, staff_user, transactions_for_analytics):
+    def test_spending_by_month_with_type_filter(
+        self, client, staff_user, transactions_for_analytics
+    ):
         """Test filtering by transaction type."""
         client.login(email="staff@test.com", password="testpass123")
 
@@ -377,7 +396,9 @@ class TestSpendingByMonthView:
         # Flagged transaction should not be included
         assert data["metadata"]["total_volume"] == 0.0
 
-    def test_spending_by_month_average_calculation(self, client, staff_user, transactions_for_analytics):
+    def test_spending_by_month_average_calculation(
+        self, client, staff_user, transactions_for_analytics
+    ):
         """Test average monthly calculation."""
         client.login(email="staff@test.com", password="testpass123")
 

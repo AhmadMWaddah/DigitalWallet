@@ -133,8 +133,7 @@ class PDFStatementGenerator:
         # Calculate Opening Balance = All deposits/incoming - All withdrawals/outgoing BEFORE start date
         opening_balance = Decimal("0.00")
         prior_transactions = self.wallet.transactions.filter(
-            created_at__lt=self.start_date,
-            status="COMPLETED"
+            created_at__lt=self.start_date, status="COMPLETED"
         ).select_related("counterparty_wallet")
 
         for txn in prior_transactions:
@@ -154,9 +153,7 @@ class PDFStatementGenerator:
         # Calculate net change during period
         net_change = Decimal("0.00")
         period_transactions = self.wallet.transactions.filter(
-            created_at__gte=self.start_date,
-            created_at__lte=self.end_date,
-            status="COMPLETED"
+            created_at__gte=self.start_date, created_at__lte=self.end_date, status="COMPLETED"
         ).order_by("created_at")
 
         for txn in period_transactions:
@@ -208,8 +205,7 @@ class PDFStatementGenerator:
         # Re-calculate opening balance for running balance
         opening_balance = Decimal("0.00")
         prior_transactions = self.wallet.transactions.filter(
-            created_at__lt=self.start_date, 
-            status="COMPLETED"
+            created_at__lt=self.start_date, status="COMPLETED"
         )
         for txn in prior_transactions:
             if txn.type == "DEPOSIT":
@@ -224,9 +220,7 @@ class PDFStatementGenerator:
 
         # Get transactions for the period - chronological for running balance calculation
         transactions = self.wallet.transactions.filter(
-            created_at__gte=self.start_date, 
-            created_at__lte=self.end_date, 
-            status="COMPLETED"
+            created_at__gte=self.start_date, created_at__lte=self.end_date, status="COMPLETED"
         ).order_by("created_at")
 
         if not transactions.exists():

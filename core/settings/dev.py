@@ -48,7 +48,8 @@ CSRF_COOKIE_SECURE = False  # Allow HTTP for local development
 
 # Add debug toolbar to INSTALLED_APPS (only if not testing)
 import sys
-if 'pytest' not in sys.modules:
+
+if "pytest" not in sys.modules:
     INSTALLED_APPS += [
         "debug_toolbar",
     ]

@@ -179,7 +179,7 @@ if existing_count < 5:
             "created_at": timezone.now() - timezone.timedelta(days=5),
         }
     )
-    
+
     Transaction.objects.get_or_create(
         wallet=wallet1,
         reference_id="TEST-DEP-002",
@@ -190,7 +190,7 @@ if existing_count < 5:
             "created_at": timezone.now() - timezone.timedelta(days=15),
         }
     )
-    
+
     # Create some withdrawals
     Transaction.objects.get_or_create(
         wallet=wallet1,
@@ -202,7 +202,7 @@ if existing_count < 5:
             "created_at": timezone.now() - timezone.timedelta(days=10),
         }
     )
-    
+
     # Create some transfers
     Transaction.objects.get_or_create(
         wallet=wallet1,
@@ -215,7 +215,7 @@ if existing_count < 5:
             "created_at": timezone.now() - timezone.timedelta(days=7),
         }
     )
-    
+
     print("  ✅ Created test transactions")
 else:
     print(f"  ℹ️  Test transactions already exist ({existing_count} transactions)")
@@ -264,7 +264,7 @@ case $choice in
         print_info "Rule 2: > 5 transfers in 1 hour should be flagged"
         print_info "Rule 3: New account (> $1,000) should be flagged"
         echo ""
-        
+
         $MANAGE shell --settings=$DJANGO_SETTINGS << 'EOF'
 from accounts.models import CustomUser
 from wallet.models import Wallet, Transaction
@@ -329,7 +329,7 @@ for txn in flagged:
 print("="*50)
 EOF
         ;;
-    
+
     2)
         echo ""
         print_info "Staff Dashboard URL: http://localhost:8500/staff/dashboard/"
@@ -340,7 +340,7 @@ EOF
         read -p "Press Enter to open the URL in browser..."
         xdg-open "http://localhost:8500/staff/dashboard/" 2>/dev/null || open "http://localhost:8500/staff/dashboard/" 2>/dev/null || echo "Please open http://localhost:8500/staff/dashboard/ in your browser"
         ;;
-    
+
     3)
         echo ""
         print_info "Analytics Dashboard URL: http://localhost:8500/analytics/dashboard/"
@@ -351,7 +351,7 @@ EOF
         read -p "Press Enter to open the URL in browser..."
         xdg-open "http://localhost:8500/analytics/dashboard/" 2>/dev/null || open "http://localhost:8500/analytics/dashboard/" 2>/dev/null || echo "Please open http://localhost:8500/analytics/dashboard/ in your browser"
         ;;
-    
+
     4)
         echo ""
         echo "=============================================="
@@ -360,7 +360,7 @@ EOF
         echo ""
         pytest operations/tests/ analytics/tests/ -v --tb=short --settings=$DJANGO_SETTINGS
         ;;
-    
+
     5)
         echo ""
         echo "=============================================="
@@ -369,7 +369,7 @@ EOF
         echo ""
         $MANAGE shell --settings=$DJANGO_SETTINGS
         ;;
-    
+
     6)
         echo ""
         echo "=============================================="
@@ -381,7 +381,7 @@ EOF
         echo ""
         $MANAGE runserver 8500 --settings=$DJANGO_SETTINGS
         ;;
-    
+
     7)
         echo ""
         echo "=============================================="
@@ -394,13 +394,13 @@ EOF
         export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS
         celery -A core worker -l info
         ;;
-    
+
     8)
         echo ""
         print_info "Exiting testing script"
         exit 0
         ;;
-    
+
     *)
         print_error "Invalid choice. Please run the script again."
         exit 1

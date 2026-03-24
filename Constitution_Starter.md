@@ -61,7 +61,47 @@
 
 ---
 
-## 5. Phase Methodology
+## 5. Tools & Execution Environment
+
+This section should define the operational tools used across the project, separate from the application stack and separate from phase-by-phase dependencies. It exists so future contributors and AI agents know what tools are officially part of the working environment.
+
+### Recommended Structure
+
+Every project constitution should define the following subsections:
+
+- **Application Stack:** Frameworks, database, frontend stack, async stack, deployment platform.
+- **Development Tooling:** Formatters, linters, test runners, package managers, shell helpers, automation scripts.
+- **AI CLI Tools:** The AI tools allowed on the project, their primary role, and their limits.
+- **Usage Policy:** The rules for how those tools should be used and who has final authority.
+
+### Example: Development Tooling
+
+| Category | Example Tools |
+|----------|---------------|
+| **Code Quality** | `pre-commit`, `black`, `flake8`, `isort` |
+| **Testing** | `pytest`, framework-specific test tools |
+| **Git Automation** | project-specific commit/merge scripts |
+| **Runtime Services** | task queues, cache servers, background workers |
+
+### Example: AI CLI Tools
+
+| Tool | Primary Role | Notes |
+|------|--------------|-------|
+| **Developer AI** | Implementation | Writes code, tests, and fixes |
+| **Consultant AI** | Architecture | Helps with design, planning, and tradeoff analysis |
+| **Reviewer AI** | Verification | Focuses on regressions, review findings, and quality enforcement |
+
+### Example: Usage Policy
+
+- The Manager remains the final authority for acceptance, merge approval, and scope decisions.
+- Every AI tool must have a defined role. Avoid overlapping responsibility unless explicitly needed.
+- AI output is not considered complete without verification.
+- If a new AI tool is introduced, add it to this section before treating it as part of the official workflow.
+- This section should describe stable, cross-project tooling. Phase-specific dependencies should still be listed inside the relevant phases.
+
+---
+
+## 6. Phase Methodology
 
 Each project must define its roadmap as a set of numbered phases.
 
@@ -97,7 +137,7 @@ A task should be:
 
 ---
 
-## 6. Task Methodology
+## 7. Task Methodology
 
 Tasks are the required execution layer inside each phase.
 
@@ -131,7 +171,7 @@ A task is complete only when:
 
 ---
 
-## 7. Phase Template
+## 8. Phase Template
 
 Use the following structure for every project-specific phase:
 
@@ -177,7 +217,7 @@ python manage.py runserver
 
 ---
 
-## 8. Code Commenting & Documentation
+## 9. Code Commenting & Documentation
 
 - **Docstrings:** Use concise `"""Docstring content"""` for classes and complex functions.
 - **Logic Comments:** Explain why a decision exists, not what the line literally does.
@@ -189,7 +229,7 @@ python manage.py runserver
 
 ---
 
-## 9. Frontend & Asset Architecture
+## 10. Frontend & Asset Architecture
 
 - **Static Structure:**
   - `static/css/`
@@ -205,7 +245,7 @@ python manage.py runserver
 
 ---
 
-## 10. Naming Conventions
+## 11. Naming Conventions
 
 - **Files:** Lowercase with underscores where appropriate
 - **CSS Classes:** Kebab-case
@@ -216,7 +256,7 @@ python manage.py runserver
 
 ---
 
-## 11. Testing & Quality Assurance
+## 12. Testing & Quality Assurance
 
 - **Primary Tooling:** `pytest` and `pytest-django`
 - **Test Location:** Prefer `app/tests/` or clearly organized test modules
@@ -229,7 +269,7 @@ python manage.py runserver
 
 ---
 
-## 12. Deployment Standards
+## 13. Deployment Standards
 
 - **Environment Parity:** Use environment-specific settings from the start, such as `base.py`, `dev.py`, and `prod.py`
 - **Secrets Management:** Use environment variables and never commit secrets
@@ -238,7 +278,7 @@ python manage.py runserver
 
 ---
 
-## 13. Review Standards
+## 14. Review Standards
 
 - **Reviewer Focus:** Review for bugs, regressions, security issues, architectural drift, and missing tests
 - **Review Order:** Findings first, summary second
@@ -247,7 +287,7 @@ python manage.py runserver
 
 ---
 
-## 14. Minimal Project Setup Checklist
+## 15. Minimal Project Setup Checklist
 
 Use this checklist when starting a new project:
 

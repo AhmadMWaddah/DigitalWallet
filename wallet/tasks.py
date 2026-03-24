@@ -51,7 +51,9 @@ def generate_statement_pdf(self, wallet_id: int, start_date_str: str, end_date_s
             "wallet_id": wallet_id,
         }
         cache.set(f"task_result_{task_id}", result, timeout=3600)
-        cache.set(f"task_status_{task_id}", {"status": "FAILURE", "error": result["error"]}, timeout=3600)
+        cache.set(
+            f"task_status_{task_id}", {"status": "FAILURE", "error": result["error"]}, timeout=3600
+        )
         return result
 
     try:
@@ -61,11 +63,15 @@ def generate_statement_pdf(self, wallet_id: int, start_date_str: str, end_date_s
 
         # Store task status in cache with OWNER BINDING
         # This ensures only the task creator can access status
-        cache.set(f"task_status_{task_id}", {
-            "status": "STARTED",
-            "progress": 10,
-            "task_owner_id": task_owner_id,  # SECURITY: Bind task to owner
-        }, timeout=3600)
+        cache.set(
+            f"task_status_{task_id}",
+            {
+                "status": "STARTED",
+                "progress": 10,
+                "task_owner_id": task_owner_id,  # SECURITY: Bind task to owner
+            },
+            timeout=3600,
+        )
 
         # Parse dates
         start_date = datetime.fromisoformat(start_date_str)
@@ -100,7 +106,9 @@ def generate_statement_pdf(self, wallet_id: int, start_date_str: str, end_date_s
             "wallet_id": wallet_id,
         }
         cache.set(f"task_result_{task_id}", result, timeout=3600)
-        cache.set(f"task_status_{task_id}", {"status": "FAILURE", "error": result["error"]}, timeout=3600)
+        cache.set(
+            f"task_status_{task_id}", {"status": "FAILURE", "error": result["error"]}, timeout=3600
+        )
         return result
 
     except Exception as e:
