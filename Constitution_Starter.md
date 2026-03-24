@@ -171,7 +171,7 @@ A task is complete only when:
 
 ---
 
-## 7. Phase Template
+## 8. Phase Template
 
 Use the following structure for every project-specific phase:
 
@@ -217,7 +217,7 @@ python manage.py runserver
 
 ---
 
-## 8. Code Commenting & Documentation
+## 9. Code Commenting & Documentation
 
 - **Docstrings:** Use concise `"""Docstring content"""` for classes and complex functions.
 - **Logic Comments:** Explain why a decision exists, not what the line literally does.
@@ -229,7 +229,7 @@ python manage.py runserver
 
 ---
 
-## 9. Frontend & Asset Architecture
+## 10. Frontend & Asset Architecture
 
 - **Static Structure:**
   - `static/css/`
@@ -245,7 +245,7 @@ python manage.py runserver
 
 ---
 
-## 10. Naming Conventions
+## 11. Naming Conventions
 
 - **Files:** Lowercase with underscores where appropriate
 - **CSS Classes:** Kebab-case
@@ -256,7 +256,7 @@ python manage.py runserver
 
 ---
 
-## 11. Testing & Quality Assurance
+## 12. Testing & Quality Assurance
 
 - **Primary Tooling:** `pytest` and `pytest-django`
 - **Test Location:** Prefer `app/tests/` or clearly organized test modules
@@ -269,7 +269,7 @@ python manage.py runserver
 
 ---
 
-## 12. Deployment Standards
+## 13. Deployment Standards
 
 - **Environment Parity:** Use environment-specific settings from the start, such as `base.py`, `dev.py`, and `prod.py`
 - **Secrets Management:** Use environment variables and never commit secrets
@@ -278,7 +278,7 @@ python manage.py runserver
 
 ---
 
-## 13. Review Standards
+## 14. Review Standards
 
 - **Reviewer Focus:** Review for bugs, regressions, security issues, architectural drift, and missing tests
 - **Review Order:** Findings first, summary second
@@ -287,7 +287,7 @@ python manage.py runserver
 
 ---
 
-## 14. Minimal Project Setup Checklist
+## 15. Minimal Project Setup Checklist
 
 Use this checklist when starting a new project:
 

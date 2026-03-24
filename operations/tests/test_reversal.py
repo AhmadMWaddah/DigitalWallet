@@ -110,12 +110,12 @@ class TestReverseTransfer:
         sender_wallet.refresh_from_db()
         receiver_wallet.refresh_from_db()
 
-        assert sender_wallet.balance == Decimal("1000.00"), (
-            f"Sender should have $1000 restored, got ${sender_wallet.balance}"
-        )
-        assert receiver_wallet.balance == Decimal("500.00"), (
-            f"Receiver should have $500 (original), got ${receiver_wallet.balance}"
-        )
+        assert sender_wallet.balance == Decimal(
+            "1000.00"
+        ), f"Sender should have $1000 restored, got ${sender_wallet.balance}"
+        assert receiver_wallet.balance == Decimal(
+            "500.00"
+        ), f"Receiver should have $500 (original), got ${receiver_wallet.balance}"
 
         # Verify original transaction status
         transfer.refresh_from_db()

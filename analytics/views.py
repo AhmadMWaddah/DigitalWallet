@@ -34,10 +34,14 @@ class AnalyticsDashboardView(LoginRequiredMixin, StaffOnlyMixin, View):
         current_year = timezone.now().year
         years = list(range(current_year - 2, current_year + 1))
 
-        return render(request, "analytics/analytics_dashboard.html", {
-            "current_year": current_year,
-            "years": years,
-        })
+        return render(
+            request,
+            "analytics/analytics_dashboard.html",
+            {
+                "current_year": current_year,
+                "years": years,
+            },
+        )
 
 
 class AnalyticsDashboardDataView(LoginRequiredMixin, StaffOnlyMixin, View):
@@ -131,13 +135,15 @@ class AnalyticsDashboardDataView(LoginRequiredMixin, StaffOnlyMixin, View):
 
         return {
             "labels": categories,
-            "datasets": [{
-                "label": f"Transaction Volume (Last {days} days)",
-                "data": data,
-                "backgroundColor": colors,
-                "borderColor": colors,
-                "borderWidth": 2,
-            }]
+            "datasets": [
+                {
+                    "label": f"Transaction Volume (Last {days} days)",
+                    "data": data,
+                    "backgroundColor": colors,
+                    "borderColor": colors,
+                    "borderWidth": 2,
+                }
+            ],
         }
 
     def _get_monthly_data(self, year, transaction_type=None):
@@ -159,9 +165,12 @@ class AnalyticsDashboardDataView(LoginRequiredMixin, StaffOnlyMixin, View):
                 "volume": Decimal("0.00"),
             }
 
-        monthly_totals = queryset.annotate(
-            month=ExtractMonth("created_at")
-        ).values("month").annotate(total=Sum("amount")).order_by("month")
+        monthly_totals = (
+            queryset.annotate(month=ExtractMonth("created_at"))
+            .values("month")
+            .annotate(total=Sum("amount"))
+            .order_by("month")
+        )
 
         for item in monthly_totals:
             month_num = int(item["month"])
@@ -175,15 +184,17 @@ class AnalyticsDashboardDataView(LoginRequiredMixin, StaffOnlyMixin, View):
 
         return {
             "labels": labels,
-            "datasets": [{
-                "label": f"Transaction Volume {year}{type_label}",
-                "data": data,
-                "backgroundColor": "rgba(188, 108, 37, 0.6)",
-                "borderColor": "#bc6c25",
-                "borderWidth": 2,
-                "fill": True,
-                "tension": 0.4,
-            }]
+            "datasets": [
+                {
+                    "label": f"Transaction Volume {year}{type_label}",
+                    "data": data,
+                    "backgroundColor": "rgba(188, 108, 37, 0.6)",
+                    "borderColor": "#bc6c25",
+                    "borderWidth": 2,
+                    "fill": True,
+                    "tension": 0.4,
+                }
+            ],
         }
 
 
@@ -321,9 +332,12 @@ class SpendingByMonthView(LoginRequiredMixin, StaffOnlyMixin, View):
         # Get monthly aggregates (SQLite compatible)
         from django.db.models.functions import ExtractMonth
 
-        monthly_totals = queryset.annotate(
-            month=ExtractMonth("created_at")
-        ).values("month").annotate(total=Sum("amount")).order_by("month")
+        monthly_totals = (
+            queryset.annotate(month=ExtractMonth("created_at"))
+            .values("month")
+            .annotate(total=Sum("amount"))
+            .order_by("month")
+        )
 
         for item in monthly_totals:
             month_num = int(item["month"])
@@ -343,7 +357,8 @@ class SpendingByMonthView(LoginRequiredMixin, StaffOnlyMixin, View):
             "labels": labels,
             "datasets": [
                 {
-                    "label": f"Transaction Volume {year}" + (f" ({transaction_type})" if transaction_type else ""),
+                    "label": f"Transaction Volume {year}"
+                    + (f" ({transaction_type})" if transaction_type else ""),
                     "data": data,
                     "backgroundColor": "rgba(188, 108, 37, 0.6)",  # Copperwood with transparency
                     "borderColor": "#bc6c25",

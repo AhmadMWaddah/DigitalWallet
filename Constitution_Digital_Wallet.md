@@ -83,10 +83,10 @@ This section defines the operational tools used across the project. Unlike phase
 #### AI CLI Tools
 
 | Tool | Primary Role | Expected Responsibility |
-|------|--------------|-------------------------|
-| **Qwen** | Developer AI | Implements features, writes code, fixes bugs, and executes assigned tasks |
-| **Gem** | Consultant AI | Provides architecture guidance, planning support, and technical consultation |
-| **Cod** | Reviewer AI | Reviews implementation quality, identifies regressions, verifies fixes, and supports critical improvements |
+|----------|---------------|------------------------------------------------------------------------------------------------------------|
+| **Qwen** | Developer AI  | Implements features, writes code, fixes bugs, and executes assigned tasks                                  |
+| **Gem**  | Consultant AI | Provides architecture guidance, planning support, and technical consultation                               |
+| **Cod**  | Reviewer AI   | Reviews implementation quality, identifies regressions, verifies fixes, and supports critical improvements |
 
 #### Usage Policy for AI Tools
 
