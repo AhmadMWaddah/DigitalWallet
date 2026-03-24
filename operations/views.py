@@ -82,60 +82,42 @@ class ReviewTransactionView(LoginRequiredMixin, StaffOnlyMixin, View):
     HTMX view to review and update flagged transaction status.
 
     Allows staff to mark flagged transactions as COMPLETED or FAILED.
+    Business logic delegated to wallet/services.py::process_fraud_review
     """
 
     def post(self, request, transaction_id):
         """Update transaction status based on staff review."""
+        from wallet.services import process_fraud_review
+
         action = request.POST.get("action")
-        transaction = get_object_or_404(Transaction, pk=transaction_id)
 
-        # Ensure transaction is flagged
-        if transaction.status != TransactionStatus.FLAGGED:
-            return JsonResponse({
-                "success": False,
-                "error": "Transaction is not flagged."
-            })
-
-        if action == "approve":
-            transaction.status = TransactionStatus.COMPLETED
-            transaction.metadata = {
-                **transaction.metadata,
-                "reviewed_by": request.user.email,
-                "reviewed_at": transaction.created_at.isoformat(),
-                "review_action": "approved",
-            }
-            transaction.save(update_fields=["status", "metadata"])
-
-            message = f"Transaction #{transaction.id} approved and marked as COMPLETED."
-
-        elif action == "reject":
-            transaction.status = TransactionStatus.FAILED
-            transaction.metadata = {
-                **transaction.metadata,
-                "reviewed_by": request.user.email,
-                "reviewed_at": transaction.created_at.isoformat(),
-                "review_action": "rejected",
-            }
-            transaction.save(update_fields=["status", "metadata"])
-
-            message = f"Transaction #{transaction.id} rejected and marked as FAILED."
-
-        else:
-            return JsonResponse({
-                "success": False,
-                "error": "Invalid action. Use 'approve' or 'reject'."
-            })
-
-        # For HTMX requests, return updated row
-        if request.headers.get("HX-Request"):
-            html = render_to_string(
-                "operations/partials/transaction_row.html",
-                {"transaction": transaction},
-                request=request,
+        try:
+            # Delegate to service layer
+            result = process_fraud_review(
+                transaction_id=transaction_id,
+                action=action,
+                staff_user=request.user,
             )
-            return HttpResponse(html)
 
-        return JsonResponse({"success": True, "message": message})
+            # Get updated transaction
+            transaction = get_object_or_404(Transaction, pk=transaction_id)
+
+            # For HTMX requests, return updated row
+            if request.headers.get("HX-Request"):
+                html = render_to_string(
+                    "operations/partials/transaction_row.html",
+                    {"transaction": transaction},
+                    request=request,
+                )
+                return HttpResponse(html)
+
+            return JsonResponse({"success": True, "message": result["message"]})
+
+        except ValueError as e:
+            return JsonResponse({
+                "success": False,
+                "error": str(e),
+            })
 
 
 class FreezeWalletView(LoginRequiredMixin, StaffOnlyMixin, View):

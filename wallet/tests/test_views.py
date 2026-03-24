@@ -182,7 +182,11 @@ class TestDepositView:
         assert response.status_code == 200
         # HTMX requests return HTML, not JSON
         assert response["Content-Type"] == "text/html; charset=utf-8"
-        assert b"alert-success" in response.content or b"Deposited" in response.content or b"50" in response.content
+        assert (
+            b"alert-success" in response.content
+            or b"Deposited" in response.content
+            or b"50" in response.content
+        )
 
         wallet.refresh_from_db()
         assert wallet.balance == Decimal("150.00")

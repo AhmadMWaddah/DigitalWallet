@@ -1,0 +1,588 @@
+<!-- --#-- Security Settings Template - Clean Hierarchical Design -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Security Settings - Digital Wallet{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+<style>
+    /* --#-- Security Page Layout */
+    .security-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .security-header {
+        margin-bottom: var(--spacing-3xl);
+        text-align: center;
+    }
+
+    .security-title {
+        font-size: var(--text-4xl);
+        font-weight: var(--font-bold);
+        color: var(--cornsilk);
+        margin-bottom: var(--spacing-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-md);
+    }
+
+    .security-subtitle {
+        color: var(--text-secondary);
+        font-size: var(--text-lg);
+        margin: 0;
+    }
+
+    /* --#-- Security Sections */
+    .security-section {
+        background: rgba(40, 54, 24, 0.4);
+        backdrop-filter: blur(12px);
+        border-radius: var(--radius-2xl);
+        border: 1px solid var(--border-color);
+        padding: var(--spacing-2xl);
+        margin-bottom: var(--spacing-xl);
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-base);
+    }
+
+    .security-section:hover {
+        box-shadow: var(--shadow-lg);
+        border-color: rgba(188, 108, 37, 0.3);
+    }
+
+    .security-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--copperwood), var(--toasted-almond));
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--text-xl);
+        color: var(--cornsilk);
+        flex-shrink: 0;
+    }
+
+    .section-title-wrapper {
+        flex: 1;
+    }
+
+    .section-title {
+        font-size: var(--text-xl);
+        font-weight: var(--font-semibold);
+        color: var(--cornsilk);
+        margin: 0;
+    }
+
+    .section-description {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        margin: var(--spacing-xs) 0 0 0;
+    }
+
+    /* --#-- Security Items List */
+    .security-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .security-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--spacing-lg);
+        background: rgba(254, 250, 224, 0.02);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(254, 250, 224, 0.05);
+        transition: all var(--transition-fast);
+    }
+
+    .security-item:hover {
+        background: rgba(254, 250, 224, 0.04);
+        border-color: rgba(188, 108, 37, 0.2);
+    }
+
+    .security-item-content {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        flex: 1;
+    }
+
+    .security-item-icon {
+        width: 44px;
+        height: 44px;
+        background: rgba(188, 108, 37, 0.15);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--text-lg);
+        color: var(--toasted-almond);
+        flex-shrink: 0;
+    }
+
+    .security-item-info {
+        flex: 1;
+    }
+
+    .security-item-title {
+        font-size: var(--text-base);
+        font-weight: var(--font-semibold);
+        color: var(--cornsilk);
+        margin-bottom: var(--spacing-xs);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .security-item-description {
+        font-size: var(--text-sm);
+        color: var(--text-tertiary);
+        margin: 0;
+    }
+
+    /* --#-- Status Indicators */
+    .security-item-status {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        flex-shrink: 0;
+    }
+
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: var(--radius-full);
+        position: relative;
+    }
+
+    .status-dot.active {
+        background: var(--color-success);
+        box-shadow: 0 0 10px var(--color-success);
+    }
+
+    .status-dot.inactive {
+        background: var(--text-tertiary);
+    }
+
+    .status-dot.pending {
+        background: var(--color-warning);
+        box-shadow: 0 0 10px var(--color-warning);
+    }
+
+    /* --#-- Password Form */
+    .password-form {
+        margin-top: var(--spacing-lg);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        display: block;
+        font-size: var(--text-sm);
+        font-weight: var(--font-medium);
+        color: var(--cornsilk);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: rgba(254, 250, 224, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        color: var(--cornsilk);
+        font-size: var(--text-base);
+        transition: all var(--transition-fast);
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(188, 108, 37, 0.2);
+    }
+
+    .form-input::placeholder {
+        color: var(--text-tertiary);
+    }
+
+    .form-help {
+        font-size: var(--text-xs);
+        color: var(--text-tertiary);
+        margin-top: var(--spacing-xs);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .form-error-list {
+        list-style: none;
+        margin: var(--spacing-sm) 0 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .form-error {
+        font-size: var(--text-sm);
+        color: #ffb4a2;
+    }
+
+    .form-non-field-errors {
+        margin-bottom: var(--spacing-lg);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255, 180, 162, 0.35);
+        background: rgba(179, 72, 52, 0.12);
+    }
+
+    /* --#-- Buttons */
+    .btn-section {
+        margin-top: var(--spacing-lg);
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    /* --#-- Session Info */
+    .session-info {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .session-device {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        background: rgba(188, 108, 37, 0.15);
+        border-radius: var(--radius-md);
+        color: var(--toasted-almond);
+        font-weight: var(--font-medium);
+    }
+
+    /* --#-- Responsive Design */
+    @media (max-width: 768px) {
+        .security-container {
+            padding: 0 var(--spacing-md);
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .security-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+        }
+
+        .security-item-status {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="security-container">
+    <!-- --#-- Page Header -->
+    <div class="security-header">
+        <h1 class="security-title">
+            <i class="fas fa-shield-halved"></i> Security Settings
+        </h1>
+        <p class="security-subtitle">Manage your account security and password</p>
+    </div>
+
+    <!-- --#-- Password Management Section -->
+    <div class="security-section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-key"></i>
+            </div>
+            <div class="section-title-wrapper">
+                <h2 class="section-title">Password Management</h2>
+                <p class="section-description">Update your password to keep your account secure</p>
+            </div>
+        </div>
+
+        <form method="post" class="password-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="form-non-field-errors">
+                <ul class="form-error-list">
+                    {% for error in form.non_field_errors %}
+                    <li class="form-error"><i class="fas fa-circle-exclamation"></i> {{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="form-label" for="{{ form.old_password.id_for_label }}">
+                        <i class="fas fa-lock"></i> Current Password
+                    </label>
+                    {{ form.old_password }}
+                    {% if form.old_password.errors %}
+                    <ul class="form-error-list">
+                        {% for error in form.old_password.errors %}
+                        <li class="form-error">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.new_password1.id_for_label }}">
+                        <i class="fas fa-key"></i> New Password
+                    </label>
+                    {{ form.new_password1 }}
+                    {% if form.new_password1.help_text %}
+                    <div class="form-help">{{ form.new_password1.help_text|safe }}</div>
+                    {% endif %}
+                    {% if form.new_password1.errors %}
+                    <ul class="form-error-list">
+                        {% for error in form.new_password1.errors %}
+                        <li class="form-error">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.new_password2.id_for_label }}">
+                        <i class="fas fa-lock"></i> Confirm Password
+                    </label>
+                    {{ form.new_password2 }}
+                    {% if form.new_password2.errors %}
+                    <ul class="form-error-list">
+                        {% for error in form.new_password2.errors %}
+                        <li class="form-error">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="btn-section">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Password
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- --#-- Two-Factor Authentication Section -->
+    <div class="security-section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-mobile-screen"></i>
+            </div>
+            <div class="section-title-wrapper">
+                <h2 class="section-title">Two-Factor Authentication</h2>
+                <p class="section-description">Add an extra layer of security to your account</p>
+            </div>
+        </div>
+
+        <div class="security-list">
+            <div class="security-item">
+                <div class="security-item-content">
+                    <div class="security-item-icon">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <div class="security-item-info">
+                        <h3 class="security-item-title">
+                            Authenticator App
+                        </h3>
+                        <p class="security-item-description">Use an authenticator app for enhanced security</p>
+                    </div>
+                </div>
+                <div class="security-item-status">
+                    <span class="status-dot pending"></span>
+                    <span class="badge badge-warning">Coming Soon</span>
+                </div>
+            </div>
+
+            <div class="security-item">
+                <div class="security-item-content">
+                    <div class="security-item-icon">
+                        <i class="fas fa-sms"></i>
+                    </div>
+                    <div class="security-item-info">
+                        <h3 class="security-item-title">
+                            SMS Verification
+                        </h3>
+                        <p class="security-item-description">Receive verification codes via SMS</p>
+                    </div>
+                </div>
+                <div class="security-item-status">
+                    <span class="status-dot pending"></span>
+                    <span class="badge badge-warning">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --#-- Recent Activity Section -->
+    <div class="security-section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-clock-rotate-left"></i>
+            </div>
+            <div class="section-title-wrapper">
+                <h2 class="section-title">Recent Security Activity</h2>
+                <p class="section-description">Monitor recent login activity on your account</p>
+            </div>
+        </div>
+
+        <div class="security-list">
+            <div class="security-item">
+                <div class="security-item-content">
+                    <div class="security-item-icon" style="background: rgba(96, 108, 56, 0.2); color: #a3b18a;">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <div class="security-item-info">
+                        <h3 class="security-item-title">
+                            Current Session
+                            <span class="badge badge-success" style="margin-left: var(--spacing-sm);">
+                                <i class="fas fa-check"></i> Active
+                            </span>
+                        </h3>
+                        <p class="security-item-description">
+                            Signed in: {{ current_session.logged_in_at|date:"F d, Y H:i" }}
+                        </p>
+                        <div class="session-info" style="margin-top: var(--spacing-xs);">
+                            <span class="session-device">
+                                <i class="fas fa-desktop"></i> {{ current_session.device }}
+                            </span>
+                            <span class="session-device">
+                                <i class="fas fa-globe"></i> {{ current_session.browser }}
+                            </span>
+                            <span class="session-device">
+                                <i class="fas fa-location-dot"></i> {{ current_session.ip_address }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="security-item-status">
+                    <span class="status-dot active"></span>
+                </div>
+            </div>
+
+            <div class="security-item">
+                <div class="security-item-content">
+                    <div class="security-item-icon" style="background: rgba(188, 108, 37, 0.15); color: var(--toasted-almond);">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="security-item-info">
+                        <h3 class="security-item-title">Previous Session</h3>
+                        <p class="security-item-description">
+                            {% if previous_session %}
+                                {{ previous_session.logged_in_at|date:"F d, Y H:i" }}
+                            {% else %}
+                                No previous login recorded
+                            {% endif %}
+                        </p>
+                        {% if previous_session %}
+                        <div class="session-info" style="margin-top: var(--spacing-xs);">
+                            <span class="session-device">
+                                <i class="fas fa-desktop"></i> {{ previous_session.device }}
+                            </span>
+                            <span class="session-device">
+                                <i class="fas fa-globe"></i> {{ previous_session.browser }}
+                            </span>
+                            <span class="session-device">
+                                <i class="fas fa-location-dot"></i> {{ previous_session.ip_address }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --#-- Account Status Section -->
+    <div class="security-section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-circle-check"></i>
+            </div>
+            <div class="section-title-wrapper">
+                <h2 class="section-title">Account Status</h2>
+                <p class="section-description">Your overall account security health</p>
+            </div>
+        </div>
+
+        <div class="security-list">
+            <div class="security-item">
+                <div class="security-item-content">
+                    <div class="security-item-icon" style="background: rgba(96, 108, 56, 0.2); color: #a3b18a;">
+                        <i class="fas fa-envelope-circle-check"></i>
+                    </div>
+                    <div class="security-item-info">
+                        <h3 class="security-item-title">Email Verified</h3>
+                        <p class="security-item-description">Your email address has been confirmed</p>
+                    </div>
+                </div>
+                <div class="security-item-status">
+                    <span class="status-dot active"></span>
+                    <span class="badge badge-success">Verified</span>
+                </div>
+            </div>
+
+            <div class="security-item">
+                <div class="security-item-content">
+                    <div class="security-item-icon" style="background: rgba(96, 108, 56, 0.2); color: #a3b18a;">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="security-item-info">
+                        <h3 class="security-item-title">Login Alerts</h3>
+                        <p class="security-item-description">Get notified of suspicious activity</p>
+                    </div>
+                </div>
+                <div class="security-item-status">
+                    <span class="status-dot active"></span>
+                    <span class="badge badge-success">Enabled</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

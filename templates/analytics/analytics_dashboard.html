@@ -9,13 +9,15 @@
 {% endblock %}
 
 {% block content %}
-<!-- --#-- Page Header -->
-<div class="page-header analytics-header">
-    <h1 class="page-title">
-        <i class="fas fa-chart-line"></i> Analytics Dashboard
-    </h1>
-    <p class="page-subtitle">Transaction insights and spending trends</p>
-</div>
+<!-- --#-- Analytics Container -->
+<div class="analytics-container">
+    <!-- --#-- Page Header -->
+    <div class="page-header analytics-header">
+        <h1 class="page-title">
+            <i class="fas fa-chart-line"></i> Analytics Dashboard
+        </h1>
+        <p class="page-subtitle">Transaction insights and spending trends</p>
+    </div>
 
 <!-- --#-- Filter Controls -->
 <div class="card filter-card">
@@ -25,7 +27,7 @@
               hx-target="#charts-container"
               hx-swap="innerHTML"
               hx-trigger="change from:body delay:300ms">
-            
+
             <div class="filter-row">
                 <div class="filter-group">
                     <label for="days-filter">
@@ -74,7 +76,7 @@
      hx-get="{% url 'analytics:analytics_dashboard_data' %}?days=30&year={{ current_year }}"
      hx-trigger="load"
      hx-swap="innerHTML">
-    
+
     <!-- Loading State -->
     <div class="charts-loading">
         <div class="loading-spinner">
@@ -83,6 +85,8 @@
         <p>Loading analytics data...</p>
     </div>
 </div>
+
+</div><!-- End Analytics Container -->
 {% endblock %}
 
 {% block extra_js %}
@@ -199,11 +203,11 @@ function initializeCharts(data) {
 
     // Update metadata display
     if (data.metadata) {
-        document.getElementById('total-volume').textContent = 
+        document.getElementById('total-volume').textContent =
             '$' + data.metadata.total_volume.toLocaleString('en-US', {minimumFractionDigits: 2});
-        
+
         if (data.metadata.average_monthly) {
-            document.getElementById('avg-monthly').textContent = 
+            document.getElementById('avg-monthly').textContent =
                 '$' + data.metadata.average_monthly.toLocaleString('en-US', {minimumFractionDigits: 2});
         }
     }

@@ -1,4 +1,4 @@
-<!-- --#-- Sidebar Navigation -->
+<!-- --#-- Sidebar Navigation - Client & Staff Portals -->
 {% load static %}
 
 <aside class="sidebar">
@@ -6,79 +6,86 @@
         <!-- --#-- Navigation Links -->
         <nav class="sidebar-nav">
             {% if user.is_authenticated %}
-            {% if user.is_staff_user %}
-            <!-- --#-- Staff Menu -->
-            <div class="nav-section">
-                <span class="nav-section-title">Main</span>
-                <a href="/admin/" class="nav-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
-                    <i class="fas fa-building nav-icon"></i>
-                    <span class="nav-text">Admin Panel</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-users nav-icon"></i>
-                    <span class="nav-text">Users</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-exclamation-triangle nav-icon"></i>
-                    <span class="nav-text">Fraud Alerts</span>
-                </a>
-            </div>
-            {% else %}
-            <!-- --#-- Client Menu -->
-            <div class="nav-section">
-                <span class="nav-section-title">Main</span>
-                <a href="{% url 'wallet:dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                    <i class="fas fa-chart-pie nav-icon"></i>
-                    <span class="nav-text">Dashboard</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-receipt nav-icon"></i>
-                    <span class="nav-text">Transactions</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-chart-line nav-icon"></i>
-                    <span class="nav-text">Analytics</span>
-                </a>
-            </div>
+                {% if user.is_staff_user or user.is_superuser %}
+                <!-- --#-- Staff Menu -->
+                <div class="nav-section">
+                    <span class="nav-section-title">Operations</span>
+                    <a href="{% url 'operations:staff_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'staff_dashboard' %}active{% endif %}">
+                        <i class="fas fa-shield-alt nav-icon"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="{% url 'wallet:transaction_list' %}" class="nav-item {% if request.resolver_match.url_name == 'transaction_list' %}active{% endif %}">
+                        <i class="fas fa-list nav-icon"></i>
+                        <span class="nav-text">All Transactions</span>
+                    </a>
+                    <a href="{% url 'analytics:analytics_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'analytics_dashboard' %}active{% endif %}">
+                        <i class="fas fa-chart-line nav-icon"></i>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                </div>
 
-            <div class="nav-section">
-                <span class="nav-section-title">Actions</span>
-                <a href="{% url 'wallet:deposit' %}" class="nav-item">
-                    <i class="fas fa-circle-plus nav-icon"></i>
-                    <span class="nav-text">Deposit</span>
-                </a>
-                <a href="{% url 'wallet:withdraw' %}" class="nav-item">
-                    <i class="fas fa-circle-minus nav-icon"></i>
-                    <span class="nav-text">Withdraw</span>
-                </a>
-                <a href="{% url 'wallet:transfer' %}" class="nav-item">
-                    <i class="fas fa-right-left nav-icon"></i>
-                    <span class="nav-text">Transfer</span>
-                </a>
-            </div>
+                <!-- --#-- SuperUser Only: Admin Panel -->
+                {% if user.is_superuser %}
+                <div class="nav-section">
+                    <span class="nav-section-title">System</span>
+                    <a href="{% url 'admin:index' %}" class="nav-item">
+                        <i class="fas fa-cog nav-icon"></i>
+                        <span class="nav-text">Admin Panel</span>
+                    </a>
+                </div>
+                {% endif %}
+                {% else %}
+                <!-- --#-- Client Menu -->
+                <div class="nav-section">
+                    <span class="nav-section-title">Main</span>
+                    <a href="{% url 'wallet:dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-chart-pie nav-icon"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="{% url 'wallet:transaction_list' %}" class="nav-item {% if request.resolver_match.url_name == 'transaction_list' %}active{% endif %}">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <span class="nav-text">Transactions</span>
+                    </a>
+                </div>
 
-            <div class="nav-section">
-                <span class="nav-section-title">Account</span>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-user nav-icon"></i>
-                    <span class="nav-text">Profile</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-shield-halved nav-icon"></i>
-                    <span class="nav-text">Security</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-file-invoice-dollar nav-icon"></i>
-                    <span class="nav-text">Statements</span>
-                </a>
-            </div>
-            {% endif %}
+                <div class="nav-section">
+                    <span class="nav-section-title">Actions</span>
+                    <a href="{% url 'wallet:deposit' %}" class="nav-item {% if request.resolver_match.url_name == 'deposit' %}active{% endif %}">
+                        <i class="fas fa-circle-plus nav-icon"></i>
+                        <span class="nav-text">Deposit</span>
+                    </a>
+                    <a href="{% url 'wallet:withdraw' %}" class="nav-item {% if request.resolver_match.url_name == 'withdraw' %}active{% endif %}">
+                        <i class="fas fa-circle-minus nav-icon"></i>
+                        <span class="nav-text">Withdraw</span>
+                    </a>
+                    <a href="{% url 'wallet:transfer' %}" class="nav-item {% if request.resolver_match.url_name == 'transfer' %}active{% endif %}">
+                        <i class="fas fa-right-left nav-icon"></i>
+                        <span class="nav-text">Transfer</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-section-title">Account</span>
+                    <a href="{% url 'accounts:profile' %}" class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                        <i class="fas fa-user nav-icon"></i>
+                        <span class="nav-text">Profile</span>
+                    </a>
+                    <a href="{% url 'accounts:security' %}" class="nav-item {% if request.resolver_match.url_name == 'security' %}active{% endif %}">
+                        <i class="fas fa-shield-halved nav-icon"></i>
+                        <span class="nav-text">Security</span>
+                    </a>
+                </div>
+                {% endif %}
             {% else %}
             <!-- --#-- Guest Menu -->
             <div class="nav-section">
                 <a href="{% url 'accounts:login' %}" class="nav-item active">
                     <i class="fas fa-sign-in-alt nav-icon"></i>
                     <span class="nav-text">Login</span>
+                </a>
+                <a href="{% url 'accounts:register' %}" class="nav-item">
+                    <i class="fas fa-user-plus nav-icon"></i>
+                    <span class="nav-text">Register</span>
                 </a>
             </div>
             {% endif %}

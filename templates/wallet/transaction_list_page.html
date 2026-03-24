@@ -11,28 +11,151 @@
 {% block content %}
 <!-- --#-- Page Header -->
 <div class="page-header">
-    <h1 class="page-title">Transaction History</h1>
-    <p class="page-subtitle">View all your wallet transactions</p>
+    <h1 class="page-title">
+        {% if is_staff_view %}
+        <i class="fas fa-list-ul"></i> All Platform Transactions
+        {% else %}
+        <i class="fas fa-receipt"></i> My Transactions
+        {% endif %}
+    </h1>
+    <p class="page-subtitle">
+        {% if is_staff_view %}
+        Monitor and filter all user transactions across the platform
+        {% else %}
+        View all your wallet transactions
+        {% endif %}
+    </p>
 </div>
 
 <!-- --#-- Back to Dashboard -->
 <div class="mb-4">
+    {% if is_staff_view %}
+    <a href="{% url 'operations:staff_dashboard' %}" class="btn btn-outline btn-sm">
+        <i class="fas fa-arrow-left"></i> Back to Staff Dashboard
+    </a>
+    {% else %}
     <a href="{% url 'wallet:dashboard' %}" class="btn btn-outline btn-sm">
         <i class="fas fa-arrow-left"></i> Back to Dashboard
     </a>
+    {% endif %}
 </div>
+
+<!-- --#-- Staff Filters -->
+{% if is_staff_view %}
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="filter-form">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label"><i class="fas fa-search"></i> Search</label>
+                    <input
+                        type="text"
+                        name="search"
+                        class="filter-input"
+                        placeholder="Email, description, or reference ID"
+                        value="{{ current_search }}"
+                    >
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label"><i class="fas fa-tag"></i> Type</label>
+                    <select name="type" class="filter-select">
+                        <option value="">All Types</option>
+                        {% for type_key, type_label in transaction_types %}
+                        <option value="{{ type_key }}" {% if current_type == type_key %}selected{% endif %}>
+                            {{ type_label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label"><i class="fas fa-check-circle"></i> Status</label>
+                    <select name="status" class="filter-select">
+                        <option value="">All Statuses</option>
+                        {% for status_key, status_label in transaction_statuses %}
+                        <option value="{{ status_key }}" {% if current_status == status_key %}selected{% endif %}>
+                            {{ status_label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    <a href="{% url 'wallet:transaction_list' %}" class="btn btn-outline">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
 
 <!-- --#-- Transactions Card -->
 <div class="card">
     <div class="card-header">
-        <h2 class="card-title">All Transactions</h2>
+        <h2 class="card-title">
+            {% if is_staff_view %}
+            <i class="fas fa-table"></i> Transaction List
+            {% else %}
+            <i class="fas fa-list"></i> All Transactions
+            {% endif %}
+        </h2>
+        {% if is_staff_view and transactions %}
+        <span class="badge badge-primary">{{ paginator.count }} Total</span>
+        {% endif %}
     </div>
     <div class="card-body">
         {% if transactions %}
-        <div class="transaction-list-full">
-            {% for transaction in transactions %}
-            {% include 'wallet/partials/transaction_item.html' with transaction=transaction wallet=wallet %}
-            {% endfor %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        {% if is_staff_view %}
+                        <th>Counterparty</th>
+                        {% endif %}
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>#{{ transaction.id }}</td>
+                        <td class="user-email">{{ transaction.wallet.client_profile.user.email }}</td>
+                        <td>
+                            <span class="transaction-type type-{{ transaction.type|lower }}">
+                                {{ transaction.get_type_display }}
+                            </span>
+                        </td>
+                        <td class="amount">${{ transaction.amount|floatformat:2 }}</td>
+                        {% if is_staff_view %}
+                        <td class="user-email">
+                            {% if transaction.counterparty_wallet %}
+                                {{ transaction.counterparty_wallet.client_profile.user.email }}
+                            {% else %}
+                                <span class="text-muted"><i class="fas fa-external-link-alt"></i> External</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        <td>
+                            <span class="badge badge-{{ transaction.status|lower }}">
+                                {{ transaction.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="transaction-date">{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
         <!-- --#-- Pagination -->
@@ -43,7 +166,7 @@
             </span>
             <div class="pagination">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline btn-sm">
+                <a href="?page={{ page_obj.previous_page_number }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_search %}&search={{ current_search }}{% endif %}" class="btn btn-outline btn-sm">
                     <i class="fas fa-chevron-left"></i> Previous
                 </a>
                 {% else %}
@@ -57,7 +180,7 @@
                 </span>
 
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline btn-sm">
+                <a href="?page={{ page_obj.next_page_number }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_search %}&search={{ current_search }}{% endif %}" class="btn btn-outline btn-sm">
                     Next <i class="fas fa-chevron-right"></i>
                 </a>
                 {% else %}
@@ -71,11 +194,19 @@
 
         {% else %}
         <div class="empty-state">
-            <span class="empty-icon">📭</span>
-            <p class="empty-text">No transactions yet</p>
+            <i class="fas fa-inbox empty-icon"></i>
+            <p class="empty-text">
+                {% if is_staff_view %}
+                No transactions found matching your filters
+                {% else %}
+                No transactions yet
+                {% endif %}
+            </p>
+            {% if not is_staff_view %}
             <a href="{% url 'wallet:deposit' %}" class="btn btn-primary btn-sm">
                 <i class="fas fa-circle-plus"></i> Make Your First Deposit
             </a>
+            {% endif %}
         </div>
         {% endif %}
     </div>

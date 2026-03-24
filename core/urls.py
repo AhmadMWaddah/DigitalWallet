@@ -15,9 +15,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import RedirectView
+
+from accounts.views import LoginRedirectView
+
+# -- Custom 403 Error Handler
+handler403 = "accounts.views.custom_permission_denied"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -25,5 +30,12 @@ urlpatterns = [
     path("dashboard/", include("wallet.urls")),
     path("staff/", include("operations.urls")),
     path("analytics/", include("analytics.urls")),
-    path("", RedirectView.as_view(url="/dashboard/", permanent=False), name="home"),
+    # Role-aware home redirect (replaces hardcoded RedirectView)
+    path("", LoginRedirectView.as_view(), name="home"),
 ]
+
+# Debug Toolbar URLs (only in debug mode)
+if settings.DEBUG:
+    urlpatterns += [
+        path("__debug__/", include("debug_toolbar.urls")),
+    ]

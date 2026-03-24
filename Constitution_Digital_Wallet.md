@@ -9,6 +9,7 @@
 ## How to Use This Plan
 
 - **Work sequentially** through each phase — do not skip ahead.
+- **Task-Level Execution (The "Qwen/Gem" Standard):** Break each Phase into its atomic tasks. Complete, test, and commit each task (or a small group of related tasks) individually. This prevents "instruction dilution" and ensures 100% precision.
 - **Testing Mandate:** Every feature must include corresponding `pytest` test cases. Run tests before every commit.
 - **Git Mandate:**
   - **No Direct Master Commits:** Never commit directly to `master`. All work, including small fixes, must happen in a branch.
@@ -21,7 +22,9 @@
     - **Merge only on Manager Approval:** Even when a phase is "done" in the branch, the merge to `master` only occurs after the Manager (Ahmad) confirms that all deliverables, fixes, and additional requirements are met.
     - **Fix Branches:** For bugs found in code already on master, use a `fix-` branch. Merge this to `master` as soon as it is validated and the Manager approves.
     - **Phase Merges are "Releases":** Treat the merge of a `phase-n` branch into `master` as a formal release of a completed feature set.
-
+  - **Commit Title Format:** Titles must be human-readable and follow these patterns:
+    - **Parts:** `Part: {Phase # _ Phase Title} - {Part # _ Part Title}`
+    - **Error Fix:** `Fix: {Phase # _ Phase Title} - {Fix Title}`
   - **Automation:** Use `scripts/git-phase-commit.sh` and `scripts/git-phase-merge.sh` for all work. These scripts must handle pushing to and cleaning up the remote.
 - **Views Architecture:** **CBVs** for structural views, **FBVs** for lightweight HTMX actions.
 - **Frontend Architecture:** CSS in `static/css/`, JS in `static/js/`, HTML snippets in `templates/components/`.
@@ -62,6 +65,37 @@ Build a secure, production-ready **Digital Wallet Dashboard** with dual-portal a
 | **PDF**         | ReportLab                                     |
 | **Testing**     | Pytest, pytest-django                         |
 | **Deployment**  | Render, Gunicorn, WhiteNoise                  |
+
+### Tools & Execution Environment
+
+This section defines the operational tools used across the project. Unlike phase-specific dependencies, these tools are part of the working environment and collaboration process for the whole repository.
+
+#### Development Tooling
+
+| Category             | Tools |
+|----------------------|-------|
+| **Environment**      | Python virtual environment, `.env`, Django settings modularization |
+| **Code Quality**     | `pre-commit`, `black`, `flake8`, `isort` |
+| **Testing**          | `pytest`, `pytest-django` |
+| **Git Automation**   | `scripts/git-phase-commit.sh`, `scripts/git-phase-merge.sh`, helper shell scripts |
+| **Runtime Services** | Redis, Celery worker |
+
+#### AI CLI Tools
+
+| Tool | Primary Role | Expected Responsibility |
+|----------|---------------|------------------------------------------------------------------------------------------------------------|
+| **Qwen** | Developer AI  | Implements features, writes code, fixes bugs, and executes assigned tasks                                  |
+| **Gem**  | Consultant AI | Provides architecture guidance, planning support, and technical consultation                               |
+| **Cod**  | Reviewer AI   | Reviews implementation quality, identifies regressions, verifies fixes, and supports critical improvements |
+
+#### Usage Policy for AI Tools
+
+- **Manager Authority:** Ahmad remains the only final decision-maker for scope, approval, and merge authorization.
+- **Role Separation:** Qwen should remain the primary implementation agent, Gem should remain focused on architectural and strategic guidance, and Cod should remain focused on review, verification, and high-risk fix support.
+- **No Authority Transfer:** AI tools may recommend changes, but they do not define project truth. The Constitution and Ahmad's approval define project truth.
+- **Verification First:** Any AI-generated implementation or recommendation must be validated through tests, code review, or manual verification before being accepted.
+- **Commit Discipline:** AI-generated work must still follow the same branch, commit, verification, and approval rules as human-authored work.
+- **Documentation Requirement:** If a new AI CLI tool is introduced later, it must be added to this section with its role and boundaries before it becomes part of the standard workflow.
 
 ---
 

@@ -79,6 +79,13 @@ class Wallet(models.Model):
 
     # -- Metadata
 
+    metadata = models.JSONField(
+        "Metadata",
+        blank=True,
+        default=dict,
+        help_text="Additional wallet metadata (freeze info, flags, etc.).",
+    )
+
     class Meta:
         db_table = "wallet_wallet"
         verbose_name = "Wallet"

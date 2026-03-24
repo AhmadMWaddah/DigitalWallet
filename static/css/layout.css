@@ -48,6 +48,9 @@
 .main-content {
     flex: 1;
     padding: var(--spacing-xl);
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* --#-- Footer - Inside Main Content */

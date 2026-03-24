@@ -16,6 +16,7 @@
 - **No Implicit Completion:** A phase or task is not complete because code was written. It is complete only after verification passes.
 - **Manager Approval Rule:** A phase may be merged to `master` only after Ahmad explicitly approves it.
 - **Branch-Only Work:** All implementation, fixes, and experiments must happen in branches, never directly on `master`.
+- **Context Efficiency:** For complex tasks, the AI should utilize 'Plan Mode' or 'Sub-Agents' to research and design before touching the main codebase. This keeps the main session context lean and focused on execution.
 
 ---
 
@@ -45,19 +46,62 @@
   - `phase-<name>` for active feature phases
   - `fix-<description>` for bugs already present in `master`
   - `chore-<description>` for non-feature maintenance when explicitly approved
-- **Commit Standard:** Every commit must contain:
-  - A concise title
-  - A detailed body explaining why the change was made
+- **Commit Standard:** Every commit must follow these patterns:
+  - **Commit Titles:**
+    - **Parts:** `Part: {Phase # _ Phase Title} - {Part # _ Part Title}`
+    - **Error Fix:** `Fix: {Phase # _ Phase Title} - {Fix Title}`
+  - **Commit Body:** A detailed body explaining why the change was made.
 - **Branch Iteration Rule:** During a phase, it is acceptable to commit and push multiple times while fixing issues. Keep all incomplete work off `master`.
 - **Merge Rule:** A branch is merged only when:
   - The relevant tests pass
   - Manual verification is done when applicable
   - Ahmad approves the milestone
 - **Cleanup Rule:** Delete local and remote branches only after successful merge and confirmation that no follow-up changes remain.
+- **Workflow Automation:** Project-specific automation scripts (e.g., `scripts/git-task-commit.sh`) should be created early in Phase 1 to ensure consistent, error-free workflow execution.
 
 ---
 
-## 5. Phase Methodology
+## 5. Tools & Execution Environment
+
+This section should define the operational tools used across the project, separate from the application stack and separate from phase-by-phase dependencies. It exists so future contributors and AI agents know what tools are officially part of the working environment.
+
+### Recommended Structure
+
+Every project constitution should define the following subsections:
+
+- **Application Stack:** Frameworks, database, frontend stack, async stack, deployment platform.
+- **Development Tooling:** Formatters, linters, test runners, package managers, shell helpers, automation scripts.
+- **AI CLI Tools:** The AI tools allowed on the project, their primary role, and their limits.
+- **Usage Policy:** The rules for how those tools should be used and who has final authority.
+
+### Example: Development Tooling
+
+| Category | Example Tools |
+|----------|---------------|
+| **Code Quality** | `pre-commit`, `black`, `flake8`, `isort` |
+| **Testing** | `pytest`, framework-specific test tools |
+| **Git Automation** | project-specific commit/merge scripts |
+| **Runtime Services** | task queues, cache servers, background workers |
+
+### Example: AI CLI Tools
+
+| Tool | Primary Role | Notes |
+|------|--------------|-------|
+| **Developer AI** | Implementation | Writes code, tests, and fixes |
+| **Consultant AI** | Architecture | Helps with design, planning, and tradeoff analysis |
+| **Reviewer AI** | Verification | Focuses on regressions, review findings, and quality enforcement |
+
+### Example: Usage Policy
+
+- The Manager remains the final authority for acceptance, merge approval, and scope decisions.
+- Every AI tool must have a defined role. Avoid overlapping responsibility unless explicitly needed.
+- AI output is not considered complete without verification.
+- If a new AI tool is introduced, add it to this section before treating it as part of the official workflow.
+- This section should describe stable, cross-project tooling. Phase-specific dependencies should still be listed inside the relevant phases.
+
+---
+
+## 6. Phase Methodology
 
 Each project must define its roadmap as a set of numbered phases.
 
@@ -75,6 +119,15 @@ Each phase must contain:
 - Execute tasks one by one.
 - Review each task before treating the phase as complete.
 
+### Task Splitting Inside Phases
+
+- Every phase must be divided into numbered tasks before implementation starts.
+- Tasks should be ordered in dependency sequence so the developer can work without guessing what comes next.
+- If a phase feels too large to review comfortably, it is too large and must be split further.
+- Each task should represent one focused deliverable such as setup, model creation, service logic, UI integration, testing, or verification.
+- A task may be split again into subtasks if the scope is still too broad, but the main task must remain understandable at a glance.
+- The Manager may decide the task order manually based on discussion with the Consultant and then assign implementation to the Developer.
+
 ### Recommended Task Size
 
 A task should be:
@@ -84,7 +137,7 @@ A task should be:
 
 ---
 
-## 6. Task Methodology
+## 7. Task Methodology
 
 Tasks are the required execution layer inside each phase.
 
@@ -108,19 +161,17 @@ A task is complete only when:
 - Manual verification is done if needed
 - The reviewer finds no blocking issues
 
-### Task Handoff Rule
+### Coordination Rule
 
-When one AI tool hands off work to another, the handoff must state:
-- Current phase
-- Current task ID and name
-- What was completed
-- What remains
-- What verification already passed
-- Any known risks, blockers, or assumptions
+- Ahmad coordinates the workflow manually between AI tools.
+- The Consultant may help define or refine the plan.
+- The Developer executes the assigned task.
+- The Reviewer checks for bugs, regressions, missing tests, and architectural drift after implementation.
+- No automated AI-to-AI handoff format is required unless Ahmad chooses to add one later.
 
 ---
 
-## 7. Phase Template
+## 8. Phase Template
 
 Use the following structure for every project-specific phase:
 
@@ -163,11 +214,10 @@ Use the following structure for every project-specific phase:
 pytest
 python manage.py runserver
 ```
-```
 
 ---
 
-## 8. Code Commenting & Documentation
+## 9. Code Commenting & Documentation
 
 - **Docstrings:** Use concise `"""Docstring content"""` for classes and complex functions.
 - **Logic Comments:** Explain why a decision exists, not what the line literally does.
@@ -179,7 +229,7 @@ python manage.py runserver
 
 ---
 
-## 9. Frontend & Asset Architecture
+## 10. Frontend & Asset Architecture
 
 - **Static Structure:**
   - `static/css/`
@@ -195,7 +245,7 @@ python manage.py runserver
 
 ---
 
-## 10. Naming Conventions
+## 11. Naming Conventions
 
 - **Files:** Lowercase with underscores where appropriate
 - **CSS Classes:** Kebab-case
@@ -206,7 +256,7 @@ python manage.py runserver
 
 ---
 
-## 11. Testing & Quality Assurance
+## 12. Testing & Quality Assurance
 
 - **Primary Tooling:** `pytest` and `pytest-django`
 - **Test Location:** Prefer `app/tests/` or clearly organized test modules
@@ -215,10 +265,11 @@ python manage.py runserver
 - **Coverage Goal:** Target strong coverage on changed logic, especially business-critical flows
 - **Pre-Commit Quality Gate:** Use `Black`, `Flake8`, and `Isort` through `pre-commit`
 - **Verification Discipline:** Run the smallest relevant test set during iteration, then run broader verification before merge
+- **Clean Console Rule:** Verification is only successful if the console output is 100% clean (no warnings, no prints, no tracebacks) during test execution.
 
 ---
 
-## 12. Deployment Standards
+## 13. Deployment Standards
 
 - **Environment Parity:** Use environment-specific settings from the start, such as `base.py`, `dev.py`, and `prod.py`
 - **Secrets Management:** Use environment variables and never commit secrets
@@ -227,7 +278,7 @@ python manage.py runserver
 
 ---
 
-## 13. Review Standards
+## 14. Review Standards
 
 - **Reviewer Focus:** Review for bugs, regressions, security issues, architectural drift, and missing tests
 - **Review Order:** Findings first, summary second
@@ -236,7 +287,7 @@ python manage.py runserver
 
 ---
 
-## 14. Minimal Project Setup Checklist
+## 15. Minimal Project Setup Checklist
 
 Use this checklist when starting a new project:
 
@@ -254,4 +305,4 @@ Use this checklist when starting a new project:
 
 ---
 
-*Constitution Version: 2.0 (Starter with Phase-Task Methodology)*
+*Constitution Version: 2.1 (Starter with Phase-Task Methodology)*

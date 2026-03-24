@@ -48,14 +48,15 @@ CSRF_COOKIE_SECURE = False  # Allow HTTP for local development
 
 # Add debug toolbar to INSTALLED_APPS (only if not testing)
 import sys
-if 'pytest' not in sys.modules:
+
+if "pytest" not in sys.modules:
     INSTALLED_APPS += [
         "debug_toolbar",
     ]
-    
+
     # Add debug toolbar middleware (must be first, only if not testing)
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
-    
+
     # Configure debug toolbar
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG,
@@ -68,3 +69,8 @@ if 'pytest' not in sys.modules:
             "analytics/partials/",
         ),
     }
+
+# -- Development Logging (DEBUG level for detailed debugging)
+
+LOGGING["root"]["level"] = "DEBUG"
+LOGGING["loggers"]["django"]["level"] = "DEBUG"
