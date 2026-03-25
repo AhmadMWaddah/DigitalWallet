@@ -10,6 +10,5 @@ redis==5.2.*
 # PDF Generation
 reportlab==4.3.*
 
-# Production (Render)
-gunicorn==23.0.*
-whitenoise==6.8.*
+# Development & Debugging
+django-debug-toolbar==5.1.*
