@@ -1,0 +1,42 @@
+services:
+  # The "Fridge" - Redis for Celery and Caching
+  redis:
+    image: redis:7-alpine
+    container_name: digital_wallet_redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  # The "Head Chef" - Django Web Application
+  web:
+    build: .
+    container_name: digital_wallet_web
+    command: gunicorn --bind 0.0.0.0:8000 core.wsgi:application
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.prod
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    restart: always
+
+  # The "Waiter" - Celery Worker for Background Tasks
+  celery:
+    build: .
+    container_name: digital_wallet_celery
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.prod
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    restart: always

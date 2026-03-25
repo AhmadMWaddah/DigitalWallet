@@ -1,0 +1,21 @@
+# Ignore local virtual environments
+.venv/
+.env_digital_wallet/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore git and IDE config
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Ignore local database and logs
+*.sqlite3
+*.log
+
+# Ignore static and media files if they are generated during build
+staticfiles/
+media/

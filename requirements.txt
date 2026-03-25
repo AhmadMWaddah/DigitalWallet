@@ -10,10 +10,6 @@ redis==5.2.*
 # PDF Generation
 reportlab==4.3.*
 
-# Production
+# Production (Render)
 gunicorn==23.0.*
 whitenoise==6.8.*
-
-# Vercel Deployment
-vercel==35.2.*
-python-json-logger==2.0.*
