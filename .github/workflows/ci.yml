@@ -1,0 +1,46 @@
+# -- CI: lint, type-check, test with coverage
+# NOTE: plan named uv + lock file, but uv migration (task 3.1) is not
+# done yet, so this installs requirements-dev.txt with pip instead.
+
+name: CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Ruff
+        run: ruff check .
+
+      - name: Black
+        run: black --check --line-length 100 .
+
+      - name: Mypy
+        run: mypy .
+
+      - name: Pytest
+        run: pytest --ds=core.settings.test -q --cov=. --cov-report=term-missing
+        env:
+          CELERY_BROKER_URL: redis://localhost:6379/0
+          CELERY_RESULT_BACKEND: redis://localhost:6379/0
