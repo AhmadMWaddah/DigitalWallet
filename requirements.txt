@@ -5,6 +5,10 @@ psycopg2-binary==2.9.11
 whitenoise==6.8.*
 django-ratelimit==4.1.*
 
+# REST API
+djangorestframework==3.18.*
+drf-spectacular==0.30.*
+
 # Async Tasks
 celery==5.4.*
 redis==5.2.*

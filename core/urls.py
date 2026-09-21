@@ -18,6 +18,7 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from accounts.views import LoginRedirectView
 from core.views import HealthView
@@ -32,6 +33,9 @@ urlpatterns = [
     path("dashboard/", include("wallet.urls")),
     path("staff/", include("operations.urls")),
     path("analytics/", include("analytics.urls")),
+    path("api/v1/", include("wallet.api_urls")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
     # Role-aware home redirect (replaces hardcoded RedirectView)
     path("", LoginRedirectView.as_view(), name="home"),
 ]
