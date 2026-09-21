@@ -12,8 +12,10 @@
 <div id="messages-container"></div>
 
 <div class="page-header">
-    <h1 class="page-title">Verify Your Identity</h1>
-    <p class="page-subtitle">Upload an ID document to unlock large transfers</p>
+    <div>
+        <h1 class="page-title">{% include '__snippets__/icons/id-card.svg' %} Verify Your Identity</h1>
+        <p class="page-subtitle">Upload an ID document to unlock large transfers</p>
+    </div>
 </div>
 
 <div class="dashboard-grid">
@@ -22,40 +24,46 @@
             <div class="card-header">
                 <h2 class="card-title">Upload Document</h2>
             </div>
-            <div class="card-body">
-                <p><strong>Current status:</strong> {{ profile.get_kyc_status_display }}</p>
-                {% if profile.kyc_status == "REJECTED" %}
-                <p><strong>Rejection reason:</strong> {{ profile.kyc_rejection_reason }}</p>
-                {% endif %}
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-
-                    <div class="form-group">
-                        <label for="{{ form.document.id_for_label }}" class="form-label">Identity Document</label>
-                        {{ form.document }}
-                        {% if form.document.errors %}
-                        <div class="form-error">{{ form.document.errors.0 }}</div>
-                        {% endif %}
-                        <div class="form-help">Passport, national ID, or driver's license. PDF, JPG, or PNG up to 5MB.</div>
-                    </div>
-
-                    <button type="submit" class="btn btn-outline btn-lg">
-                        <i class="fas fa-id-card"></i> Submit for Review
-                    </button>
-                </form>
+            <div class="kyc-status-card">
+                <div class="kyc-status-icon {% if profile.kyc_status == 'VERIFIED' %}stat-icon--success{% elif profile.kyc_status == 'REJECTED' %}stat-icon--danger{% elif profile.kyc_status == 'PENDING' %}stat-icon--warning{% endif %}">
+                    {% include '__snippets__/icons/badge-check.svg' %}
+                </div>
+                <div>
+                    <div class="text-sm text-muted">Current status</div>
+                    <span class="badge badge-{{ profile.kyc_status|lower }}">{{ profile.get_kyc_status_display }}</span>
+                    {% if profile.kyc_status == "REJECTED" %}
+                    <div class="form-help">Reason: {{ profile.kyc_rejection_reason }}</div>
+                    {% endif %}
+                </div>
             </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.document.id_for_label }}" class="form-label">Identity Document</label>
+                    {{ form.document }}
+                    {% if form.document.errors %}
+                    <div class="form-error">{% include '__snippets__/icons/exclamation-circle.svg' %} {{ form.document.errors.0 }}</div>
+                    {% endif %}
+                    <div class="form-help">Passport, national ID, or driver's license. PDF, JPG, or PNG up to 5MB.</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    {% include '__snippets__/icons/id-card.svg' %} Submit for Review
+                </button>
+            </form>
         </div>
     </div>
 
-    <div class="dashboard-column dashboard-column-wide">
+    <div class="dashboard-column">
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Why Verify?</h2>
+                <h2 class="card-title">{% include '__snippets__/icons/info-circle.svg' %} Why Verify?</h2>
             </div>
-            <div class="card-body">
-                <p><strong>Limit:</strong> Transfers above $10,000 need a verified identity</p>
-                <p><strong>Review:</strong> Staff review documents within 1 business day</p>
-                <p><strong>Privacy:</strong> Your document is only visible to verification staff</p>
+            <div class="info-list">
+                <p><strong>Limit</strong><span>Transfers above $10,000 need verified identity</span></p>
+                <p><strong>Review</strong><span>Staff review within 1 business day</span></p>
+                <p><strong>Privacy</strong><span>Visible only to verification staff</span></p>
             </div>
         </div>
     </div>
