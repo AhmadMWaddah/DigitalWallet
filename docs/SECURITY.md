@@ -8,6 +8,7 @@ Concrete controls in this repo, with file pointers. No aspirational items.
 |----------|------|-----|------|-----|
 | `accounts:login` | `accounts/views.py::CustomLoginView` | ip | 5/min POST | brute-force |
 | `wallet:transfer` | `wallet/views.py::TransferView` | user | 10/min POST | fund-drain automation |
+| `wallet:qr_pay` | `wallet/views.py::QRPayView` | user | 10/min POST | fund-drain automation |
 | `wallet:withdraw` | `wallet/views.py::WithdrawView` | user | 10/min POST | fund-drain automation |
 | `accounts:password_reset_client` | `accounts/views_reset.py::ClientPasswordResetView` | ip | 3/min POST | reset-email spam |
 
@@ -23,6 +24,10 @@ and re-enable per case (`accounts/tests/test_rate_limits.py`,
 - `reference_id` UNIQUE → idempotent retries raise `DuplicateTransactionError`.
 - `Decimal` everywhere; amounts must be `> 0` (`InvalidAmountError`).
 - Frozen wallets rejected (`FrozenWalletError`); self-transfers rejected.
+- Transfers above $10,000 require `VERIFIED` KYC (`KYCRequiredError`,
+  threshold `KYC_REQUIRED_ABOVE` in settings).
+- QR payloads are `TimestampSigner`-signed (`wallet/qr.py`); tampered codes
+  fail closed before any money moves.
 - Ledger append-only; fraud review via `process_fraud_review` only.
 
 ## Auth & Sessions (`core/settings/base.py`, `accounts/`)

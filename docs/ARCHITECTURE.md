@@ -23,13 +23,17 @@ Core modules, tech stack, business rules, and workflow for Digital Wallet Dashbo
 | Backend      | Python 3.12, Django 5.2                                                     |
 | Database     | SQLite for local development, PostgreSQL-ready configuration for production |
 | Frontend     | Django Templates, HTMX, custom modular CSS, Vanilla JavaScript              |
-| Auth         | Custom email-based `CustomUser`                                             |
+| API          | Django REST Framework (v1 under `/api/v1/`), drf-spectacular Swagger UI     |
+| QR Codes     | qrcode + Pillow (signed payloads, PNG per request)                          |
+| Auth         | Custom email-based `CustomUser` + KYC state machine                         |
 | Async        | Celery, Redis                                                               |
 | Reporting    | ReportLab PDF generation                                                    |
 | Analytics    | Chart.js                                                                    |
 | Testing      | Pytest, pytest-django, pytest-cov                                           |
 | Code Quality | pre-commit, black, flake8, isort, ruff, mypy + django-stubs                |
-| Rate Limit   | django-ratelimit (login 5/m ip, transfer/withdraw 10/m user, reset 3/m ip) |
+| Rate Limit   | django-ratelimit (login 5/m ip, transfer/withdraw/qr-pay 10/m user, reset 3/m ip) |
+| Fees         | Sender-paid transfer fee 1.5% + $0.20 (`FEE` ledger entries)                |
+| KYC Gate     | Transfers above $10,000 require `VERIFIED` status                           |
 | Ops          | `/health/` endpoint, GitHub Actions CI + security scan                      |
 
 ---
@@ -104,7 +108,7 @@ flowchart TD
     App["Django"] --> SQL[("SQLite dev file<br/>PostgreSQL prod-ready")]
     App --> Red[("Redis<br/>Celery broker + task results")]
     App --> LocMem[("LocMemCache<br/>test settings only")]
-    App --> FS[("media/<br/>statement PDFs")]
+    App --> FS[("media/<br/>statement PDFs<br/>KYC documents")]
 ```
 
 ---
@@ -115,7 +119,24 @@ flowchart TD
 
 - Deposits, withdrawals, and transfers are handled through service-layer functions.
 - Transfers isolate funds during fraud review to prevent double-spending.
-- Rejected flagged transfers automatically reverse funds back to the sender.
+- Rejected flagged transfers automatically reverse the transfer amount back to the
+  sender; earned fees stay charged.
+- Every transfer charges the sender `amount * 1.5% + $0.20` (Decimal, half-up),
+  recorded as a `COMPLETED` `FEE` ledger entry (`<reference>-FEE`).
+- Transfers above $10,000 require a `VERIFIED` KYC profile (`KYCRequiredError`).
+
+### QR Scan-to-Pay
+
+- Each client has a signed QR code (`DW1:` + `TimestampSigner` wallet ID).
+- PNG is generated per request, never stored; tampered codes fail closed.
+- Paying via QR reuses `transfer_funds` (same fees, limits, fraud checks) and tags
+  the transaction `payment_method: qr_code`.
+
+### KYC Verification
+
+- `ClientProfile.kyc_status`: UNVERIFIED → PENDING → VERIFIED / REJECTED.
+- Clients upload ID documents (`media/kyc/`); staff approve or reject with reason.
+- Re-upload after rejection resets to PENDING.
 
 ### Fraud Review
 
@@ -164,9 +185,16 @@ Flagged transfers are routed to the staff dashboard for manual review.
 - `/dashboard/withdraw/`
 - `/dashboard/transfer/`
 - `/dashboard/transactions/`
+- `/dashboard/qr/` (own QR code)
+- `/dashboard/qr/pay/` (scan and pay)
 - `/dashboard/statement/request/`
+- `/accounts/kyc/` (identity document upload)
 - `/staff/dashboard/`
+- `/staff/kyc/<id>/review/` (approve/reject)
 - `/analytics/dashboard/`
+- `/api/v1/` (wallet, transactions, deposit, withdraw, transfer)
+- `/api/schema/` + `/api/docs/` (OpenAPI + Swagger UI)
+- `/health/`
 
 ---
 
@@ -174,18 +202,24 @@ Flagged transfers are routed to the staff dashboard for manual review.
 
 ```text
 DigitalWallet/
-├── accounts/                  # Authentication, user model, profiles, security views
+├── accounts/                  # Auth, user model, profiles, KYC upload, security views
 ├── analytics/                 # Staff analytics dashboard and chart endpoints
-├── core/                      # Settings, root URLs, Celery app bootstrap
-├── operations/                # Staff dashboard and fraud review tools
+├── core/                      # Settings, root URLs, Celery app bootstrap, JSON logging
+├── operations/                # Staff dashboard, fraud review, KYC review, freeze tools
 ├── scripts/                   # Setup, git workflow, manual helper scripts
 ├── static/                    # CSS, JS, frontend assets
-├── templates/                 # Base templates, snippets, account/wallet/staff pages
-├── wallet/                    # Wallet models, services, views, PDF tasks
+├── templates/                 # Base, account/wallet/staff pages, QR + KYC pages
+├── wallet/                    # Models, services, HTML views, DRF API, QR, fees
+│   ├── api.py                 # REST v1 endpoints (thin wrappers over services.py)
+│   ├── serializers.py         # Wallet/transaction + money-input serializers
+│   ├── qr.py                  # Signed QR payloads + PNG rendering
+│   └── tests/                 # test_api, test_qr, test_fees, test_kyc (accounts), ...
+├── docs/                      # All project documentation (this file, guides, plans)
 ├── .env.example               # Example environment configuration
 ├── manage.py
-├── requirements.txt
-└── requirements-dev.txt
+├── requirements.txt           # Pinned prod deps
+├── requirements-dev.txt       # Pinned dev deps (includes -r requirements.txt)
+└── requirements.lock          # Compiled lockfile (CI installs from this)
 ```
 
 ---
@@ -214,7 +248,7 @@ Example:
 
 ## AI Collaboration Model
 
-This repository documents a multi-agent workflow in `Constitution_Digital_Wallet.md`.
+This repository documents a multi-agent workflow in `CONSTITUTION.md`.
 
 Primary roles:
 
