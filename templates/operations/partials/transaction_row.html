@@ -21,7 +21,7 @@
     <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
     <td class="actions">
         <span class="status-badge status-{{ transaction.status|lower }}">
-            <i class="fas fa-{{ transaction.status|lower == 'completed'|yesno:'check,exclamation-circle' }}"></i>
+            <i class="fas fa-{% if transaction.status == "COMPLETED" %}check{% else %}exclamation-circle{% endif %}"></i>
             {{ transaction.get_status_display }}
         </span>
     </td>

@@ -14,8 +14,7 @@ import pytest
 from django.urls import reverse
 
 from accounts.models import UserType
-from operations.fraud_engine import FraudEngine
-from wallet.models import Transaction, TransactionStatus, Wallet
+from wallet.models import TransactionStatus, Wallet
 from wallet.services import transfer_funds
 
 
@@ -58,8 +57,7 @@ def flagged_transaction(client_user_with_wallet):
         user_type=UserType.CLIENT,
     )
     receiver_wallet = Wallet.objects.create(
-        client_profile=receiver_user.client_profile,
-        balance=Decimal("1000.00")
+        client_profile=receiver_user.client_profile, balance=Decimal("1000.00")
     )
 
     # Create a transfer that will be flagged (>$10,000)
@@ -128,7 +126,9 @@ class TestStaffDashboardView:
         assert "flagged_count" in stats
         assert stats["flagged_count"] >= 1  # At least our flagged transaction
 
-    def test_staff_dashboard_shows_flagged_transactions(self, client, staff_user, flagged_transaction):
+    def test_staff_dashboard_shows_flagged_transactions(
+        self, client, staff_user, flagged_transaction
+    ):
         """Test staff dashboard displays flagged transactions in High Alert section."""
         client.login(email="staff@test.com", password="testpass123")
 
@@ -145,70 +145,85 @@ class TestReviewTransactionView:
     def test_review_transaction_requires_login(self, client, flagged_transaction):
         """Test review transaction requires authentication."""
         response = client.post(
-            reverse("operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}),
-            {"action": "approve"}
+            reverse(
+                "operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}
+            ),
+            {"action": "approve"},
         )
         assert response.status_code == 302
 
-    def test_review_transaction_requires_staff(self, client, client_user_with_wallet, flagged_transaction):
+    def test_review_transaction_requires_staff(
+        self, client, client_user_with_wallet, flagged_transaction
+    ):
         """Test review transaction requires staff user."""
         user, wallet = client_user_with_wallet
         client.login(email="client@test.com", password="testpass123")
 
         response = client.post(
-            reverse("operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}),
-            {"action": "approve"}
+            reverse(
+                "operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}
+            ),
+            {"action": "approve"},
         )
         assert response.status_code == 403
 
     def test_review_transaction_approve(self, client, staff_user, flagged_transaction):
-        """Test approving a flagged transaction."""
+        """Test approving a flagged transaction via HTMX returns HTML row."""
         client.login(email="staff@test.com", password="testpass123")
 
         response = client.post(
-            reverse("operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}),
-            {"action": "approve"}
+            reverse(
+                "operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}
+            ),
+            {"action": "approve"},
+            HTTP_HX_REQUEST="true",
         )
 
         # Refresh from database
         flagged_transaction.refresh_from_db()
 
         assert response.status_code == 200
+        assert f"transaction-row-{flagged_transaction.id}".encode() in response.content
         assert flagged_transaction.status == TransactionStatus.COMPLETED
         assert flagged_transaction.metadata["reviewed_by"] == "staff@test.com"
         assert flagged_transaction.metadata["review_action"] == "approved"
 
     def test_review_transaction_reject(self, client, staff_user, flagged_transaction):
-        """Test rejecting a flagged transaction."""
+        """Test rejecting a flagged transaction via HTMX returns HTML row."""
         client.login(email="staff@test.com", password="testpass123")
 
         response = client.post(
-            reverse("operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}),
-            {"action": "reject"}
+            reverse(
+                "operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}
+            ),
+            {"action": "reject"},
+            HTTP_HX_REQUEST="true",
         )
 
         # Refresh from database
         flagged_transaction.refresh_from_db()
 
         assert response.status_code == 200
+        assert f"transaction-row-{flagged_transaction.id}".encode() in response.content
         assert flagged_transaction.status == TransactionStatus.FAILED
         # After reversal, metadata has 'reversed' key instead of 'review_action'
         assert flagged_transaction.metadata.get("reversed") is True
         assert flagged_transaction.metadata.get("reversed_by") == "staff@test.com"
 
     def test_review_transaction_invalid_action(self, client, staff_user, flagged_transaction):
-        """Test review transaction with invalid action."""
+        """Test review transaction with invalid action via HTMX returns alert HTML."""
         client.login(email="staff@test.com", password="testpass123")
 
         response = client.post(
-            reverse("operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}),
-            {"action": "invalid"}
+            reverse(
+                "operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}
+            ),
+            {"action": "invalid"},
+            HTTP_HX_REQUEST="true",
         )
 
         assert response.status_code == 200
-        data = response.json()
-        assert data["success"] is False
-        assert "Invalid action" in data["error"]
+        assert b"alert" in response.content
 
     def test_review_transaction_not_flagged(self, client, staff_user, client_user_with_wallet):
         """Test reviewing a non-flagged transaction fails."""
@@ -222,8 +237,7 @@ class TestReviewTransactionView:
             user_type=UserType.CLIENT,
         )
         receiver_wallet = Wallet.objects.create(
-            client_profile=receiver_user.client_profile,
-            balance=Decimal("1000.00")
+            client_profile=receiver_user.client_profile, balance=Decimal("1000.00")
         )
 
         transaction = transfer_funds(
@@ -234,13 +248,12 @@ class TestReviewTransactionView:
 
         response = client.post(
             reverse("operations:review_transaction", kwargs={"transaction_id": transaction.id}),
-            {"action": "approve"}
+            {"action": "approve"},
+            HTTP_HX_REQUEST="true",
         )
 
         assert response.status_code == 200
-        data = response.json()
-        assert data["success"] is False
-        assert "not flagged" in data["error"]
+        assert b"alert" in response.content
 
 
 class TestFreezeWalletView:
@@ -265,24 +278,29 @@ class TestFreezeWalletView:
         client.login(email="staff@test.com", password="testpass123")
         user, wallet = client_user_with_wallet
 
-        response = client.post(reverse("operations:freeze_wallet", kwargs={"wallet_id": wallet.id}))
+        response = client.post(
+            reverse("operations:freeze_wallet", kwargs={"wallet_id": wallet.id}),
+            HTTP_HX_REQUEST="true",
+        )
 
         # Refresh from database
         wallet.refresh_from_db()
 
         assert response.status_code == 200
+        assert b"wallet-status-badge" in response.content
         assert wallet.is_frozen is True
 
     def test_freeze_wallet_already_frozen(self, client, staff_user, frozen_wallet):
         """Test freezing an already frozen wallet."""
         client.login(email="staff@test.com", password="testpass123")
 
-        response = client.post(reverse("operations:freeze_wallet", kwargs={"wallet_id": frozen_wallet.id}))
+        response = client.post(
+            reverse("operations:freeze_wallet", kwargs={"wallet_id": frozen_wallet.id}),
+            HTTP_HX_REQUEST="true",
+        )
 
         assert response.status_code == 200
-        data = response.json()
-        assert data["success"] is False
-        assert "already frozen" in data["error"]
+        assert b"alert" in response.content
 
 
 class TestUnfreezeWalletView:
@@ -290,7 +308,9 @@ class TestUnfreezeWalletView:
 
     def test_unfreeze_wallet_requires_login(self, client, frozen_wallet):
         """Test unfreeze wallet requires authentication."""
-        response = client.post(reverse("operations:unfreeze_wallet", kwargs={"wallet_id": frozen_wallet.id}))
+        response = client.post(
+            reverse("operations:unfreeze_wallet", kwargs={"wallet_id": frozen_wallet.id})
+        )
         assert response.status_code == 302
 
     def test_unfreeze_wallet_requires_staff(self, client, client_user_with_wallet, frozen_wallet):
@@ -298,19 +318,25 @@ class TestUnfreezeWalletView:
         user, wallet = client_user_with_wallet
         client.login(email="client@test.com", password="testpass123")
 
-        response = client.post(reverse("operations:unfreeze_wallet", kwargs={"wallet_id": frozen_wallet.id}))
+        response = client.post(
+            reverse("operations:unfreeze_wallet", kwargs={"wallet_id": frozen_wallet.id})
+        )
         assert response.status_code == 403
 
     def test_unfreeze_wallet_success(self, client, staff_user, frozen_wallet):
         """Test unfreezing a wallet."""
         client.login(email="staff@test.com", password="testpass123")
 
-        response = client.post(reverse("operations:unfreeze_wallet", kwargs={"wallet_id": frozen_wallet.id}))
+        response = client.post(
+            reverse("operations:unfreeze_wallet", kwargs={"wallet_id": frozen_wallet.id}),
+            HTTP_HX_REQUEST="true",
+        )
 
         # Refresh from database
         frozen_wallet.refresh_from_db()
 
         assert response.status_code == 200
+        assert b"wallet-status-badge" in response.content
         assert frozen_wallet.is_frozen is False
 
     def test_unfreeze_wallet_not_frozen(self, client, staff_user, client_user_with_wallet):
@@ -318,18 +344,21 @@ class TestUnfreezeWalletView:
         client.login(email="staff@test.com", password="testpass123")
         user, wallet = client_user_with_wallet
 
-        response = client.post(reverse("operations:unfreeze_wallet", kwargs={"wallet_id": wallet.id}))
+        response = client.post(
+            reverse("operations:unfreeze_wallet", kwargs={"wallet_id": wallet.id}),
+            HTTP_HX_REQUEST="true",
+        )
 
         assert response.status_code == 200
-        data = response.json()
-        assert data["success"] is False
-        assert "not frozen" in data["error"]
+        assert b"alert" in response.content
 
 
 class TestStaffDashboardIntegration:
     """Test staff dashboard integration with fraud detection."""
 
-    def test_flagged_transaction_appears_in_dashboard(self, client, staff_user, flagged_transaction):
+    def test_flagged_transaction_appears_in_dashboard(
+        self, client, staff_user, flagged_transaction
+    ):
         """Test that flagged transactions appear in the High Alert section."""
         client.login(email="staff@test.com", password="testpass123")
 
@@ -339,14 +368,18 @@ class TestStaffDashboardIntegration:
         flagged_txns = response.context["flagged_transactions"]
         assert flagged_transaction in flagged_txns
 
-    def test_approved_transaction_removed_from_flagged(self, client, staff_user, flagged_transaction):
+    def test_approved_transaction_removed_from_flagged(
+        self, client, staff_user, flagged_transaction
+    ):
         """Test that approved transactions are removed from flagged list."""
         client.login(email="staff@test.com", password="testpass123")
 
         # Approve the transaction
         client.post(
-            reverse("operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}),
-            {"action": "approve"}
+            reverse(
+                "operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}
+            ),
+            {"action": "approve"},
         )
 
         # Reload dashboard
@@ -372,3 +405,110 @@ class TestStaffDashboardIntegration:
 
         # Check flagged count
         assert stats["flagged_count"] >= 0
+
+
+class TestNonHtmxFallbacks:
+    """Non-HTMX POSTs must redirect (never raw JSON on screen)."""
+
+    def test_review_approve_non_htmx_redirects(self, client, staff_user, flagged_transaction):
+        """Test approving without HTMX redirects to staff dashboard."""
+        from django.contrib.messages import get_messages
+
+        client.login(email="staff@test.com", password="testpass123")
+
+        response = client.post(
+            reverse(
+                "operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}
+            ),
+            {"action": "approve"},
+        )
+
+        flagged_transaction.refresh_from_db()
+
+        assert response.status_code == 302
+        assert response.url == reverse("operations:staff_dashboard")
+        assert flagged_transaction.status == TransactionStatus.COMPLETED
+        assert len(list(get_messages(response.wsgi_request))) >= 1
+
+    def test_review_invalid_action_non_htmx_redirects(
+        self, client, staff_user, flagged_transaction
+    ):
+        """Test invalid review action without HTMX redirects with error message."""
+        from django.contrib.messages import get_messages
+
+        client.login(email="staff@test.com", password="testpass123")
+
+        response = client.post(
+            reverse(
+                "operations:review_transaction", kwargs={"transaction_id": flagged_transaction.id}
+            ),
+            {"action": "invalid"},
+        )
+
+        assert response.status_code == 302
+        assert response.url == reverse("operations:staff_dashboard")
+        assert len(list(get_messages(response.wsgi_request))) >= 1
+
+    def test_freeze_non_htmx_redirects(self, client, staff_user, client_user_with_wallet):
+        """Test freezing without HTMX redirects to staff dashboard."""
+        from django.contrib.messages import get_messages
+
+        client.login(email="staff@test.com", password="testpass123")
+        user, wallet = client_user_with_wallet
+
+        response = client.post(reverse("operations:freeze_wallet", kwargs={"wallet_id": wallet.id}))
+
+        wallet.refresh_from_db()
+
+        assert response.status_code == 302
+        assert response.url == reverse("operations:staff_dashboard")
+        assert wallet.is_frozen is True
+        assert len(list(get_messages(response.wsgi_request))) >= 1
+
+    def test_freeze_already_frozen_non_htmx_redirects(self, client, staff_user, frozen_wallet):
+        """Test freezing an already-frozen wallet without HTMX redirects."""
+        from django.contrib.messages import get_messages
+
+        client.login(email="staff@test.com", password="testpass123")
+
+        response = client.post(
+            reverse("operations:freeze_wallet", kwargs={"wallet_id": frozen_wallet.id})
+        )
+
+        assert response.status_code == 302
+        assert response.url == reverse("operations:staff_dashboard")
+        assert len(list(get_messages(response.wsgi_request))) >= 1
+
+    def test_unfreeze_non_htmx_redirects(self, client, staff_user, frozen_wallet):
+        """Test unfreezing without HTMX redirects to staff dashboard."""
+        from django.contrib.messages import get_messages
+
+        client.login(email="staff@test.com", password="testpass123")
+
+        response = client.post(
+            reverse("operations:unfreeze_wallet", kwargs={"wallet_id": frozen_wallet.id})
+        )
+
+        frozen_wallet.refresh_from_db()
+
+        assert response.status_code == 302
+        assert response.url == reverse("operations:staff_dashboard")
+        assert frozen_wallet.is_frozen is False
+        assert len(list(get_messages(response.wsgi_request))) >= 1
+
+    def test_unfreeze_not_frozen_non_htmx_redirects(
+        self, client, staff_user, client_user_with_wallet
+    ):
+        """Test unfreezing a non-frozen wallet without HTMX redirects."""
+        from django.contrib.messages import get_messages
+
+        client.login(email="staff@test.com", password="testpass123")
+        user, wallet = client_user_with_wallet
+
+        response = client.post(
+            reverse("operations:unfreeze_wallet", kwargs={"wallet_id": wallet.id})
+        )
+
+        assert response.status_code == 302
+        assert response.url == reverse("operations:staff_dashboard")
+        assert len(list(get_messages(response.wsgi_request))) >= 1

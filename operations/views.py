@@ -6,18 +6,19 @@ Staff dashboard and fraud management views.
 
 from decimal import Decimal
 
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, Sum
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.db.models import Sum
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.views import View
 from django.views.generic import TemplateView
 
 from accounts.views import StaffOnlyMixin
 from wallet.models import Transaction, TransactionStatus, Wallet
-from wallet.services import flag_transaction, freeze_wallet, unfreeze_wallet
+from wallet.services import freeze_wallet, unfreeze_wallet
 
 CustomUser = get_user_model()
 
@@ -39,32 +40,33 @@ class StaffDashboardView(LoginRequiredMixin, StaffOnlyMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         # Get flagged transactions (High Alert)
-        flagged_transactions = Transaction.objects.filter(
-            status=TransactionStatus.FLAGGED
-        ).select_related(
-            "wallet__client_profile__user",
-            "counterparty_wallet__client_profile__user",
-        ).order_by("-created_at")[:50]
+        flagged_transactions = (
+            Transaction.objects.filter(status=TransactionStatus.FLAGGED)
+            .select_related(
+                "wallet__client_profile__user",
+                "counterparty_wallet__client_profile__user",
+            )
+            .order_by("-created_at")[:50]
+        )
 
         # Get recent transactions (excluding flagged)
-        recent_transactions = Transaction.objects.exclude(
-            status=TransactionStatus.FLAGGED
-        ).select_related(
-            "wallet__client_profile__user",
-            "counterparty_wallet__client_profile__user",
-        ).order_by("-created_at")[:20]
+        recent_transactions = (
+            Transaction.objects.exclude(status=TransactionStatus.FLAGGED)
+            .select_related(
+                "wallet__client_profile__user",
+                "counterparty_wallet__client_profile__user",
+            )
+            .order_by("-created_at")[:20]
+        )
 
         # System statistics
         total_users = CustomUser.objects.filter(user_type="CLIENT").count()
 
         total_deposits = Transaction.objects.filter(
-            type="DEPOSIT",
-            status=TransactionStatus.COMPLETED
+            type="DEPOSIT", status=TransactionStatus.COMPLETED
         ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
 
-        flagged_count = Transaction.objects.filter(
-            status=TransactionStatus.FLAGGED
-        ).count()
+        flagged_count = Transaction.objects.filter(status=TransactionStatus.FLAGGED).count()
 
         context["flagged_transactions"] = flagged_transactions
         context["recent_transactions"] = recent_transactions
@@ -90,6 +92,7 @@ class ReviewTransactionView(LoginRequiredMixin, StaffOnlyMixin, View):
         from wallet.services import process_fraud_review
 
         action = request.POST.get("action")
+        is_htmx = request.headers.get("HX-Request") == "true"
 
         try:
             # Delegate to service layer
@@ -102,8 +105,8 @@ class ReviewTransactionView(LoginRequiredMixin, StaffOnlyMixin, View):
             # Get updated transaction
             transaction = get_object_or_404(Transaction, pk=transaction_id)
 
-            # For HTMX requests, return updated row
-            if request.headers.get("HX-Request"):
+            # HTMX requests get the updated row HTML
+            if is_htmx:
                 html = render_to_string(
                     "operations/partials/transaction_row.html",
                     {"transaction": transaction},
@@ -111,13 +114,20 @@ class ReviewTransactionView(LoginRequiredMixin, StaffOnlyMixin, View):
                 )
                 return HttpResponse(html)
 
-            return JsonResponse({"success": True, "message": result["message"]})
+            # Non-HTMX fallback: redirect with message (never raw JSON)
+            messages.success(request, result["message"])
+            return redirect("operations:staff_dashboard")
 
         except ValueError as e:
-            return JsonResponse({
-                "success": False,
-                "error": str(e),
-            })
+            if is_htmx:
+                error_html = render_to_string(
+                    "components/alert.html",
+                    {"message": {"tags": "danger", "message": str(e)}},
+                    request=request,
+                )
+                return HttpResponse(error_html)
+            messages.error(request, str(e))
+            return redirect("operations:staff_dashboard")
 
 
 class FreezeWalletView(LoginRequiredMixin, StaffOnlyMixin, View):
@@ -129,19 +139,26 @@ class FreezeWalletView(LoginRequiredMixin, StaffOnlyMixin, View):
 
     def post(self, request, wallet_id):
         """Freeze the specified wallet."""
+        is_htmx = request.headers.get("HX-Request") == "true"
         wallet = get_object_or_404(Wallet, pk=wallet_id)
 
         if wallet.is_frozen:
-            return JsonResponse({
-                "success": False,
-                "error": "Wallet is already frozen."
-            })
+            error = "Wallet is already frozen."
+            if is_htmx:
+                error_html = render_to_string(
+                    "components/alert.html",
+                    {"message": {"tags": "danger", "message": error}},
+                    request=request,
+                )
+                return HttpResponse(error_html)
+            messages.error(request, error)
+            return redirect("operations:staff_dashboard")
 
         reason = request.POST.get("reason", "Administrative action")
         freeze_wallet(wallet, reason=reason)
 
-        # For HTMX requests, return updated status
-        if request.headers.get("HX-Request"):
+        # HTMX requests get the updated status HTML
+        if is_htmx:
             html = render_to_string(
                 "operations/partials/wallet_status.html",
                 {"wallet": wallet},
@@ -149,10 +166,9 @@ class FreezeWalletView(LoginRequiredMixin, StaffOnlyMixin, View):
             )
             return HttpResponse(html)
 
-        return JsonResponse({
-            "success": True,
-            "message": f"Wallet #{wallet.id} has been frozen."
-        })
+        # Non-HTMX fallback: redirect with message (never raw JSON)
+        messages.success(request, f"Wallet #{wallet.id} has been frozen.")
+        return redirect("operations:staff_dashboard")
 
 
 class UnfreezeWalletView(LoginRequiredMixin, StaffOnlyMixin, View):
@@ -164,18 +180,25 @@ class UnfreezeWalletView(LoginRequiredMixin, StaffOnlyMixin, View):
 
     def post(self, request, wallet_id):
         """Unfreeze the specified wallet."""
+        is_htmx = request.headers.get("HX-Request") == "true"
         wallet = get_object_or_404(Wallet, pk=wallet_id)
 
         if not wallet.is_frozen:
-            return JsonResponse({
-                "success": False,
-                "error": "Wallet is not frozen."
-            })
+            error = "Wallet is not frozen."
+            if is_htmx:
+                error_html = render_to_string(
+                    "components/alert.html",
+                    {"message": {"tags": "danger", "message": error}},
+                    request=request,
+                )
+                return HttpResponse(error_html)
+            messages.error(request, error)
+            return redirect("operations:staff_dashboard")
 
         unfreeze_wallet(wallet)
 
-        # For HTMX requests, return updated status
-        if request.headers.get("HX-Request"):
+        # HTMX requests get the updated status HTML
+        if is_htmx:
             html = render_to_string(
                 "operations/partials/wallet_status.html",
                 {"wallet": wallet},
@@ -183,7 +206,6 @@ class UnfreezeWalletView(LoginRequiredMixin, StaffOnlyMixin, View):
             )
             return HttpResponse(html)
 
-        return JsonResponse({
-            "success": True,
-            "message": f"Wallet #{wallet.id} has been unfrozen."
-        })
+        # Non-HTMX fallback: redirect with message (never raw JSON)
+        messages.success(request, f"Wallet #{wallet.id} has been unfrozen.")
+        return redirect("operations:staff_dashboard")
