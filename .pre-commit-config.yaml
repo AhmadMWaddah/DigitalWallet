@@ -18,7 +18,7 @@ repos:
     hooks:
       - id: flake8
         args: [--max-line-length, "100", --extend-ignore, "E203,W503,E501"]
-        exclude: ^migrations/|^core/settings/(dev|prod)\.py$
+        exclude: ^migrations/|^core/settings/(dev|prod|test)\.py$
 
   # -- Isort: Import Sorter
   - repo: https://github.com/PyCQA/isort
