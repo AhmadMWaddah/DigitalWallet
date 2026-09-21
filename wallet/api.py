@@ -20,6 +20,7 @@ from .exceptions import (
     FrozenWalletError,
     InsufficientFundsError,
     InvalidAmountError,
+    KYCRequiredError,
     SelfTransferError,
 )
 from .models import Transaction, Wallet
@@ -36,6 +37,7 @@ SERVICE_ERRORS = (
     FrozenWalletError,
     InvalidAmountError,
     InsufficientFundsError,
+    KYCRequiredError,
     SelfTransferError,
     DuplicateTransactionError,
 )

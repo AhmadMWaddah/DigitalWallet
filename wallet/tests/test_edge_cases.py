@@ -11,7 +11,7 @@ from decimal import Decimal
 
 from django.urls import reverse
 
-from accounts.models import CustomUser, UserType
+from accounts.models import CustomUser, KYCStatus, UserType
 from wallet.models import Transaction, TransactionStatus, Wallet
 from wallet.services import deposit_funds, freeze_wallet, transfer_funds, withdraw_funds
 
@@ -34,6 +34,8 @@ class TestLedgerConsistency:
         """Test flagged amounts credit the receiver but stay marked isolated."""
         sender = _make_client("ledger-a@test.com")
         receiver = _make_client("ledger-b@test.com", balance=Decimal("1000.00"))
+        sender.client_profile.kyc_status = KYCStatus.VERIFIED
+        sender.client_profile.save(update_fields=["kyc_status"])
         sender_wallet = sender.client_profile.wallet
         receiver_wallet = receiver.client_profile.wallet
 

@@ -248,6 +248,10 @@ SPECTACULAR_SETTINGS = {
 TRANSFER_FEE_PERCENT = Decimal("0.015")
 TRANSFER_FEE_FIXED = Decimal("0.20")
 
+# -- KYC: transfers above this amount need a VERIFIED sender profile
+
+KYC_REQUIRED_ABOVE = Decimal("10000.00")
+
 # -- Custom Error Handlers
 
 HANDLERS = {

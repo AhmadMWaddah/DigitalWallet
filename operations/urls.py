@@ -8,6 +8,7 @@ from django.urls import path
 
 from .views import (
     FreezeWalletView,
+    KYCReviewView,
     ReviewTransactionView,
     StaffDashboardView,
     UnfreezeWalletView,
@@ -24,4 +25,5 @@ urlpatterns = [
     ),
     path("wallet/<int:wallet_id>/freeze/", FreezeWalletView.as_view(), name="freeze_wallet"),
     path("wallet/<int:wallet_id>/unfreeze/", UnfreezeWalletView.as_view(), name="unfreeze_wallet"),
+    path("kyc/<int:profile_id>/review/", KYCReviewView.as_view(), name="review_kyc"),
 ]

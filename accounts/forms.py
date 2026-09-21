@@ -184,3 +184,32 @@ class ClientSetPasswordForm(forms.Form):
             raise ValidationError("Password must be at least 8 characters long.")
 
         return password2
+
+
+class KYCUploadForm(forms.Form):
+    """Form for uploading a KYC identity document."""
+
+    ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png"}
+    MAX_SIZE_BYTES = 5 * 1024 * 1024
+
+    document = forms.FileField(
+        widget=forms.ClearableFileInput(
+            attrs={"class": "form-input", "accept": ".pdf,.jpg,.jpeg,.png"}
+        ),
+        help_text="PDF, JPG, or PNG up to 5MB",
+    )
+
+    def clean_document(self):
+        """Validate file type and size."""
+        document = self.cleaned_data.get("document")
+        if document is None:
+            raise ValidationError("Please choose a document to upload.")
+
+        suffix = f".{document.name.rsplit('.', 1)[-1].lower()}" if "." in document.name else ""
+        if suffix not in self.ALLOWED_EXTENSIONS:
+            raise ValidationError("Only PDF, JPG, and PNG files are accepted.")
+
+        if document.size > self.MAX_SIZE_BYTES:
+            raise ValidationError("File must be 5MB or smaller.")
+
+        return document

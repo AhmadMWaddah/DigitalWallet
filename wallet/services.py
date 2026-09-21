@@ -18,6 +18,7 @@ from .exceptions import (
     FrozenWalletError,
     InsufficientFundsError,
     InvalidAmountError,
+    KYCRequiredError,
     SelfTransferError,
 )
 from .models import Transaction, TransactionStatus, TransactionType, Wallet
@@ -241,6 +242,14 @@ def transfer_funds(sender_wallet, receiver_wallet, amount, description="", refer
     # -- Prevent self-transfer
     if sender_wallet.id == receiver_wallet.id:
         raise SelfTransferError()
+
+    # -- KYC gate: large transfers need a VERIFIED sender profile.
+    # Compared as a string to keep services decoupled from accounts.models.
+    kyc_threshold = getattr(settings, "KYC_REQUIRED_ABOVE", Decimal("10000.00"))
+    if amount > kyc_threshold:
+        kyc_status = getattr(sender_wallet.client_profile, "kyc_status", None)
+        if kyc_status != "VERIFIED":
+            raise KYCRequiredError(amount, kyc_threshold)
 
     # -- Generate reference_id if not provided
     if reference_id is None:

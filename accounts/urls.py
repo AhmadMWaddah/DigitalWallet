@@ -9,6 +9,7 @@ from django.urls import path
 from .views import (
     ClientRegistrationView,
     CustomLoginView,
+    KYCUploadView,
     LoginRedirectView,
     LogoutView,
     ProfileView,
@@ -27,6 +28,7 @@ urlpatterns = [
     # -- Client Account Management
     path("profile/", ProfileView.as_view(), name="profile"),
     path("security/", SecurityView.as_view(), name="security"),
+    path("kyc/", KYCUploadView.as_view(), name="kyc_upload"),
     # -- Client Password Reset
     path("password-reset/", ClientPasswordResetView.as_view(), name="password_reset_client"),
     path(

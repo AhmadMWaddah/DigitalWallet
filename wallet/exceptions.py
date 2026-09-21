@@ -57,3 +57,15 @@ class CounterpartyWalletNotFoundError(WalletException):
     def __init__(self, wallet_identifier):
         self.wallet_identifier = wallet_identifier
         super().__init__(f"Counterparty wallet not found: {wallet_identifier}")
+
+
+class KYCRequiredError(WalletException):
+    """Raised when a large transfer needs verified KYC first."""
+
+    def __init__(self, amount, threshold):
+        self.amount = amount
+        self.threshold = threshold
+        super().__init__(
+            f"KYC verification required for transfers above ${threshold:.2f} "
+            f"(attempted ${amount:.2f})."
+        )
