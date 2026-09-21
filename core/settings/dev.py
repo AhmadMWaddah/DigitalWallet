@@ -70,7 +70,8 @@ if "pytest" not in sys.modules:
         ),
     }
 
-# -- Development Logging (DEBUG level for detailed debugging)
+# -- Development Logging (DEBUG level, human-readable locally)
 
 LOGGING["root"]["level"] = "DEBUG"  # type: ignore[index]
+LOGGING["handlers"]["console"]["formatter"] = "simple"  # type: ignore[index]
 LOGGING["loggers"]["django"]["level"] = "DEBUG"  # type: ignore[index]
