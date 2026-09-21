@@ -6,8 +6,9 @@ Concurrency-safe with database locking and F() expressions.
 """
 
 import uuid
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
+from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
@@ -22,6 +23,19 @@ from .exceptions import (
 from .models import Transaction, TransactionStatus, TransactionType, Wallet
 
 # -- Helper Functions
+
+
+def calculate_transfer_fee(amount):
+    """
+    Calculate the sender-paid transfer fee (percent + fixed, half-up cents).
+
+    Rates come from settings (TRANSFER_FEE_PERCENT / TRANSFER_FEE_FIXED)
+    so pricing changes without code edits.
+    """
+    percent = getattr(settings, "TRANSFER_FEE_PERCENT", Decimal("0.015"))
+    fixed = getattr(settings, "TRANSFER_FEE_FIXED", Decimal("0.20"))
+    variable = (amount * percent).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return variable + fixed
 
 
 def _validate_amount(amount):
@@ -232,6 +246,10 @@ def transfer_funds(sender_wallet, receiver_wallet, amount, description="", refer
     if reference_id is None:
         reference_id = f"TRF-{sender_wallet.id}-{receiver_wallet.id}-{uuid.uuid4().hex[:12]}"
 
+    # -- Sender-paid fee (percent + fixed), deducted on top of amount
+    fee = calculate_transfer_fee(amount)
+    total_debit = amount + fee
+
     # -- CRITICAL: Lock BOTH wallet rows for update (order by ID to prevent deadlocks)
     # Lock in consistent order (lower ID first) to prevent deadlocks
     if sender_wallet.id < receiver_wallet.id:
@@ -241,9 +259,9 @@ def transfer_funds(sender_wallet, receiver_wallet, amount, description="", refer
         receiver_wallet = Wallet.objects.select_for_update().get(pk=receiver_wallet.pk)
         sender_wallet = Wallet.objects.select_for_update().get(pk=sender_wallet.pk)
 
-    # -- Check sufficient funds (after lock, balance is current)
-    if sender_wallet.balance < amount:
-        raise InsufficientFundsError(sender_wallet.balance, amount)
+    # -- Check sufficient funds for amount + fee (after lock, balance is current)
+    if sender_wallet.balance < total_debit:
+        raise InsufficientFundsError(sender_wallet.balance, total_debit)
 
     # -- CRITICAL: Isolate funds on receiver side for potential reversal
     # Move amount to isolated_funds (can't be spent until transfer is confirmed)
@@ -254,7 +272,8 @@ def transfer_funds(sender_wallet, receiver_wallet, amount, description="", refer
     receiver_wallet.save(update_fields=["metadata"])
 
     # -- Update balances using F() expressions (avoids race conditions)
-    Wallet.objects.filter(pk=sender_wallet.pk).update(balance=F("balance") - amount)
+    # Sender pays amount + fee; receiver gets the full amount
+    Wallet.objects.filter(pk=sender_wallet.pk).update(balance=F("balance") - total_debit)
     Wallet.objects.filter(pk=receiver_wallet.pk).update(balance=F("balance") + amount)
 
     # -- Refresh wallets from database to get updated balances
@@ -283,6 +302,26 @@ def transfer_funds(sender_wallet, receiver_wallet, amount, description="", refer
     except IntegrityError as e:
         # Reference ID already exists - this is a duplicate request
         raise DuplicateTransactionError(reference_id) from e
+
+    # -- Record the sender-paid fee (same atomic block; charged even if flagged)
+    try:
+        Transaction.objects.create(
+            wallet=sender_wallet,
+            counterparty_wallet=receiver_wallet,
+            amount=fee,
+            type=TransactionType.FEE,
+            status=TransactionStatus.COMPLETED,
+            description=f"Transfer fee for {reference_id}",
+            reference_id=f"{reference_id}-FEE",
+            metadata={
+                "operation": "transfer_fee",
+                "base_amount": str(amount),
+                "original_reference": reference_id,
+                "timestamp": timezone.now().isoformat(),
+            },
+        )
+    except IntegrityError as e:
+        raise DuplicateTransactionError(f"{reference_id}-FEE") from e
 
     # -- Run fraud detection on the transaction
     fraud_result = FraudEngine.check_transaction(sender_transaction)

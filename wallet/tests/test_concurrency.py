@@ -133,10 +133,10 @@ class TestConcurrencySafety:
         Test that concurrent transfers between same wallets are safe.
 
         Scenario:
-        - Wallet A has $500, Wallet B has $500
-        - 5 transfers of $100 from A to B
+        - Wallet A has $600, Wallet B has $500
+        - 5 transfers of $100 from A to B ($1.70 fee each)
         - Expected: ALL 5 transfers succeed
-        - Expected: Wallet A ends with $0, Wallet B ends with $1000
+        - Expected: Wallet A ends with $91.50, Wallet B ends with $1000
         """
         # Create two users with wallets
         user_a = CustomUser.objects.create_user(
@@ -146,7 +146,7 @@ class TestConcurrencySafety:
         )
         wallet_a = Wallet.objects.create(
             client_profile=user_a.client_profile,
-            balance=Decimal("500.00"),
+            balance=Decimal("600.00"),
         )
 
         user_b = CustomUser.objects.create_user(
@@ -181,8 +181,8 @@ class TestConcurrencySafety:
         wallet_b.refresh_from_db()
 
         assert wallet_a.balance == Decimal(
-            "0.00"
-        ), f"Wallet A should have $0.00, got ${wallet_a.balance}"
+            "91.50"
+        ), f"Wallet A should have $91.50, got ${wallet_a.balance}"
         assert wallet_b.balance == Decimal(
             "1000.00"
         ), f"Wallet B should have $1000.00, got ${wallet_b.balance}"

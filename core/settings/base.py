@@ -5,6 +5,7 @@ This file contains the core settings shared across all environments.
 Environment-specific settings should be in dev.py or prod.py.
 """
 
+from decimal import Decimal
 from pathlib import Path
 
 import environ
@@ -241,6 +242,11 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Digital Wallet API",
     "VERSION": "1.0.0",
 }
+
+# -- Transfer Fees (sender-paid, percent + fixed, Decimal)
+
+TRANSFER_FEE_PERCENT = Decimal("0.015")
+TRANSFER_FEE_FIXED = Decimal("0.20")
 
 # -- Custom Error Handlers
 

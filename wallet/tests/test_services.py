@@ -260,13 +260,13 @@ class TestTransferFunds:
         sender_wallet.refresh_from_db()
         receiver_wallet.refresh_from_db()
 
-        assert sender_wallet.balance == Decimal("700.00")
+        assert sender_wallet.balance == Decimal("695.30")  # 300 + 4.70 fee
         assert receiver_wallet.balance == Decimal("300.00")
         assert transaction.amount == Decimal("300.00")
         assert transaction.type == "TRANSFER"
 
     def test_transfer_creates_two_records(self):
-        """Test transfer creates transaction records for both wallets."""
+        """Test transfer creates transaction records for both wallets plus fee."""
         sender = CustomUser.objects.create_user(
             email="sender2@test.com",
             password="testpass123",
@@ -289,7 +289,7 @@ class TestTransferFunds:
 
         transfer_funds(sender_wallet, receiver_wallet, Decimal("100.00"))
 
-        assert sender_wallet.transactions.count() == 1
+        assert sender_wallet.transactions.count() == 2  # TRANSFER + FEE
         assert receiver_wallet.transactions.count() == 1
 
     def test_transfer_self_transfer_raises_error(self):

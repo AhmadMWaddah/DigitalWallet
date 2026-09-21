@@ -322,7 +322,7 @@ class TestIntegration:
         # Verify money moved
         sender_wallet.refresh_from_db()
         receiver_wallet.refresh_from_db()
-        assert sender_wallet.balance == Decimal("450.00")
+        assert sender_wallet.balance == Decimal("449.05")  # 50 + 0.95 fee
         assert receiver_wallet.balance == Decimal("150.00")
 
         # Reject the transfer
@@ -330,10 +330,10 @@ class TestIntegration:
 
         assert result["success"] is True
 
-        # Verify money restored
+        # Verify money restored (transfer amount back; earned fee stays charged)
         sender_wallet.refresh_from_db()
         receiver_wallet.refresh_from_db()
-        assert sender_wallet.balance == Decimal("500.00")
+        assert sender_wallet.balance == Decimal("499.05")
         assert receiver_wallet.balance == Decimal("100.00")
 
         # Verify transaction status

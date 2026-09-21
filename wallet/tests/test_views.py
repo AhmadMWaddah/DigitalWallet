@@ -326,7 +326,7 @@ class TestTransferView:
 
         sender_wallet.refresh_from_db()
         receiver_wallet.refresh_from_db()
-        assert sender_wallet.balance == Decimal("400.00")
+        assert sender_wallet.balance == Decimal("398.30")  # 100 + 1.70 fee
         assert receiver_wallet.balance == Decimal("100.00")
 
     def test_transfer_to_self_fails(self, client):

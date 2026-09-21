@@ -19,6 +19,7 @@ class TransactionType(models.TextChoices):
     DEPOSIT = "DEPOSIT", "Deposit"
     WITHDRAWAL = "WITHDRAWAL", "Withdrawal"
     TRANSFER = "TRANSFER", "Transfer"
+    FEE = "FEE", "Fee"
 
 
 class TransactionStatus(models.TextChoices):
