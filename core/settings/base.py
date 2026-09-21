@@ -159,6 +159,9 @@ LOGGING = {
             "format": "{levelname} {message}",
             "style": "{",
         },
+        "json": {
+            "()": "core.logging.JsonFormatter",
+        },
     },
     "filters": {
         "require_debug_false": {
@@ -168,7 +171,7 @@ LOGGING = {
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "simple",
+            "formatter": "json",
         },
         "mail_admins": {
             "class": "django.utils.log.AdminEmailHandler",
