@@ -45,6 +45,8 @@ and re-enable per case (`accounts/tests/test_rate_limits.py`,
 
 ## Known Gaps (not yet done)
 
-- No JWT/token auth — API layer (Phase 4) must add it; session auth only.
+- API v1 (`/api/v1/`, `wallet/api.py`) uses session auth + `IsClientUser`
+  (own-wallet-only) + `transfer` throttle scope; no JWT yet — add token
+  auth when a mobile client lands.
 - `ALLOWED_HOSTS` / `SECRET_KEY` come from `.env` — verify in prod deploy.
 - Redis has no password in `docker-compose.yml` — fine for local, not for prod.
