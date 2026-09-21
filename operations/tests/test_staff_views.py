@@ -13,7 +13,7 @@ from decimal import Decimal
 import pytest
 from django.urls import reverse
 
-from accounts.models import UserType
+from accounts.models import KYCStatus, UserType
 from wallet.models import TransactionStatus, Wallet
 from wallet.services import transfer_funds
 
@@ -49,6 +49,8 @@ def client_user_with_wallet(db):
 def flagged_transaction(client_user_with_wallet):
     """Create a flagged transaction for testing."""
     user, sender_wallet = client_user_with_wallet
+    user.client_profile.kyc_status = KYCStatus.VERIFIED
+    user.client_profile.save(update_fields=["kyc_status"])
 
     # Create receiver wallet
     receiver_user = type(user).objects.create_user(

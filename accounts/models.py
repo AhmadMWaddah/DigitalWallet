@@ -162,6 +162,15 @@ class StaffProfile(models.Model):
         return f"{self.get_role_display()} - {self.user.email}"
 
 
+class KYCStatus(models.TextChoices):
+    """KYC verification state machine."""
+
+    UNVERIFIED = "UNVERIFIED", "Unverified"
+    PENDING = "PENDING", "Pending Review"
+    VERIFIED = "VERIFIED", "Verified"
+    REJECTED = "REJECTED", "Rejected"
+
+
 class ClientProfile(models.Model):
     """
     Profile for client users (wallet holders).
@@ -198,6 +207,44 @@ class ClientProfile(models.Model):
 
     kyc_verified = models.BooleanField(
         "KYC Verified", default=False, help_text="Know Your Customer verification status."
+    )
+
+    kyc_status = models.CharField(
+        "KYC Status",
+        max_length=20,
+        choices=KYCStatus.choices,
+        default=KYCStatus.UNVERIFIED,
+        help_text="KYC verification state machine.",
+    )
+
+    kyc_document = models.FileField(
+        "KYC Document",
+        upload_to="kyc/",
+        blank=True,
+        null=True,
+        help_text="Identity document for verification (PDF/JPG/PNG).",
+    )
+
+    kyc_submitted_at = models.DateTimeField(
+        "KYC Submitted At",
+        blank=True,
+        null=True,
+        help_text="When the document was last submitted.",
+    )
+
+    kyc_verified_at = models.DateTimeField(
+        "KYC Verified At",
+        blank=True,
+        null=True,
+        help_text="When staff approved the document.",
+    )
+
+    kyc_rejection_reason = models.CharField(
+        "KYC Rejection Reason",
+        max_length=500,
+        blank=True,
+        default="",
+        help_text="Why staff rejected the document.",
     )
 
     created_at = models.DateTimeField(

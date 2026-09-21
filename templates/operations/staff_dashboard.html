@@ -131,6 +131,61 @@
     </div>
     {% endif %}
 
+    <!-- --#-- KYC Applications Section -->
+    {% if pending_kyc %}
+    <div class="section-card alert-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-id-card"></i> KYC Applications Pending Review
+            </h2>
+            <span class="badge badge-danger">{{ pending_kyc|length }}</span>
+        </div>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Submitted</th>
+                        <th>Document</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in pending_kyc %}
+                    <tr class="flagged-row" id="kyc-row-{{ profile.id }}">
+                        <td class="cell-email">{{ profile.user.email }}</td>
+                        <td class="cell-date">{{ profile.kyc_submitted_at|date:"M d, H:i" }}</td>
+                        <td>
+                            {% if profile.kyc_document %}
+                            <a href="{{ profile.kyc_document.url }}" target="_blank">View document</a>
+                            {% else %}
+                            <span>No document</span>
+                            {% endif %}
+                        </td>
+                        <td class="cell-actions">
+                            <form hx-post="{% url 'operations:review_kyc' profile.id %}"
+                                  hx-target="#kyc-row-{{ profile.id }}"
+                                  hx-swap="outerHTML"
+                                  class="inline-form">
+                                {% csrf_token %}
+                                <input type="text" name="reason" placeholder="Rejection reason (for reject)"
+                                       class="form-input" style="max-width: 220px;">
+                                <button type="submit" name="action" value="approve" class="btn-icon btn-success" title="Approve">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button type="submit" name="action" value="reject" class="btn-icon btn-danger" title="Reject">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- --#-- Recent Transactions -->
     <div class="section-card">
         <div class="section-header">

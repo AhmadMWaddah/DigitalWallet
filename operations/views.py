@@ -13,9 +13,11 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.views import View
 from django.views.generic import TemplateView
 
+from accounts.models import ClientProfile, KYCStatus
 from accounts.views import StaffOnlyMixin
 from wallet.models import Transaction, TransactionStatus, Wallet
 from wallet.services import freeze_wallet, unfreeze_wallet
@@ -68,8 +70,16 @@ class StaffDashboardView(LoginRequiredMixin, StaffOnlyMixin, TemplateView):
 
         flagged_count = Transaction.objects.filter(status=TransactionStatus.FLAGGED).count()
 
+        # Pending KYC applications for staff review
+        pending_kyc = (
+            ClientProfile.objects.filter(kyc_status=KYCStatus.PENDING)
+            .select_related("user")
+            .order_by("kyc_submitted_at")[:50]
+        )
+
         context["flagged_transactions"] = flagged_transactions
         context["recent_transactions"] = recent_transactions
+        context["pending_kyc"] = pending_kyc
         context["stats"] = {
             "total_users": total_users,
             "total_volume": total_deposits,
@@ -209,3 +219,72 @@ class UnfreezeWalletView(LoginRequiredMixin, StaffOnlyMixin, View):
         # Non-HTMX fallback: redirect with message (never raw JSON)
         messages.success(request, f"Wallet #{wallet.id} has been unfrozen.")
         return redirect("operations:staff_dashboard")
+
+
+class KYCReviewView(LoginRequiredMixin, StaffOnlyMixin, View):
+    """
+    Staff view to approve or reject KYC applications.
+
+    Mirrors ReviewTransactionView shapes: alert HTML for HTMX,
+    redirect with message otherwise.
+    """
+
+    def post(self, request, profile_id):
+        """Approve or reject a pending KYC application."""
+        is_htmx = request.headers.get("HX-Request") == "true"
+        profile = get_object_or_404(ClientProfile, pk=profile_id)
+        action = request.POST.get("action")
+        reason = request.POST.get("reason", "").strip()
+
+        def _fail(message):
+            if is_htmx:
+                return HttpResponse(
+                    render_to_string(
+                        "components/alert.html",
+                        {"message": {"tags": "danger", "message": message}},
+                        request=request,
+                    )
+                )
+            messages.error(request, message)
+            return redirect("operations:staff_dashboard")
+
+        def _ok(message):
+            if is_htmx:
+                return HttpResponse(
+                    render_to_string(
+                        "components/alert.html",
+                        {"message": {"tags": "success", "message": message}},
+                        request=request,
+                    )
+                )
+            messages.success(request, message)
+            return redirect("operations:staff_dashboard")
+
+        if profile.kyc_status != KYCStatus.PENDING:
+            return _fail("Only pending applications can be reviewed.")
+
+        if action == "approve":
+            profile.kyc_status = KYCStatus.VERIFIED
+            profile.kyc_verified = True
+            profile.kyc_verified_at = timezone.now()
+            profile.kyc_rejection_reason = ""
+            profile.save(
+                update_fields=[
+                    "kyc_status",
+                    "kyc_verified",
+                    "kyc_verified_at",
+                    "kyc_rejection_reason",
+                ]
+            )
+            return _ok(f"KYC approved for {profile.user.email}.")
+
+        if action == "reject":
+            if not reason:
+                return _fail("A rejection reason is required.")
+            profile.kyc_status = KYCStatus.REJECTED
+            profile.kyc_verified = False
+            profile.kyc_rejection_reason = reason
+            profile.save(update_fields=["kyc_status", "kyc_verified", "kyc_rejection_reason"])
+            return _ok(f"KYC rejected for {profile.user.email}.")
+
+        return _fail("Unknown action.")

@@ -13,7 +13,7 @@ from decimal import Decimal
 import pytest
 from django.utils import timezone
 
-from accounts.models import UserType
+from accounts.models import KYCStatus, UserType
 from operations.fraud_engine import FraudEngine
 from wallet.models import Transaction, Wallet
 from wallet.services import transfer_funds
@@ -323,6 +323,8 @@ class TestFraudEngineIntegration:
     ):
         """Test that transfer_funds automatically flags transfers > $10,000."""
         user, sender_wallet = client_user_with_wallet
+        user.client_profile.kyc_status = KYCStatus.VERIFIED
+        user.client_profile.save(update_fields=["kyc_status"])
 
         # Perform transfer over $10,000
         transaction = transfer_funds(
@@ -402,6 +404,8 @@ class TestFraudEngineIntegration:
     def test_flagged_transaction_metadata(self, client_user_with_wallet, receiver_wallet):
         """Test that flagged transactions have proper metadata."""
         user, sender_wallet = client_user_with_wallet
+        user.client_profile.kyc_status = KYCStatus.VERIFIED
+        user.client_profile.save(update_fields=["kyc_status"])
 
         transaction = transfer_funds(
             sender_wallet=sender_wallet,
@@ -425,6 +429,8 @@ class TestFraudEngineHelperMethods:
     def test_get_flagged_transactions(self, client_user_with_wallet, receiver_wallet):
         """Test getting flagged transactions."""
         user, sender_wallet = client_user_with_wallet
+        user.client_profile.kyc_status = KYCStatus.VERIFIED
+        user.client_profile.save(update_fields=["kyc_status"])
 
         # Create a unique receiver for this test to avoid cross-test contamination
         from accounts.models import CustomUser

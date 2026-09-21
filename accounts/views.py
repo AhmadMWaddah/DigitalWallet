@@ -19,8 +19,8 @@ from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, TemplateView, View
 from django_ratelimit.decorators import ratelimit
 
-from .forms import ClientPasswordChangeForm, ClientRegistrationForm
-from .models import UserType
+from .forms import ClientPasswordChangeForm, ClientRegistrationForm, KYCUploadForm
+from .models import KYCStatus, UserType
 
 CustomUser = get_user_model()
 
@@ -461,3 +461,48 @@ class SecurityView(LoginRequiredMixin, ClientOnlyMixin, PasswordChangeView):
     def get_previous_session(self):
         """Get previous session information for display."""
         return _normalize_session_snapshot(self.request.session.get("previous_session_snapshot"))
+
+
+class KYCUploadView(LoginRequiredMixin, ClientOnlyMixin, View):
+    """
+    Client KYC document upload.
+
+    Valid upload moves the profile to PENDING for staff review.
+    Re-upload after rejection resets to PENDING.
+    """
+
+    def get(self, request):
+        """Display the upload page with current status."""
+        form = KYCUploadForm()
+        return render(
+            request,
+            "accounts/kyc_upload.html",
+            {"form": form, "profile": request.user.client_profile},
+        )
+
+    def post(self, request):
+        """Handle document upload."""
+        form = KYCUploadForm(request.POST, request.FILES)
+        profile = request.user.client_profile
+
+        if form.is_valid():
+            profile.kyc_document = form.cleaned_data["document"]
+            profile.kyc_status = KYCStatus.PENDING
+            profile.kyc_submitted_at = timezone.now()
+            profile.kyc_rejection_reason = ""
+            profile.save(
+                update_fields=[
+                    "kyc_document",
+                    "kyc_status",
+                    "kyc_submitted_at",
+                    "kyc_rejection_reason",
+                ]
+            )
+            messages.success(request, "Document submitted. Staff will review it shortly.")
+            return redirect("accounts:profile")
+
+        return render(
+            request,
+            "accounts/kyc_upload.html",
+            {"form": form, "profile": profile},
+        )
