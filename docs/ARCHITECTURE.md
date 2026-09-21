@@ -40,13 +40,13 @@ Core modules, tech stack, business rules, and workflow for Digital Wallet Dashbo
 flowchart LR
     Client[Browser + HTMX] --> Auth[Auth + Portal Middleware]
     Auth --> Views[Django Views]
-    Views --> Services[Service Layer\nwallet/services.py]
+    Views --> Services[Service Layer<br/>wallet/services.py]
     Services --> DB[(SQLite / PostgreSQL)]
-    Views --> Partials[HTMX Partials\nHTML swap, no page reload]
+    Views --> Partials[HTMX Partials<br/>HTML swap, no page reload]
     Partials --> Client
     Views --> Celery[Celery Worker]
-    Celery --> Redis[(Redis\nbroker + result backend)]
-    Celery --> Artifacts[PDF Statements\nEmail]
+    Celery --> Redis[(Redis<br/>broker + result backend)]
+    Celery --> Artifacts[PDF Statements<br/>Email]
     Artifacts --> Media[(media/statements/)]
 ```
 
@@ -54,26 +54,26 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    Login[POST /accounts/login/\nCustomLoginView\nratelimit 5/m per IP] --> Type{user_type?}
-    Type -->|superuser| Admin[Django Admin\n/admin/]
-    Type -->|STAFF| Staff[Staff Dashboard\n/staff/dashboard/]
-    Type -->|CLIENT| Wallet[Wallet Dashboard\n/dashboard/]
-    Staff -.->|hits client page| F4031[403 custom page\n+ smart redirect]
-    Wallet -.->|hits staff page| F4032[403 custom page\n+ smart redirect]
+    Login[POST /accounts/login/<br/>CustomLoginView<br/>ratelimit 5/m per IP] --> Type{user_type?}
+    Type -->|superuser| Admin[Django Admin<br/>/admin/]
+    Type -->|STAFF| Staff[Staff Dashboard<br/>/staff/dashboard/]
+    Type -->|CLIENT| Wallet[Wallet Dashboard<br/>/dashboard/]
+    Staff -.->|hits client page| F4031[403 custom page<br/>+ smart redirect]
+    Wallet -.->|hits staff page| F4032[403 custom page<br/>+ smart redirect]
 ```
 
 ## Transfer Flow (Happy Path + Flag)
 
 ```mermaid
 flowchart TD
-    Form[POST /dashboard/transfer/\nTransferView\nratelimit 10/m per user] --> Svc[transfer_funds\n@transaction.atomic]
-    Svc --> Lock[SELECT FOR UPDATE\nboth wallets by ID order]
+    Form[POST /dashboard/transfer/<br/>TransferView<br/>ratelimit 10/m per user] --> Svc[transfer_funds<br/>@transaction.atomic]
+    Svc --> Lock[SELECT FOR UPDATE<br/>both wallets by ID order]
     Lock --> F[F() balance updates]
-    F --> Idem{reference_id\nunique?}
-    Idem -->|duplicate| Dup[DuplicateTransactionError\n400]
+    F --> Idem{reference_id<br/>unique?}
+    Idem -->|duplicate| Dup[DuplicateTransactionError<br/>400]
     Idem -->|new| Fraud[FraudEngine.check]
-    Fraud -->|clean| Done[COMPLETED\nreceiver ledger entry]
-    Fraud -->|flagged| Flag[FLAGGED\nfunds isolated]
+    Fraud -->|clean| Done[COMPLETED<br/>receiver ledger entry]
+    Fraud -->|flagged| Flag[FLAGGED<br/>funds isolated]
     Flag --> StaffQ[Staff High-Alert queue]
 ```
 
@@ -81,30 +81,30 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    StaffQ[FLAGGED transaction\n/staff/dashboard/] --> Review[POST review/\nReviewTransactionView\nprocess_fraud_review]
+    StaffQ[FLAGGED transaction<br/>/staff/dashboard/] --> Review[POST review/<br/>ReviewTransactionView<br/>process_fraud_review]
     Review --> Act{action?}
-    Act -->|approve| OK[COMPLETED\nmetadata: reviewed_by/at]
-    Act -->|reject| Rev[FAILED + reversal\nfunds back to sender]
-    Freeze[Freeze/Unfreeze\nwallet controls] -.-> StaffQ
+    Act -->|approve| OK[COMPLETED<br/>metadata: reviewed_by/at]
+    Act -->|reject| Rev[FAILED + reversal<br/>funds back to sender]
+    Freeze[Freeze/Unfreeze<br/>wallet controls] -.-> StaffQ
 ```
 
 ## Statement Flow (Async)
 
 ```mermaid
 flowchart TD
-    Req[POST statement/request/\nStatementRequestView] --> Task[generate_statement_pdf.delay\nCelery + Redis]
-    Task --> Poll[GET statement/status/id/\nTaskStatusView\nHTMX poll, owner-bound]
-    Poll --> DL[GET statement/download/id/\nownership verified\nFileResponse PDF]
+    Req[POST statement/request/<br/>StatementRequestView] --> Task[generate_statement_pdf.delay<br/>Celery + Redis]
+    Task --> Poll[GET statement/status/id/<br/>TaskStatusView<br/>HTMX poll, owner-bound]
+    Poll --> DL[GET statement/download/id/<br/>ownership verified<br/>FileResponse PDF]
 ```
 
 ## Storage Layer
 
 ```mermaid
 flowchart TD
-    App[Django] --> SQL[(SQLite dev file\nPostgreSQL prod-ready)]
-    App --> Red[(Redis\nCelery broker + task results)]
-    App --> LocMem[(LocMemCache\ntest settings only)]
-    App --> FS[(media/\nstatement PDFs)]
+    App[Django] --> SQL[(SQLite dev file<br/>PostgreSQL prod-ready)]
+    App --> Red[(Redis<br/>Celery broker + task results)]
+    App --> LocMem[(LocMemCache<br/>test settings only)]
+    App --> FS[(media/<br/>statement PDFs)]
 ```
 
 ---
