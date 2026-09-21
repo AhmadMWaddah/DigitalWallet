@@ -1,0 +1,21 @@
+# -- Dev Compose: hot reload, SQLite, no Redis required
+# Usage: docker compose -f docker-compose.dev.yml up --build
+# Note: statement PDF flow needs a Celery worker + Redis;
+# start the prod compose services if you need async tasks.
+
+services:
+  web:
+    build: .
+    container_name: digital_wallet_web_dev
+    command: python manage.py runserver 0.0.0.0:8000 --settings=core.settings.dev
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.dev
+      - DEBUG=True
+    stdin_open: true
+    tty: true
