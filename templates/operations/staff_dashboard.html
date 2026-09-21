@@ -1,4 +1,4 @@
-<!-- --#-- Staff Dashboard Template - Clean Compact Design -->
+<!-- --#-- Staff Dashboard Template -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -9,233 +9,230 @@
 {% endblock %}
 
 {% block content %}
-<div class="staff-container">
-    <!-- --#-- Page Header -->
-    <div class="page-header">
-        <div class="header-content">
-            <div>
-                <h1 class="page-title">
-                    <i class="fas fa-shield-alt"></i> Staff Operations
-                </h1>
-                <p class="page-subtitle">Monitor transactions and review fraud alerts</p>
-            </div>
-            <div class="header-actions">
-                {% if user.is_superuser %}
-                <a href="{% url 'admin:index' %}" class="btn btn-admin">
-                    <i class="fas fa-cog"></i> Admin Panel
-                </a>
-                {% endif %}
-                <a href="{% url 'analytics:analytics_dashboard' %}" class="btn btn-analytics">
-                    <i class="fas fa-chart-line"></i> Analytics
-                </a>
-            </div>
+<!-- --#-- Page Header -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            {% include '__snippets__/icons/desktop.svg' %} Staff Operations
+        </h1>
+        <p class="page-subtitle">Monitor transactions and review fraud alerts</p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if user.is_superuser %}
+        <a href="{% url 'admin:index' %}" class="btn btn-secondary btn-sm">
+            {% include '__snippets__/icons/cog.svg' %} Admin Panel
+        </a>
+        {% endif %}
+        <a href="{% url 'analytics:analytics_dashboard' %}" class="btn btn-outline btn-sm">
+            {% include '__snippets__/icons/chart-line.svg' %} Analytics
+        </a>
+    </div>
+</div>
+
+<!-- --#-- Stats Row -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon">{% include '__snippets__/icons/users.svg' %}</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.total_users }}</div>
+            <div class="stat-label">Active Clients</div>
         </div>
     </div>
 
-    <!-- --#-- Stats Row -->
-    <div class="stats-row">
-        <div class="stat-card stat-primary">
-            <div class="stat-icon"><i class="fas fa-users"></i></div>
-            <div class="stat-content">
-                <h3 class="stat-value">{{ stats.total_users }}</h3>
-                <p class="stat-label">Active Clients</p>
-            </div>
-        </div>
-
-        <div class="stat-card stat-success">
-            <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
-            <div class="stat-content">
-                <h3 class="stat-value">${{ stats.total_volume|floatformat:2 }}</h3>
-                <p class="stat-label">Total Volume</p>
-            </div>
-        </div>
-
-        <div class="stat-card stat-danger {% if stats.flagged_count > 0 %}pulse{% endif %}">
-            <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="stat-content">
-                <h3 class="stat-value">{{ stats.flagged_count }}</h3>
-                <p class="stat-label">Flagged</p>
-            </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon--success">{% include '__snippets__/icons/dollar-sign.svg' %}</div>
+        <div class="stat-content">
+            <div class="stat-value">${{ stats.total_volume|floatformat:2 }}</div>
+            <div class="stat-label">Total Volume</div>
         </div>
     </div>
 
-    <!-- --#-- Flagged Transactions Section -->
-    {% if flagged_transactions %}
-    <div class="section-card alert-section">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-bell"></i> High Priority - Flagged Transactions
-            </h2>
-            <span class="badge badge-danger">{{ flagged_transactions.count }}</span>
+    <div class="stat-card">
+        <div class="stat-icon {% if stats.flagged_count > 0 %}stat-icon--danger{% endif %}">
+            {% include '__snippets__/icons/exclamation-triangle.svg' %}
         </div>
-        <div class="table-wrapper">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>User</th>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>Flag Reason</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for transaction in flagged_transactions %}
-                    <tr class="flagged-row" id="transaction-row-{{ transaction.id }}">
-                        <td class="cell-id">#{{ transaction.id }}</td>
-                        <td class="cell-email">{{ transaction.wallet.client_profile.user.email }}</td>
-                        <td>
-                            <span class="type-badge type-{{ transaction.type|lower }}">
-                                {{ transaction.get_type_display }}
-                            </span>
-                        </td>
-                        <td class="cell-amount">${{ transaction.amount|floatformat:2 }}</td>
-                        <td class="cell-flag">{{ transaction.metadata.flag_reason|default:"Under review" }}</td>
-                        <td class="cell-date">{{ transaction.created_at|date:"M d, H:i" }}</td>
-                        <td class="cell-actions">
-                            <form hx-post="{% url 'operations:review_transaction' transaction.id %}"
-                                  hx-target="#transaction-row-{{ transaction.id }}"
-                                  hx-swap="outerHTML"
-                                  class="inline-form">
-                                {% csrf_token %}
-                                <button type="submit" name="action" value="approve" class="btn-icon btn-success" title="Approve">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button type="submit" name="action" value="reject" class="btn-icon btn-danger" title="Reject">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.flagged_count }}</div>
+            <div class="stat-label">Flagged</div>
         </div>
+    </div>
+</div>
+
+<!-- --#-- Flagged Transactions Section -->
+{% if flagged_transactions %}
+<div class="section-card alert-section">
+    <div class="section-header">
+        <h2 class="section-title">
+            {% include '__snippets__/icons/bell.svg' %} High Priority - Flagged Transactions
+        </h2>
+        <span class="badge badge-danger">{{ flagged_transactions.count }}</span>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Flag Reason</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in flagged_transactions %}
+                <tr class="flagged-row" id="transaction-row-{{ transaction.id }}">
+                    <td>#{{ transaction.id }}</td>
+                    <td>{{ transaction.wallet.client_profile.user.email }}</td>
+                    <td>
+                        <span class="transaction-type type-{{ transaction.type|lower }}">
+                            {{ transaction.get_type_display }}
+                        </span>
+                    </td>
+                    <td class="tx-amount">${{ transaction.amount|floatformat:2 }}</td>
+                    <td>{{ transaction.metadata.flag_reason|default:"Under review" }}</td>
+                    <td class="tx-date">{{ transaction.created_at|date:"M d, H:i" }}</td>
+                    <td>
+                        <form hx-post="{% url 'operations:review_transaction' transaction.id %}"
+                              hx-target="#transaction-row-{{ transaction.id }}"
+                              hx-swap="outerHTML"
+                              class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" name="action" value="approve" class="btn-icon btn-success" title="Approve">
+                                {% include '__snippets__/icons/check.svg' %}
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn-icon btn-danger" title="Reject">
+                                {% include '__snippets__/icons/times.svg' %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<!-- --#-- All Clear Card -->
+<div class="section-card all-clear">
+    <div class="all-clear-icon">
+        {% include '__snippets__/icons/check-circle.svg' %}
+    </div>
+    <h3 class="all-clear-title">All Clear</h3>
+    <p class="all-clear-message">No flagged transactions requiring review</p>
+    <div class="all-clear-status">
+        <span class="status-dot active"></span>
+        <span>System Operating Normally</span>
+    </div>
+</div>
+{% endif %}
+
+<!-- --#-- KYC Applications Section -->
+{% if pending_kyc %}
+<div class="section-card alert-section">
+    <div class="section-header">
+        <h2 class="section-title">
+            {% include '__snippets__/icons/id-card.svg' %} KYC Applications Pending Review
+        </h2>
+        <span class="badge badge-danger">{{ pending_kyc|length }}</span>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Submitted</th>
+                    <th>Document</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in pending_kyc %}
+                <tr class="flagged-row" id="kyc-row-{{ profile.id }}">
+                    <td>{{ profile.user.email }}</td>
+                    <td class="tx-date">{{ profile.kyc_submitted_at|date:"M d, H:i" }}</td>
+                    <td>
+                        {% if profile.kyc_document %}
+                        <a href="{{ profile.kyc_document.url }}" target="_blank">View document</a>
+                        {% else %}
+                        <span class="text-muted">No document</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form hx-post="{% url 'operations:review_kyc' profile.id %}"
+                              hx-target="#kyc-row-{{ profile.id }}"
+                              hx-swap="outerHTML"
+                              class="inline-form">
+                            {% csrf_token %}
+                            <input type="text" name="reason" placeholder="Rejection reason (for reject)"
+                                   class="filter-input" style="max-width: 220px;">
+                            <button type="submit" name="action" value="approve" class="btn-icon btn-success" title="Approve">
+                                {% include '__snippets__/icons/check.svg' %}
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn-icon btn-danger" title="Reject">
+                                {% include '__snippets__/icons/times.svg' %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- --#-- Recent Transactions -->
+<div class="section-card">
+    <div class="section-header">
+        <h2 class="section-title">
+            {% include '__snippets__/icons/history.svg' %} Recent Transactions
+        </h2>
+        <a href="{% url 'wallet:transaction_list' %}" class="btn btn-sm btn-ghost">
+            View All {% include '__snippets__/icons/arrow-right.svg' %}
+        </a>
+    </div>
+    {% if recent_transactions %}
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in recent_transactions %}
+                <tr>
+                    <td>#{{ transaction.id }}</td>
+                    <td>{{ transaction.wallet.client_profile.user.email }}</td>
+                    <td>
+                        <span class="transaction-type type-{{ transaction.type|lower }}">
+                            {{ transaction.get_type_display }}
+                        </span>
+                    </td>
+                    <td class="tx-amount">${{ transaction.amount|floatformat:2 }}</td>
+                    <td>
+                        <span class="badge badge-{{ transaction.status|lower }}">
+                            {{ transaction.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="tx-date">{{ transaction.created_at|date:"M d, H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     {% else %}
-    <!-- --#-- All Clear Card -->
-    <div class="section-card all-clear">
-        <div class="all-clear-content">
-            <div class="all-clear-icon">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <h3 class="all-clear-title">All Clear</h3>
-            <p class="all-clear-message">No flagged transactions requiring review</p>
-            <div class="all-clear-status">
-                <span class="status-dot active"></span>
-                <span>System Operating Normally</span>
-            </div>
-        </div>
+    <div class="empty-state">
+        <div class="empty-icon">{% include '__snippets__/icons/inbox.svg' %}</div>
+        <p class="empty-text">No recent transactions</p>
     </div>
     {% endif %}
-
-    <!-- --#-- KYC Applications Section -->
-    {% if pending_kyc %}
-    <div class="section-card alert-section">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-id-card"></i> KYC Applications Pending Review
-            </h2>
-            <span class="badge badge-danger">{{ pending_kyc|length }}</span>
-        </div>
-        <div class="table-wrapper">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Submitted</th>
-                        <th>Document</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for profile in pending_kyc %}
-                    <tr class="flagged-row" id="kyc-row-{{ profile.id }}">
-                        <td class="cell-email">{{ profile.user.email }}</td>
-                        <td class="cell-date">{{ profile.kyc_submitted_at|date:"M d, H:i" }}</td>
-                        <td>
-                            {% if profile.kyc_document %}
-                            <a href="{{ profile.kyc_document.url }}" target="_blank">View document</a>
-                            {% else %}
-                            <span>No document</span>
-                            {% endif %}
-                        </td>
-                        <td class="cell-actions">
-                            <form hx-post="{% url 'operations:review_kyc' profile.id %}"
-                                  hx-target="#kyc-row-{{ profile.id }}"
-                                  hx-swap="outerHTML"
-                                  class="inline-form">
-                                {% csrf_token %}
-                                <input type="text" name="reason" placeholder="Rejection reason (for reject)"
-                                       class="form-input" style="max-width: 220px;">
-                                <button type="submit" name="action" value="approve" class="btn-icon btn-success" title="Approve">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button type="submit" name="action" value="reject" class="btn-icon btn-danger" title="Reject">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- --#-- Recent Transactions -->
-    <div class="section-card">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-history"></i> Recent Transactions
-            </h2>
-            <a href="{% url 'wallet:transaction_list' %}" class="btn btn-sm btn-outline">
-                View All <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-        <div class="table-wrapper">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>User</th>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for transaction in recent_transactions %}
-                    <tr>
-                        <td class="cell-id">#{{ transaction.id }}</td>
-                        <td class="cell-email">{{ transaction.wallet.client_profile.user.email }}</td>
-                        <td>
-                            <span class="type-badge type-{{ transaction.type|lower }}">
-                                {{ transaction.get_type_display }}
-                            </span>
-                        </td>
-                        <td class="cell-amount">${{ transaction.amount|floatformat:2 }}</td>
-                        <td>
-                            <span class="badge badge-{{ transaction.status|lower }}">
-                                {{ transaction.get_status_display }}
-                            </span>
-                        </td>
-                        <td class="cell-date">{{ transaction.created_at|date:"M d, H:i" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% if not recent_transactions %}
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>No recent transactions</p>
-        </div>
-        {% endif %}
-    </div>
 </div>
 {% endblock %}

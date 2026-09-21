@@ -1,54 +1,38 @@
-<!-- --#-- Transaction Item Component -->
-<div class="transaction-item {% if transaction.status == 'FLAGGED' %}transaction-flagged{% endif %}">
-    <div class="transaction-icon">
-        {% if transaction.type == 'DEPOSIT' %}
-        <span class="icon-deposit">⬆️</span>
-        {% elif transaction.type == 'WITHDRAWAL' %}
-        <span class="icon-withdrawal">⬇️</span>
-        {% else %}
-        <span class="icon-transfer">🔄</span>
-        {% endif %}
-    </div>
-
-    <div class="transaction-details">
-        <div class="transaction-main">
-            <span class="transaction-type">{{ transaction.get_type_display }}</span>
-            <span class="transaction-amount {% if transaction.type == 'DEPOSIT' %}amount-positive{% else %}amount-negative{% endif %}">
-                {% if transaction.type == 'DEPOSIT' %}+{% endif %}${{ transaction.amount }}
-            </span>
-        </div>
-
-        <div class="transaction-meta">
-            <span class="transaction-date">{{ transaction.created_at|date:"M d, Y" }}</span>
-            <span class="transaction-time">{{ transaction.created_at|time:"H:i" }}</span>
-
-            {% if transaction.counterparty_wallet %}
-            <span class="transaction-counterparty">
-                {% if transaction.type == 'TRANSFER' and transaction.wallet == wallet %}
-                To: {{ transaction.counterparty_wallet.client_profile.full_name|default:"Unknown" }}
-                {% else %}
-                From: {{ transaction.counterparty_wallet.client_profile.full_name|default:"Unknown" }}
-                {% endif %}
-            </span>
+<!-- --#-- Transaction Item Component (table row) -->
+<tr class="{% if transaction.status == 'FLAGGED' %}tx-flagged{% endif %}">
+    <td class="tx-icon">
+        <span class="tx-icon-badge tx-icon--{{ transaction.type|lower }}">
+            {% if transaction.type == 'DEPOSIT' %}
+            {% include '__snippets__/icons/circle-plus.svg' %}
+            {% elif transaction.type == 'WITHDRAWAL' %}
+            {% include '__snippets__/icons/circle-minus.svg' %}
+            {% elif transaction.type == 'FEE' %}
+            {% include '__snippets__/icons/tag.svg' %}
+            {% else %}
+            {% include '__snippets__/icons/right-left.svg' %}
             {% endif %}
-        </div>
-
+        </span>
+    </td>
+    <td>
+        <span class="tx-description">{{ transaction.get_type_display }}</span>
         {% if transaction.description %}
-        <div class="transaction-description">
-            {{ transaction.description }}
-        </div>
+        <span class="tx-sub">{{ transaction.description }}</span>
         {% endif %}
-
-        <div class="transaction-status">
-            {% if transaction.status == 'COMPLETED' %}
-            <span class="status-badge status-completed">✓ Completed</span>
-            {% elif transaction.status == 'PENDING' %}
-            <span class="status-badge status-pending">⏳ Pending</span>
-            {% elif transaction.status == 'FAILED' %}
-            <span class="status-badge status-failed">✗ Failed</span>
-            {% elif transaction.status == 'FLAGGED' %}
-            <span class="status-badge status-flagged">🚨 Flagged</span>
+        {% if transaction.counterparty_wallet %}
+        <span class="tx-sub">
+            {% if transaction.wallet == wallet %}
+            To: {{ transaction.counterparty_wallet.client_profile.full_name|default:"Unknown" }}
+            {% else %}
+            From: {{ transaction.counterparty_wallet.client_profile.full_name|default:"Unknown" }}
             {% endif %}
-        </div>
-    </div>
-</div>
+        </span>
+        {% endif %}
+    </td>
+    <td class="tx-amount {% if transaction.type == 'DEPOSIT' %}tx-amount--positive{% else %}tx-amount--negative{% endif %}">
+        {% if transaction.type == 'DEPOSIT' %}+{% else %}−{% endif %}${{ transaction.amount }}
+    </td>
+    <td>
+        <span class="badge badge-{{ transaction.status|lower }}">{{ transaction.get_status_display }}</span>
+    </td>
+    <td class="tx-date">{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+</tr>

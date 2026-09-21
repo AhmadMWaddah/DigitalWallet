@@ -9,12 +9,13 @@
 {% endblock %}
 
 {% block content %}
-<!-- Messages Container for HTMX responses -->
 <div id="messages-container"></div>
 
 <div class="page-header">
-    <h1 class="page-title">Transfer Funds</h1>
-    <p class="page-subtitle">Send money to another user</p>
+    <div>
+        <h1 class="page-title">{% include '__snippets__/icons/right-left.svg' %} Transfer Funds</h1>
+        <p class="page-subtitle">Send money to another user</p>
+    </div>
 </div>
 
 <div class="dashboard-grid">
@@ -23,64 +24,62 @@
             <div class="card-header">
                 <h2 class="card-title">Transfer Form</h2>
             </div>
-            <div class="card-body">
-                <form method="post"
-                      hx-post="{% url 'wallet:transfer' %}"
-                      hx-target="#messages-container"
-                      hx-swap="innerHTML"
-                      hx-indicator=".htmx-indicator"
-                      hx-on::after-request="if(event.detail.successful) this.reset()">
-                    {% csrf_token %}
+            <form method="post"
+                  hx-post="{% url 'wallet:transfer' %}"
+                  hx-target="#messages-container"
+                  hx-swap="innerHTML"
+                  hx-indicator=".processing-indicator"
+                  hx-on::after-request="if(event.detail.successful) this.reset()">
+                {% csrf_token %}
 
-                    <div class="form-group">
-                        <label for="{{ form.recipient_email.id_for_label }}" class="form-label">Recipient Email</label>
-                        {{ form.recipient_email }}
-                        {% if form.recipient_email.errors %}
-                        <div class="form-error">{{ form.recipient_email.errors.0 }}</div>
-                        {% endif %}
-                        <div class="form-help">Enter the recipient's email address</div>
-                    </div>
+                <div class="form-group">
+                    <label for="{{ form.recipient_email.id_for_label }}" class="form-label">Recipient Email</label>
+                    {{ form.recipient_email }}
+                    {% if form.recipient_email.errors %}
+                    <div class="form-error">{% include '__snippets__/icons/exclamation-circle.svg' %} {{ form.recipient_email.errors.0 }}</div>
+                    {% endif %}
+                    <div class="form-help">Enter the recipient's email address</div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
-                        {{ form.amount }}
-                        {% if form.amount.errors %}
-                        <div class="form-error">{{ form.amount.errors.0 }}</div>
-                        {% endif %}
-                        <div class="form-help">Minimum transfer: $0.01</div>
-                    </div>
+                <div class="form-group">
+                    <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}
+                    <div class="form-error">{% include '__snippets__/icons/exclamation-circle.svg' %} {{ form.amount.errors.0 }}</div>
+                    {% endif %}
+                    <div class="form-help">Minimum transfer: $0.01</div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="{{ form.description.id_for_label }}" class="form-label">Description (Optional)</label>
-                        {{ form.description }}
-                        {% if form.description.errors %}
-                        <div class="form-error">{{ form.description.errors.0 }}</div>
-                        {% endif %}
-                    </div>
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">Description (Optional)</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="form-error">{% include '__snippets__/icons/exclamation-circle.svg' %} {{ form.description.errors.0 }}</div>
+                    {% endif %}
+                </div>
 
-                    <button type="submit" class="btn btn-outline btn-lg">
-                        <i class="fas fa-right-left"></i> Transfer Funds
-                    </button>
-                    <span class="htmx-indicator" style="margin-left: var(--spacing-md);">
-                        <i class="fas fa-circle-notch fa-spin"></i> Processing...
-                    </span>
-                </form>
-            </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    {% include '__snippets__/icons/right-left.svg' %} Transfer Funds
+                </button>
+                <span class="processing-indicator">
+                    {% include '__snippets__/icons/circle-notch.svg' %} Processing...
+                </span>
+            </form>
         </div>
     </div>
 
-    <div class="dashboard-column dashboard-column-wide">
+    <div class="dashboard-column">
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Transfer Information</h2>
+                <h2 class="card-title">{% include '__snippets__/icons/info-circle.svg' %} Transfer Information</h2>
             </div>
-            <div class="card-body">
-                <p><strong>Processing Time:</strong> Instant</p>
-                <p><strong>Minimum Transfer:</strong> $0.01</p>
-                <p><strong>Maximum Transfer:</strong> $2,500 per day</p>
-                <p><strong>Fees:</strong> No fees for transfers</p>
-                <p><strong>Note:</strong> Transfers are instant and irreversible</p>
-                <p><strong>Security:</strong> You cannot transfer to yourself</p>
+            <div class="info-list">
+                <p><strong>Processing Time</strong><span>Instant</span></p>
+                <p><strong>Minimum Transfer</strong><span>$0.01</span></p>
+                <p><strong>Maximum Transfer</strong><span>$2,500 per day</span></p>
+                <p><strong>Fee</strong><span>1.5% + $0.20 (sender-paid)</span></p>
+                <p><strong>Note</strong><span>Instant and irreversible</span></p>
+                <p><strong>Security</strong><span>No self-transfers</span></p>
             </div>
         </div>
     </div>

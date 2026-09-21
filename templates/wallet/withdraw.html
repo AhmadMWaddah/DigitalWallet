@@ -9,12 +9,13 @@
 {% endblock %}
 
 {% block content %}
-<!-- Messages Container for HTMX responses -->
 <div id="messages-container"></div>
 
 <div class="page-header">
-    <h1 class="page-title">Withdraw Funds</h1>
-    <p class="page-subtitle">Remove money from your wallet</p>
+    <div>
+        <h1 class="page-title">{% include '__snippets__/icons/circle-minus.svg' %} Withdraw Funds</h1>
+        <p class="page-subtitle">Remove money from your wallet</p>
+    </div>
 </div>
 
 <div class="dashboard-grid">
@@ -23,54 +24,52 @@
             <div class="card-header">
                 <h2 class="card-title">Withdraw Form</h2>
             </div>
-            <div class="card-body">
-                <form method="post"
-                      hx-post="{% url 'wallet:withdraw' %}"
-                      hx-target="#messages-container"
-                      hx-swap="innerHTML"
-                      hx-indicator=".htmx-indicator"
-                      hx-on::after-request="if(event.detail.successful) this.reset()">
-                    {% csrf_token %}
+            <form method="post"
+                  hx-post="{% url 'wallet:withdraw' %}"
+                  hx-target="#messages-container"
+                  hx-swap="innerHTML"
+                  hx-indicator=".processing-indicator"
+                  hx-on::after-request="if(event.detail.successful) this.reset()">
+                {% csrf_token %}
 
-                    <div class="form-group">
-                        <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
-                        {{ form.amount }}
-                        {% if form.amount.errors %}
-                        <div class="form-error">{{ form.amount.errors.0 }}</div>
-                        {% endif %}
-                        <div class="form-help">Minimum withdrawal: $0.01</div>
-                    </div>
+                <div class="form-group">
+                    <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}
+                    <div class="form-error">{% include '__snippets__/icons/exclamation-circle.svg' %} {{ form.amount.errors.0 }}</div>
+                    {% endif %}
+                    <div class="form-help">Minimum withdrawal: $0.01</div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="{{ form.description.id_for_label }}" class="form-label">Description (Optional)</label>
-                        {{ form.description }}
-                        {% if form.description.errors %}
-                        <div class="form-error">{{ form.description.errors.0 }}</div>
-                        {% endif %}
-                    </div>
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">Description (Optional)</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="form-error">{% include '__snippets__/icons/exclamation-circle.svg' %} {{ form.description.errors.0 }}</div>
+                    {% endif %}
+                </div>
 
-                    <button type="submit" class="btn btn-outline btn-lg">
-                        <i class="fas fa-circle-minus"></i> Withdraw Funds
-                    </button>
-                    <span class="htmx-indicator" style="margin-left: var(--spacing-md);">
-                        <i class="fas fa-circle-notch fa-spin"></i> Processing...
-                    </span>
-                </form>
-            </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    {% include '__snippets__/icons/circle-minus.svg' %} Withdraw Funds
+                </button>
+                <span class="processing-indicator">
+                    {% include '__snippets__/icons/circle-notch.svg' %} Processing...
+                </span>
+            </form>
         </div>
     </div>
 
-    <div class="dashboard-column dashboard-column-wide">
+    <div class="dashboard-column">
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Withdrawal Information</h2>
+                <h2 class="card-title">{% include '__snippets__/icons/info-circle.svg' %} Withdrawal Information</h2>
             </div>
-            <div class="card-body">
-                <p><strong>Processing Time:</strong> 1-3 business days</p>
-                <p><strong>Minimum Withdrawal:</strong> $0.01</p>
-                <p><strong>Maximum Withdrawal:</strong> $5,000 per day</p>
-                <p><strong>Fees:</strong> No fees for withdrawals</p>
-                <p><strong>Note:</strong> Ensure you have sufficient balance</p>
+            <div class="info-list">
+                <p><strong>Processing Time</strong><span>1-3 business days</span></p>
+                <p><strong>Minimum Withdrawal</strong><span>$0.01</span></p>
+                <p><strong>Maximum Withdrawal</strong><span>$5,000 per day</span></p>
+                <p><strong>Fees</strong><span>None</span></p>
+                <p><strong>Note</strong><span>Ensure sufficient balance</span></p>
             </div>
         </div>
     </div>

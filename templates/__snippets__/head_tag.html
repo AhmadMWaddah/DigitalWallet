@@ -9,13 +9,7 @@
 <!-- --#-- Favicon -->
 <link rel="icon" type="image/png" href="{% static 'images/Digital_Wallet_Fav_Icon.png' %}">
 
-<!-- --#-- Font Awesome Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<!-- --#-- HTMX CDN -->
-<script src="https://unpkg.com/htmx.org@2.0.4"></script>
-
-<!-- --#-- Theme Bootstrap (before CSS: no flash, saved choice else OS) -->
+<!-- --#-- Theme Init (before CSS paint: saved choice, else OS) -->
 <script>
     (function () {
         var theme = 'light';
@@ -26,7 +20,36 @@
             if (window.matchMedia('(prefers-color-scheme: dark)').matches) theme = 'dark';
         }
         document.documentElement.dataset.theme = theme;
+        try {
+            if (localStorage.getItem('sidebar-collapsed') === '1') {
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.getElementById('app').classList.add('sidebar-collapsed');
+                });
+            }
+        } catch (e) { /* private mode: no persistence */ }
     })();
+</script>
+
+<!-- --#-- HTMX -->
+<script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+<!-- --#-- Chart.js Lazy Loader (analytics page only) -->
+<script>
+    window.chartjsLoaded = false;
+    function loadChartJs() {
+        return new Promise(function (resolve) {
+            if (window.chartjsLoaded) { resolve(); return; }
+            if (typeof Chart !== 'undefined') {
+                window.chartjsLoaded = true;
+                resolve();
+                return;
+            }
+            var s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
+            s.onload = function () { window.chartjsLoaded = true; resolve(); };
+            document.head.appendChild(s);
+        });
+    }
 </script>
 
 <!-- --#-- Modular CSS -->
@@ -36,3 +59,4 @@
 <link rel="stylesheet" href="{% static 'css/forms.css' %}">
 <link rel="stylesheet" href="{% static 'css/utilities.css' %}">
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">

@@ -15,32 +15,36 @@
 
 <body>
     <!-- --#-- App Container -->
-    <div class="app-container">
-
-        <!-- --#-- Navbar -->
-        {% include '__snippets__/navbar.html' %}
+    <div class="app-container" id="app">
 
         <!-- --#-- Sidebar -->
         {% include '__snippets__/sidebar.html' %}
 
-        <!-- --#-- Main Content Wrapper -->
-        <div class="main-content-wrapper">
-            <!-- --#-- Main Content -->
-            <main class="main-content">
-                <!-- --#-- Messages/Alerts -->
-                {% if messages %}
-                <div class="messages-container">
-                    {% for message in messages %}
-                    {% include 'components/alert.html' with message=message %}
-                    {% endfor %}
-                </div>
-                {% endif %}
+        <!-- --#-- Sidebar Backdrop (mobile) -->
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
-                <!-- --#-- Page Content -->
-                {% block content %}{% endblock %}
-            </main>
+        <!-- --#-- Topbar -->
+        <header class="topbar">
+            {% include '__snippets__/navbar.html' %}
+        </header>
 
-            <!-- --#-- Footer -->
+        <!-- --#-- Main Content -->
+        <main class="main-content">
+            <!-- --#-- Messages/Alerts -->
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                {% include 'components/alert.html' with message=message %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- --#-- Page Content -->
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- --#-- Footer -->
+        <div class="app-footer">
             {% include '__snippets__/footer.html' %}
         </div>
     </div>

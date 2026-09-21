@@ -11,8 +11,10 @@
 {% block content %}
 <!-- --#-- Page Header -->
 <div class="page-header">
-    <h1 class="page-title">Welcome back, {{ user.get_full_name|default:user.email }}</h1>
-    <p class="page-subtitle">Manage your wallet and transactions</p>
+    <div>
+        <h1 class="page-title">Welcome back, {{ user.get_full_name|default:user.email }}</h1>
+        <p class="page-subtitle">Manage your wallet and transactions</p>
+    </div>
 </div>
 
 <!-- --#-- Messages Container -->
@@ -21,72 +23,102 @@
 <!-- --#-- Dashboard Grid -->
 <div class="dashboard-grid">
 
-    <!-- --#-- Left Column -->
+    <!-- --#-- Left Column: Balance + Actions + Statement -->
     <div class="dashboard-column">
 
-        <!-- --#-- Your Wallet Card -->
+        <!-- --#-- Balance -->
+        {% if wallet %}
+        {% include 'components/balance_card.html' with wallet=wallet last_updated="Just now" %}
+        {% else %}
         <div class="card">
-            <div class="card-body" style="padding: 0;">
-                {% if wallet %}
-                {% include 'components/balance_card.html' with wallet=wallet last_updated="Just now" %}
-                {% else %}
-                <div class="empty-state">
-                    <p class="empty-text">No wallet found. Please contact support.</p>
-                </div>
-                {% endif %}
+            <div class="empty-state">
+                <div class="empty-icon">{% include '__snippets__/icons/wallet.svg' %}</div>
+                <p class="empty-text">No wallet found. Please contact support.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- --#-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">{% include '__snippets__/icons/right-left.svg' %} Quick Actions</h2>
+            </div>
+            <div class="action-grid">
+                <a href="{% url 'wallet:deposit' %}" class="action-btn">
+                    <span class="action-btn-icon">{% include '__snippets__/icons/circle-plus.svg' %}</span>
+                    <span class="action-btn-label">Deposit</span>
+                    <span class="action-btn-sublabel">Add funds</span>
+                </a>
+                <a href="{% url 'wallet:withdraw' %}" class="action-btn">
+                    <span class="action-btn-icon">{% include '__snippets__/icons/circle-minus.svg' %}</span>
+                    <span class="action-btn-label">Withdraw</span>
+                    <span class="action-btn-sublabel">Remove funds</span>
+                </a>
+                <a href="{% url 'wallet:transfer' %}" class="action-btn">
+                    <span class="action-btn-icon">{% include '__snippets__/icons/right-left.svg' %}</span>
+                    <span class="action-btn-label">Transfer</span>
+                    <span class="action-btn-sublabel">Send money</span>
+                </a>
+                <a href="{% url 'wallet:my_qr' %}" class="action-btn">
+                    <span class="action-btn-icon">{% include '__snippets__/icons/qrcode.svg' %}</span>
+                    <span class="action-btn-label">My QR</span>
+                    <span class="action-btn-sublabel">Receive</span>
+                </a>
+                <a href="{% url 'wallet:qr_pay' %}" class="action-btn">
+                    <span class="action-btn-icon">{% include '__snippets__/icons/qr-scan.svg' %}</span>
+                    <span class="action-btn-label">Scan &amp; Pay</span>
+                    <span class="action-btn-sublabel">Pay QR</span>
+                </a>
+                <a href="{% url 'wallet:transaction_list' %}" class="action-btn">
+                    <span class="action-btn-icon">{% include '__snippets__/icons/receipt.svg' %}</span>
+                    <span class="action-btn-label">History</span>
+                    <span class="action-btn-sublabel">All txns</span>
+                </a>
             </div>
         </div>
 
-        <!-- --#-- Quick Actions - Button Links to Pages -->
+        <!-- --#-- PDF Statement -->
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Quick Actions</h2>
+                <h2 class="card-title">{% include '__snippets__/icons/file-pdf.svg' %} PDF Statement</h2>
             </div>
-            <div class="card-body">
-                <div class="action-grid">
-                    <a href="{% url 'wallet:deposit' %}" class="action-btn">
-                        <i class="fas fa-circle-plus action-btn-icon"></i>
-                        <span class="action-btn-label">Deposit</span>
-                        <span class="action-btn-sublabel">Add funds</span>
-                    </a>
-                    <a href="{% url 'wallet:withdraw' %}" class="action-btn">
-                        <i class="fas fa-circle-minus action-btn-icon"></i>
-                        <span class="action-btn-label">Withdraw</span>
-                        <span class="action-btn-sublabel">Remove funds</span>
-                    </a>
-                    <a href="{% url 'wallet:transfer' %}" class="action-btn">
-                        <i class="fas fa-right-left action-btn-icon"></i>
-                        <span class="action-btn-label">Transfer</span>
-                        <span class="action-btn-sublabel">Send money</span>
-                    </a>
-                </div>
+            <div id="statement-section"
+                 hx-get="{% url 'wallet:statement_form_partial' %}"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
+                <p class="text-muted text-sm">Loading statement form...</p>
             </div>
         </div>
 
     </div>
 
-    <!-- --#-- Right Column -->
-    <div class="dashboard-column dashboard-column-wide">
+    <!-- --#-- Right Column: Recent Transactions -->
+    <div class="dashboard-column">
 
-        <!-- --#-- Recent Transactions (Limited to 5) -->
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Recent Transactions</h2>
+                <h2 class="card-title">{% include '__snippets__/icons/history.svg' %} Recent Transactions</h2>
+                <a href="{% url 'wallet:transaction_list' %}" class="btn btn-ghost btn-sm">View All</a>
             </div>
-            <div class="card-body">
-                <div class="transaction-list"
-                     hx-get="{% url 'wallet:transaction_history' %}?limit=5"
-                     hx-trigger="load"
-                     hx-swap="innerHTML">
-                    <div class="text-center p-4">
-                        <span class="htmx-indicator spinner">Loading...</span>
-                    </div>
-                </div>
-
-                <!-- --#-- Action Buttons -->
-                <div class="transaction-actions">
-                    <a href="{% url 'wallet:transaction_list' %}" class="btn btn-outline btn-sm">View All Transactions</a>
-                </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Details</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody hx-get="{% url 'wallet:transaction_history' %}?limit=5"
+                           hx-trigger="load"
+                           hx-swap="innerHTML">
+                        <tr>
+                            <td colspan="5" class="table-empty">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 

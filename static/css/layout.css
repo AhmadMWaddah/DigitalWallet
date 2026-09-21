@@ -1,63 +1,50 @@
-/* --#-- Layout CSS - CSS Grid Structure */
+/* --#-- Layout CSS - Sidebar + Topbar Grid Shell */
 
-/* --#-- App Container - Full Height Grid */
 .app-container {
     display: grid;
-    grid-template-columns: 280px 1fr; /* Sidebar | Content */
-    grid-template-rows: 64px 1fr; /* Navbar | Main */
+    grid-template-columns: var(--sidebar-width-expanded) 1fr;
+    grid-template-rows: var(--topbar-height) 1fr auto;
+    grid-template-areas:
+        "sidebar topbar"
+        "sidebar main"
+        "sidebar footer";
     min-height: 100vh;
     background: var(--bg-gradient);
+    transition: grid-template-columns var(--transition-layout);
 }
 
-/* --#-- Navbar - Spans Full Width */
-.navbar {
-    grid-column: 1 / -1;
-    grid-row: 1;
+.app-container.sidebar-collapsed {
+    grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+}
+
+/* --#-- Grid Areas */
+.sidebar {
+    grid-area: sidebar;
+}
+
+.topbar {
+    grid-area: topbar;
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
-/* --#-- Sidebar - Full Height */
-.sidebar {
-    grid-column: 1;
-    grid-row: 2;
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-right: 1px solid var(--glass-border);
-    overflow-y: auto;
-    z-index: 900;
-    height: calc(100vh - 64px); /* Full height minus navbar */
-}
-
-.sidebar-content {
-    padding: var(--spacing-lg);
-    min-height: 100%;
-}
-
-/* --#-- Main Content Area */
-.main-content-wrapper {
-    grid-column: 2;
-    grid-row: 2;
-    display: flex;
-    flex-direction: column;
-    min-height: calc(100vh - 64px);
-}
-
 .main-content {
-    flex: 1;
+    grid-area: main;
     padding: var(--spacing-xl);
-    max-width: 100%;
+    min-width: 0;
     width: 100%;
     box-sizing: border-box;
 }
 
-/* --#-- Footer - Inside Main Content (always dark glass) */
+.app-footer {
+    grid-area: footer;
+}
+
+/* --#-- Footer (always dark glass, both modes) */
 .footer {
     background: rgba(40, 54, 24, 0.8);
     backdrop-filter: blur(12px);
-    /* Pin light text: footer surface stays dark in both modes */
     --text-secondary: rgba(254, 250, 224, 0.8);
     --text-tertiary: rgba(254, 250, 224, 0.6);
     color: var(--text-secondary);
@@ -114,34 +101,53 @@
     border: 1px solid rgba(254, 250, 224, 0.2);
 }
 
-/* --#-- Responsive */
+/* --#-- Responsive: sidebar becomes overlay drawer */
 @media (max-width: 1024px) {
-    .app-container {
+    .app-container,
+    .app-container.sidebar-collapsed {
         grid-template-columns: 1fr;
+        grid-template-areas:
+            "topbar"
+            "main"
+            "footer";
     }
 
     .sidebar {
-        grid-column: 1;
-        grid-row: auto;
         position: fixed;
-        top: 64px;
+        top: 0;
         left: 0;
-        right: 0;
         bottom: 0;
+        width: var(--sidebar-width-expanded) !important;
         transform: translateX(-100%);
-        transition: transform var(--transition-base);
+        transition: transform var(--transition-layout);
+        z-index: 1100;
     }
 
     .sidebar.active {
         transform: translateX(0);
     }
 
-    .main-content-wrapper {
-        grid-column: 1;
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1050;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity var(--transition-base), visibility var(--transition-base);
+    }
+
+    .sidebar-backdrop.visible {
+        opacity: 1;
+        visibility: visible;
     }
 }
 
 @media (max-width: 768px) {
+    .main-content {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
     .footer-content {
         flex-direction: column;
         text-align: center;

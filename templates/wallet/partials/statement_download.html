@@ -1,137 +1,33 @@
 {# --#-- Download State (Result State) #}
 {# Shows download button and option to generate new statement #}
 
-<div class="statement-success">
-    <div class="success-icon">
-        <i class="fas fa-check-circle"></i>
+<div class="statement-download">
+    <div class="statement-success-icon">
+        {% include '__snippets__/icons/check-circle.svg' %}
     </div>
 
-    <div class="success-message">
-        <h4>Statement Ready!</h4>
-        <p>Your account statement has been generated successfully.</p>
-    </div>
+    <h4 class="mt-0">Statement Ready!</h4>
+    <p class="text-muted text-sm">Your account statement has been generated successfully.</p>
 
-    <div class="download-actions">
+    <div class="mt-3">
         {# Standard link for file download (HTMX doesn't handle files) #}
         <a href="{{ download_url }}"
-           class="btn btn-download"
+           class="btn btn-secondary"
            download>
-            <i class="fas fa-file-pdf"></i>
+            {% include '__snippets__/icons/file-pdf.svg' %}
             Download Statement (PDF)
         </a>
-        <p class="download-hint">
-            <small>Click to download. You can download this statement multiple times.</small>
-        </p>
+        <p class="form-help">Click to download. You can download this statement multiple times.</p>
     </div>
 
-    <div class="secondary-actions">
-        {# Button to show form again - triggers form partial #}
-        <button class="btn btn-secondary"
-                hx-get="{% url 'wallet:statement_form_partial' %}"
-                hx-target="#statement-section"
-                hx-swap="innerHTML">
-            <i class="fas fa-redo"></i>
-            Generate New Statement
-        </button>
-    </div>
+    <div class="divider"></div>
 
-    <style>
-        .statement-success {
-            padding: var(--spacing-lg);
-            background: rgba(96, 108, 56, 0.15);
-            border-radius: var(--radius-lg);
-            text-align: center;
-            border: 1px solid var(--color-success);
-        }
-
-        .success-icon {
-            font-size: 2.5rem;
-            color: var(--color-success);
-            margin-bottom: var(--spacing-sm);
-            animation: successPop 0.5s ease-out;
-        }
-
-        @keyframes successPop {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        .success-message h4 {
-            color: var(--text-primary);
-            margin: 0 0 var(--spacing-xs) 0;
-            font-size: var(--text-lg);
-            font-weight: var(--font-semibold);
-        }
-
-        .success-message p {
-            color: var(--text-secondary);
-            margin: 0 0 var(--spacing-md) 0;
-            font-size: var(--text-sm);
-        }
-
-        .download-actions {
-            margin-top: var(--spacing-md);
-        }
-
-        .btn-download {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            padding: var(--spacing-md) var(--spacing-lg);
-            background: linear-gradient(135deg, var(--olive-leaf) 0%, var(--black-forest) 100%);
-            color: var(--cornsilk);
-            text-decoration: none;
-            border-radius: var(--radius-md);
-            font-weight: var(--font-medium);
-            font-size: var(--text-sm);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(96, 108, 56, 0.3);
-        }
-
-        .btn-download:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(96, 108, 56, 0.4);
-            background: linear-gradient(135deg, var(--black-forest) 0%, var(--olive-leaf) 100%);
-        }
-
-        .btn-download i {
-            font-size: var(--text-base);
-        }
-
-        .download-hint {
-            margin-top: var(--spacing-sm);
-            color: var(--text-tertiary);
-        }
-
-        .secondary-actions {
-            margin-top: var(--spacing-md);
-            padding-top: var(--spacing-md);
-            border-top: 1px solid var(--border-color);
-        }
-
-        .btn-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            padding: var(--spacing-sm) var(--spacing-md);
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color-light);
-            border-radius: var(--radius-md);
-            font-weight: var(--font-medium);
-            font-size: var(--text-sm);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-card);
-            border-color: var(--color-primary);
-        }
-
-        .btn-secondary i {
-            font-size: var(--text-sm);
-        }
-    </style>
+    {# Button to show form again - triggers form partial #}
+    <button class="btn btn-ghost btn-sm"
+            hx-get="{% url 'wallet:statement_form_partial' %}"
+            hx-target="#statement-section"
+            hx-swap="innerHTML">
+        {% include '__snippets__/icons/redo.svg' %}
+        Generate New Statement
+    </button>
 </div>

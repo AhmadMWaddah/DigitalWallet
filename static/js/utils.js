@@ -122,43 +122,60 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// --#-- Mobile Menu Toggle
+// --#-- Sidebar: Collapse (desktop) + Drawer (mobile), persisted
 ready(() => {
-    const menuToggle = document.querySelector('.mobile-menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
+    const app = document.getElementById('app');
+    const sidebar = document.getElementById('sidebar');
+    const collapseBtn = document.getElementById('sidebar-toggle');
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const backdrop = document.getElementById('sidebar-backdrop');
+
+    if (collapseBtn && app) {
+        collapseBtn.addEventListener('click', () => {
+            app.classList.toggle('sidebar-collapsed');
+            try {
+                localStorage.setItem(
+                    'sidebar-collapsed',
+                    app.classList.contains('sidebar-collapsed') ? '1' : '0'
+                );
+            } catch (e) { /* private mode: no persistence */ }
+        });
+    }
+
+    const closeDrawer = () => {
+        if (sidebar) sidebar.classList.remove('active');
+        if (backdrop) backdrop.classList.remove('visible');
+    };
 
     if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', () => {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
             sidebar.classList.toggle('active');
+            if (backdrop) backdrop.classList.toggle('visible', sidebar.classList.contains('active'));
         });
 
-        // Close sidebar when clicking outside
+        if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+        // Close drawer when clicking outside
         document.addEventListener('click', (e) => {
-            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                sidebar.classList.remove('active');
+            if (sidebar.classList.contains('active')
+                && !sidebar.contains(e.target)
+                && !menuToggle.contains(e.target)) {
+                closeDrawer();
             }
         });
     }
 });
 
-// --#-- Theme Toggle (light/dark, persists in localStorage)
-function applyThemeIcon(theme) {
-    const icon = document.querySelector('#theme-toggle-btn i');
-    if (!icon) return;
-    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-}
-
+// --#-- Theme Toggle (light/dark, persists in localStorage; icon swap is pure CSS)
 function setTheme(theme) {
     document.documentElement.dataset.theme = theme;
     try {
         localStorage.setItem('theme', theme);
     } catch (e) { /* private mode: theme just won't persist */ }
-    applyThemeIcon(theme);
 }
 
 ready(() => {
-    applyThemeIcon(document.documentElement.dataset.theme || 'light');
-
     const toggleBtn = document.querySelector('#theme-toggle-btn');
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
@@ -166,4 +183,44 @@ ready(() => {
             setTheme(current === 'dark' ? 'light' : 'dark');
         });
     }
+});
+
+// --#-- Chart.js Lazy Load (analytics canvases only)
+ready(() => {
+    const canvas = document.querySelector('canvas[data-chart]');
+    if (!canvas || typeof loadChartJs !== 'function') return;
+    if (!('IntersectionObserver' in window)) { loadChartJs(); return; }
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+            loadChartJs();
+            observer.disconnect();
+        }
+    });
+    observer.observe(canvas);
+});
+
+// --#-- Modal: close on overlay click, close button, or Cancel
+function closeModal(modal) {
+    if (typeof modal === 'string') modal = document.getElementById(modal);
+    if (modal) modal.remove();
+}
+
+ready(() => {
+    document.addEventListener('click', (e) => {
+        const closer = e.target.closest ? e.target.closest('[data-close-modal]') : null;
+        if (closer) {
+            const overlay = closer.closest('.modal-overlay');
+            closeModal(overlay || document.querySelector('.modal-overlay'));
+            return;
+        }
+        if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+            closeModal(e.target);
+            return;
+        }
+        const dismisser = e.target.closest ? e.target.closest('[data-dismiss-alert]') : null;
+        if (dismisser) {
+            const alert = dismisser.closest('.alert');
+            if (alert) alert.remove();
+        }
+    });
 });

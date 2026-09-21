@@ -1,0 +1,72 @@
+/* --#-- Analytics Dashboard CSS */
+
+/* --#-- Filter Card */
+.filter-card {
+    margin-bottom: var(--spacing-xl);
+}
+
+/* --#-- Charts Grid */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    padding: var(--spacing-lg);
+}
+
+.chart-header {
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chart-title {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.chart-title svg {
+    width: 20px;
+    height: 20px;
+    color: var(--copperwood);
+}
+
+.chart-body {
+    position: relative;
+    height: 300px;
+}
+
+.chart-body canvas {
+    max-width: 100%;
+}
+
+/* --#-- Loading State */
+.charts-loading {
+    text-align: center;
+    padding: var(--spacing-2xl);
+    color: var(--text-tertiary);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto var(--spacing-md);
+    color: var(--copperwood);
+}
+
+.loading-spinner svg {
+    width: 100%;
+    height: 100%;
+}
