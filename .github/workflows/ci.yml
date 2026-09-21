@@ -44,3 +44,26 @@ jobs:
         env:
           CELERY_BROKER_URL: redis://localhost:6379/0
           CELERY_RESULT_BACKEND: redis://localhost:6379/0
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: pip-audit
+        run: pip-audit -r requirements.txt
+
+      - name: Ruff security rules
+        run: ruff check --select S .
+
+      - name: Bandit
+        run: bandit -r accounts wallet operations analytics core --exclude "*/tests/*,*/migrations/*,*/settings/*" -q
