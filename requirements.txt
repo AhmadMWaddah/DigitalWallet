@@ -9,6 +9,10 @@ django-ratelimit==4.1.*
 djangorestframework==3.18.*
 drf-spectacular==0.30.*
 
+# QR Payments
+qrcode==8.2
+pillow==12.3.*
+
 # Async Tasks
 celery==5.4.*
 redis==5.2.*
