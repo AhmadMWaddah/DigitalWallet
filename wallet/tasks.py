@@ -9,6 +9,7 @@ from datetime import datetime
 
 from celery import shared_task
 from django.core.cache import cache
+from django.utils import timezone
 
 from wallet.models import Wallet
 from wallet.utils.pdf_generator import generate_statement_pdf_to_media
@@ -73,9 +74,14 @@ def generate_statement_pdf(self, wallet_id: int, start_date_str: str, end_date_s
             timeout=3600,
         )
 
-        # Parse dates
+        # Parse dates (make aware: naive datetimes break tz-aware
+        # comparisons on PostgreSQL and warn under USE_TZ)
         start_date = datetime.fromisoformat(start_date_str)
         end_date = datetime.fromisoformat(end_date_str)
+        if timezone.is_naive(start_date):
+            start_date = timezone.make_aware(start_date)
+        if timezone.is_naive(end_date):
+            end_date = timezone.make_aware(end_date)
 
         # Generate PDF
         file_path = generate_statement_pdf_to_media(
