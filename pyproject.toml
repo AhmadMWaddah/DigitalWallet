@@ -8,7 +8,12 @@ ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 # Settings modules re-export base via star import by design
-"core/settings/*.py" = ["F403", "F405"]
+"core/settings/*.py" = ["F403", "F405", "S105"]
+# Tests assert by design; fixture passwords are not real credentials
+"*/tests/*.py" = ["S101", "S106"]
+"conftest.py" = ["S106"]
+# Dev seed data: demo passwords and non-crypto randomness by design
+"wallet/management/commands/seed_wallets.py" = ["S106", "S311"]
 
 [tool.black]
 line-length = 100

@@ -3,6 +3,9 @@ Seed wallets management command.
 
 Creates dummy client users with pre-funded wallets and random transaction history
 for testing and demonstration purposes.
+
+Security note: `# nosec` markers below cover demo-only credentials and
+non-cryptographic randomness. Never use this command with real money.
 """
 
 import random
@@ -73,7 +76,7 @@ class Command(BaseCommand):
             # Create user
             user = CustomUser.objects.create_user(
                 email=email,
-                password="testpass123",
+                password="testpass123",  # nosec
                 user_type=UserType.CLIENT,
                 is_verified=True,
             )
@@ -94,7 +97,8 @@ class Command(BaseCommand):
         # -- Fund wallets with initial deposits
         self.stdout.write("\nFunding wallets with initial deposits...")
         for wallet in wallets:
-            initial_amount = Decimal(str(random.uniform(1000, 10000))).quantize(Decimal("0.01"))
+            raw_amount = random.uniform(1000, 10000)  # nosec
+            initial_amount = Decimal(str(raw_amount)).quantize(Decimal("0.01"))
             deposit_funds(
                 wallet=wallet,
                 amount=initial_amount,
@@ -113,13 +117,14 @@ class Command(BaseCommand):
 
         for wallet in wallets:
             # Random number of transactions per wallet (5-15)
-            num_transactions = random.randint(5, 15)
+            num_transactions = random.randint(5, 15)  # nosec
 
             for j in range(num_transactions):
-                transaction_type = random.choice(["deposit", "withdraw", "transfer"])
+                transaction_type = random.choice(["deposit", "withdraw", "transfer"])  # nosec
 
                 if transaction_type == "deposit":
-                    amount = Decimal(str(random.uniform(50, 500))).quantize(Decimal("0.01"))
+                    raw_amount = random.uniform(50, 500)  # nosec
+                    amount = Decimal(str(raw_amount)).quantize(Decimal("0.01"))
                     deposit_funds(
                         wallet=wallet,
                         amount=amount,
@@ -132,9 +137,8 @@ class Command(BaseCommand):
                     # Only withdraw if balance is sufficient
                     if wallet.balance > 100:
                         max_withdraw = min(Decimal("100"), wallet.balance)
-                        amount = Decimal(str(random.uniform(20, float(max_withdraw)))).quantize(
-                            Decimal("0.01")
-                        )
+                        raw_amount = random.uniform(20, float(max_withdraw))  # nosec
+                        amount = Decimal(str(raw_amount)).quantize(Decimal("0.01"))
                         withdraw_funds(
                             wallet=wallet,
                             amount=amount,
@@ -148,10 +152,9 @@ class Command(BaseCommand):
                     other_wallets = [w for w in wallets if w.id != wallet.id]
                     if other_wallets and wallet.balance > 50:
                         max_transfer = min(Decimal("50"), wallet.balance)
-                        amount = Decimal(str(random.uniform(10, float(max_transfer)))).quantize(
-                            Decimal("0.01")
-                        )
-                        receiver = random.choice(other_wallets)
+                        raw_amount = random.uniform(10, float(max_transfer))  # nosec
+                        amount = Decimal(str(raw_amount)).quantize(Decimal("0.01"))
+                        receiver = random.choice(other_wallets)  # nosec
                         transfer_funds(
                             sender_wallet=wallet,
                             receiver_wallet=receiver,
