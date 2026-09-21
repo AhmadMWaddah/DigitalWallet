@@ -74,7 +74,7 @@ class TestQRPay:
 
         assert response.status_code == 200
         assert response.json()["success"] is True
-        assert _wallet_of("qr-snd@test.com").balance == Decimal("70.00")
+        assert _wallet_of("qr-snd@test.com").balance == Decimal("69.35")  # 30 + 0.65 fee
         assert _wallet_of("qr-rcv@test.com").balance == Decimal("40.00")
         transaction = Transaction.objects.filter(
             wallet=_wallet_of("qr-snd@test.com"), type="TRANSFER"

@@ -104,7 +104,7 @@ class TestWalletApiWrites:
         assert response.json()["status"] == TransactionStatus.COMPLETED
         sender = Wallet.objects.get(client_profile__user__email="api-snd@test.com")
         receiver = Wallet.objects.get(client_profile__user__email="api-rcv@test.com")
-        assert sender.balance == Decimal("70.00")
+        assert sender.balance == Decimal("69.35")  # 30 + 0.65 fee
         assert receiver.balance == Decimal("40.00")
 
 

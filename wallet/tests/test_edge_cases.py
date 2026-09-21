@@ -57,8 +57,9 @@ class TestLedgerConsistency:
         receiver_wallet.refresh_from_db()
 
         # Sender debited; receiver credited but flagged amount marked isolated
-        # in metadata (reversal enforced at review time, not spend time)
-        assert sender_wallet.balance == Decimal("35700.00")
+        # in metadata (reversal enforced at review time, not spend time).
+        # Sender fees: 15000 -> 225.20, 100 -> 1.70.
+        assert sender_wallet.balance == Decimal("35473.10")
         assert receiver_wallet.balance == Decimal("16100.00")
         assert receiver_wallet.metadata.get("isolated_LED-TRF-FLAG") == "15000.00"
 
@@ -80,12 +81,19 @@ class TestLedgerConsistency:
             (t.amount for t in ledger if _op(t) == "transfer_receive"),
             Decimal("0.00"),
         )
-        debits = sum(
-            (t.amount for t in ledger if t.type == "WITHDRAWAL"),
-            Decimal("0.00"),
-        ) + sum(
-            (t.amount for t in ledger if _op(t) == "transfer_send"),
-            Decimal("0.00"),
+        debits = (
+            sum(
+                (t.amount for t in ledger if t.type == "WITHDRAWAL"),
+                Decimal("0.00"),
+            )
+            + sum(
+                (t.amount for t in ledger if _op(t) == "transfer_send"),
+                Decimal("0.00"),
+            )
+            + sum(
+                (t.amount for t in ledger if t.type == "FEE"),
+                Decimal("0.00"),
+            )
         )
         assert sender_wallet.balance == Decimal("50000.00") + credits - debits
 
