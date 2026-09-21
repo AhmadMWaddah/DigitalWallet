@@ -53,10 +53,13 @@
     box-sizing: border-box;
 }
 
-/* --#-- Footer - Inside Main Content */
+/* --#-- Footer - Inside Main Content (always dark glass) */
 .footer {
     background: rgba(40, 54, 24, 0.8);
     backdrop-filter: blur(12px);
+    /* Pin light text: footer surface stays dark in both modes */
+    --text-secondary: rgba(254, 250, 224, 0.8);
+    --text-tertiary: rgba(254, 250, 224, 0.6);
     color: var(--text-secondary);
     padding: var(--spacing-lg) var(--spacing-xl);
     border-top: 1px solid var(--glass-border);
@@ -108,7 +111,7 @@
     font-size: var(--text-xs);
     font-family: var(--font-mono);
     color: var(--text-tertiary);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(254, 250, 224, 0.2);
 }
 
 /* --#-- Responsive */

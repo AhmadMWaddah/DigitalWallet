@@ -177,13 +177,13 @@
 
 .btn-outline {
     background: transparent;
-    color: var(--sunlit-clay);
-    border-color: var(--sunlit-clay);
+    color: var(--copperwood);
+    border-color: var(--copperwood);
 }
 
 .btn-outline:hover:not(:disabled) {
-    background: var(--sunlit-clay);
-    color: var(--black-forest);
+    background: var(--copperwood);
+    color: var(--cornsilk);
 }
 
 .btn-ghost {
@@ -192,8 +192,8 @@
 }
 
 .btn-ghost:hover:not(:disabled) {
-    background: rgba(254, 250, 224, 0.1);
-    color: var(--cornsilk);
+    background: var(--input-bg);
+    color: var(--text-primary);
 }
 
 .btn-danger {
