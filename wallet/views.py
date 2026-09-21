@@ -14,8 +14,10 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import ListView, TemplateView
+from django_ratelimit.decorators import ratelimit
 
 from accounts.models import ClientProfile, UserType
 from accounts.views import ClientOnlyMixin
@@ -222,6 +224,7 @@ class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
             return JsonResponse({"success": False, "errors": form.errors})
 
 
+@method_decorator(ratelimit(key="user", rate="10/m", method="POST", block=True), name="dispatch")
 class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
     """
     Withdraw view handling HTMX POST.
@@ -292,6 +295,7 @@ class WithdrawView(LoginRequiredMixin, ClientOnlyMixin, View):
             return JsonResponse({"success": False, "errors": form.errors})
 
 
+@method_decorator(ratelimit(key="user", rate="10/m", method="POST", block=True), name="dispatch")
 class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
     """
     Transfer view handling HTMX POST.

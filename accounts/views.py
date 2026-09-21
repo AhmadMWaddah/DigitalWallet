@@ -15,7 +15,9 @@ from django.shortcuts import redirect, render
 from django.urls import NoReverseMatch, reverse_lazy
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, TemplateView, View
+from django_ratelimit.decorators import ratelimit
 
 from .forms import ClientPasswordChangeForm, ClientRegistrationForm
 from .models import UserType
@@ -176,6 +178,7 @@ class ClientOnlyMixin(UserPassesTestMixin):
 # -- Authentication Views
 
 
+@method_decorator(ratelimit(key="ip", rate="5/m", method="POST", block=True), name="dispatch")
 class CustomLoginView(BaseLoginView):
     """
     Custom login view with portal-based redirects.
