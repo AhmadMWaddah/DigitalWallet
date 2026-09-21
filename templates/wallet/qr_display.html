@@ -12,33 +12,35 @@
 <div id="messages-container"></div>
 
 <div class="page-header">
-    <h1 class="page-title">My QR Code</h1>
-    <p class="page-subtitle">Let others scan to pay you instantly</p>
+    <div>
+        <h1 class="page-title">{% include '__snippets__/icons/qrcode.svg' %} My QR Code</h1>
+        <p class="page-subtitle">Let others scan to pay you instantly</p>
+    </div>
 </div>
 
 <div class="dashboard-grid">
     <div class="dashboard-column">
-        <div class="card">
+        <div class="card qr-center">
             <div class="card-header">
-                <h2 class="card-title">Scan to Pay Me</h2>
+                <h2 class="card-title">{% include '__snippets__/icons/qr-scan.svg' %} Scan to Pay Me</h2>
             </div>
-            <div class="card-body" style="text-align: center;">
-                <img src="{{ qr_image_url }}" alt="My wallet QR code" style="max-width: 100%; height: auto;">
-                <p class="form-help">Show this code to the payer. It identifies your wallet and cannot be forged.</p>
+            <div class="qr-image-wrap">
+                <img src="{{ qr_image_url }}" alt="My wallet QR code">
             </div>
+            <p class="form-help">Show this code to the payer. It identifies your wallet and cannot be forged.</p>
         </div>
     </div>
 
-    <div class="dashboard-column dashboard-column-wide">
+    <div class="dashboard-column">
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">How It Works</h2>
+                <h2 class="card-title">{% include '__snippets__/icons/info-circle.svg' %} How It Works</h2>
             </div>
-            <div class="card-body">
-                <p><strong>Share:</strong> Show this code to anyone who owes you money</p>
-                <p><strong>Scan:</strong> They scan it from their Scan &amp; Pay page</p>
-                <p><strong>Receive:</strong> Funds land in your wallet instantly</p>
-                <p><strong>Security:</strong> The code is cryptographically signed to your wallet</p>
+            <div class="info-list">
+                <p><strong>Share</strong><span>Show this code to anyone who owes you money</span></p>
+                <p><strong>Scan</strong><span>They scan it from their Scan &amp; Pay page</span></p>
+                <p><strong>Receive</strong><span>Funds land in your wallet instantly</span></p>
+                <p><strong>Security</strong><span>Cryptographically signed to your wallet</span></p>
             </div>
         </div>
     </div>

@@ -1,59 +1,38 @@
-/* --#-- Dashboard CSS - Luxury Earth-Tone Design */
+/* --#-- Dashboard CSS - 2-Column Grid, Balance Card, Tables, Actions */
 
-/* --#-- Page Header */
-.page-header {
-    margin-bottom: var(--spacing-2xl);
-}
-
-.page-title {
-    font-size: var(--text-3xl);
-    font-weight: var(--font-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
-}
-
-.page-subtitle {
-    color: var(--text-secondary);
-    font-size: var(--text-base);
-    margin: 0;
-}
-
-/* --#-- Card Title Spacing */
-.card-title {
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-}
-
-/* --#-- Dashboard Grid */
+/* --#-- Dashboard Grid (balance + actions left, activity right) */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: minmax(320px, 5fr) 7fr;
     gap: var(--spacing-xl);
+    align-items: start;
 }
 
 .dashboard-column {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
-}
-
-.dashboard-column-wide {
     min-width: 0;
 }
 
-/* --#-- Your Wallet Card - Earth-Tone Premium Design */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --#-- Balance Card (gradient hero) */
 .balance-card {
     background: linear-gradient(135deg, var(--copperwood) 0%, var(--toasted-almond) 50%, var(--sunlit-clay) 100%);
-    border-radius: var(--radius-3xl);
+    border-radius: var(--radius-2xl);
     padding: var(--spacing-2xl);
     color: var(--cornsilk);
-    box-shadow: var(--shadow-2xl), 0 0 60px rgba(188, 108, 37, 0.4);
+    box-shadow: var(--shadow-xl), 0 0 60px rgba(188, 108, 37, 0.35);
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(254, 250, 224, 0.2);
 }
 
-/* Animated background effect */
 .balance-card::before {
     content: "";
     position: absolute;
@@ -62,11 +41,11 @@
     width: 200%;
     height: 200%;
     background: radial-gradient(circle, rgba(254, 250, 224, 0.15) 0%, transparent 70%);
-    animation: pulse 8s ease-in-out infinite;
+    animation: balanceGlow 8s ease-in-out infinite;
     pointer-events: none;
 }
 
-@keyframes pulse {
+@keyframes balanceGlow {
     0%, 100% { transform: scale(1) translate(0, 0); }
     50% { transform: scale(1.1) translate(-20px, -20px); }
 }
@@ -75,6 +54,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: var(--spacing-md);
     margin-bottom: var(--spacing-xl);
     position: relative;
     z-index: 1;
@@ -90,12 +70,19 @@
 }
 
 .balance-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
     padding: var(--spacing-xs) var(--spacing-md);
     border-radius: var(--radius-full);
     font-size: var(--text-xs);
     font-weight: var(--font-semibold);
-    backdrop-filter: blur(10px);
     border: 1px solid rgba(254, 250, 224, 0.3);
+}
+
+.balance-badge svg {
+    width: 14px;
+    height: 14px;
 }
 
 .badge-active {
@@ -109,588 +96,382 @@
 }
 
 .balance-amount {
-    margin-bottom: var(--spacing-xl);
     position: relative;
     z-index: 1;
+    margin-bottom: var(--spacing-xl);
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-xs);
 }
 
 .currency-symbol {
     font-size: var(--text-2xl);
     font-weight: var(--font-semibold);
     opacity: 0.9;
-    margin-right: var(--spacing-xs);
-    vertical-align: top;
 }
 
 .amount-value {
-    font-size: 3.5rem;
+    font-size: var(--text-4xl);
     font-weight: var(--font-bold);
-    letter-spacing: -0.025em;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(to bottom, #ffffff, #fefae0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    letter-spacing: -0.02em;
 }
 
 .balance-footer {
-    margin-top: var(--spacing-md);
-    padding-top: var(--spacing-md);
-    border-top: 1px solid rgba(254, 250, 224, 0.2);
-    font-size: var(--text-xs);
-    color: rgba(254, 250, 224, 0.7);
     position: relative;
     z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: var(--text-xs);
+    color: rgba(254, 250, 224, 0.8);
 }
 
-/* --#-- Quick Actions - 3-Column Card Grid Design */
+/* --#-- Quick Actions Grid */
 .action-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
+    gap: var(--spacing-md);
+}
+
+@media (max-width: 640px) {
+    .action-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .action-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-xl) var(--spacing-lg);
-    background: linear-gradient(135deg, var(--bg-card), var(--bg-tertiary));
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg) var(--spacing-sm);
+    background: var(--input-bg);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     text-decoration: none;
-    color: var(--text-primary);
-    font-weight: var(--font-semibold);
-    font-size: var(--text-sm);
-    transition: all var(--transition-base);
-    box-shadow: var(--shadow-sm);
-    min-height: 140px;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Subtle gradient overlay on hover */
-.action-btn::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(188, 108, 37, 0.1), transparent);
-    opacity: 0;
-    transition: opacity var(--transition-base);
-    pointer-events: none;
+    transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .action-btn:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg), 0 0 20px rgba(188, 108, 37, 0.2);
-    border-color: var(--color-primary);
-    background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
-}
-
-.action-btn:hover::before {
-    opacity: 1;
-}
-
-.action-btn:active {
     transform: translateY(-2px);
+    border-color: var(--color-primary);
+    background: var(--color-primary-bg);
 }
 
 .action-btn-icon {
-    font-size: 2.5rem;
-    margin-bottom: var(--spacing-sm);
-    filter: drop-shadow(0 2px 4px rgba(188, 108, 37, 0.3));
-    transition: transform var(--transition-base);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: var(--color-primary-bg);
+    color: var(--copperwood);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.action-btn:hover .action-btn-icon {
-    transform: scale(1.1);
+.action-btn-icon svg {
+    width: 22px;
+    height: 22px;
 }
 
 .action-btn-label {
+    font-size: var(--text-sm);
     font-weight: var(--font-semibold);
     color: var(--text-primary);
-    font-size: var(--text-sm);
-    margin-bottom: var(--spacing-xs);
 }
 
 .action-btn-sublabel {
     font-size: var(--text-xs);
     color: var(--text-tertiary);
-    font-weight: var(--font-normal);
-    text-align: center;
 }
 
-/* Responsive: Stack on mobile */
-@media (max-width: 768px) {
-    .action-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-md);
-    }
-
-    .action-btn {
-        min-height: 100px;
-        flex-direction: row;
-        justify-content: flex-start;
-        padding: var(--spacing-md) var(--spacing-lg);
-        gap: var(--spacing-md);
-    }
-
-    .action-btn-icon {
-        font-size: 2rem;
-        margin-bottom: 0;
-    }
-
-    .action-btn-label {
-        margin-bottom: 0;
-    }
+/* --#-- Transaction Table Rows */
+.tx-icon {
+    width: 36px;
 }
 
-/* --#-- Transaction List */
-.transaction-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-/* --#-- Transaction Items Container (for HTMX partials) */
-.transaction-items-container {
-    display: flex;
-    flex-direction: column;
-}
-
-/* --#-- Load More Button Wrapper */
-.load-more-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-top: var(--spacing-lg);
-    padding-top: var(--spacing-md);
-}
-
-.load-more-btn {
-    min-width: 140px;
-}
-
-/* --#-- Full Transaction List Page */
-.transaction-list-full {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
-}
-
-/* --#-- Pagination Container */
-.pagination-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: var(--spacing-xl);
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--border-color);
-    flex-wrap: wrap;
-    gap: var(--spacing-md);
-}
-
-.pagination-info {
-    color: var(--text-tertiary);
-    font-size: var(--text-sm);
-}
-
-.pagination {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-}
-
-.page-indicator {
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-}
-
-.pagination .btn.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-/* --#-- Transaction Actions (View All / Load More) */
-.transaction-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: var(--spacing-lg);
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--border-color);
-}
-
-.transaction-actions .btn {
-    min-width: 120px;
-}
-
-/* --#-- Transaction Card - Earth-Tone Design */
-.transaction-card {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg);
-    background: var(--bg-card);
-    backdrop-filter: var(--glass-blur);
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-md);
-    transition: all var(--transition-base);
-    position: relative;
-    overflow: hidden;
-    margin-bottom: var(--spacing-md);
-}
-
-.transaction-card:last-child {
-    margin-bottom: 0;
-}
-
-.transaction-card::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--toasted-almond);
-    transition: all var(--transition-fast);
-}
-
-.transaction-card:hover {
-    transform: translateX(8px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--toasted-almond);
-}
-
-.transaction-card.deposit::before {
-    background: var(--olive-leaf);
-}
-
-.transaction-card.withdrawal::before {
-    background: var(--copperwood);
-}
-
-.transaction-card.transfer::before {
-    background: var(--sunlit-clay);
-}
-
-.transaction-card.flagged {
-    border-color: var(--color-warning);
-    background: rgba(245, 158, 11, 0.1);
-}
-
-.transaction-card.flagged::before {
-    background: var(--color-warning);
-}
-
-.transaction-icon-wrapper {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--radius-xl);
-    display: flex;
+.tx-icon-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--text-2xl);
-    flex-shrink: 0;
-    position: relative;
 }
 
-/* Earth-Tone Icon Backgrounds - NO BLUE */
-.transaction-card.deposit .transaction-icon-wrapper {
-    background: linear-gradient(135deg, rgba(96, 108, 56, 0.3), rgba(96, 108, 56, 0.1));
+.tx-icon-badge svg {
+    width: 18px;
+    height: 18px;
+}
+
+.tx-icon--deposit {
+    background: var(--color-success-bg);
     color: var(--status-success-text);
-    border: 1px solid rgba(96, 108, 56, 0.4);
 }
 
-.transaction-card.withdrawal .transaction-icon-wrapper {
-    background: linear-gradient(135deg, rgba(188, 108, 37, 0.3), rgba(188, 108, 37, 0.1));
+.tx-icon--withdrawal {
+    background: var(--color-danger-bg);
+    color: var(--status-danger-text);
+}
+
+.tx-icon--transfer {
+    background: var(--color-info-bg);
+    color: var(--color-info);
+}
+
+.tx-icon--fee {
+    background: var(--color-warning-bg);
     color: var(--status-warning-text);
-    border: 1px solid rgba(188, 108, 37, 0.4);
 }
 
-.transaction-card.transfer .transaction-icon-wrapper {
-    background: linear-gradient(135deg, rgba(221, 161, 94, 0.3), rgba(221, 161, 94, 0.1));
-    color: var(--status-warning-text);
-    border: 1px solid rgba(221, 161, 94, 0.4);
-}
-
-.transaction-details {
-    flex: 1;
-    min-width: 0;
-}
-
-.transaction-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-xs);
-}
-
-.transaction-type {
-    font-size: var(--text-base);
-    font-weight: var(--font-semibold);
+.tx-description {
+    font-weight: var(--font-medium);
     color: var(--text-primary);
 }
 
-.transaction-amount {
-    font-size: var(--text-xl);
-    font-weight: var(--font-bold);
-    letter-spacing: -0.025em;
-}
-
-.transaction-amount.positive {
-    color: var(--status-success-text);
-}
-
-.transaction-amount.negative {
-    color: var(--status-warning-text);
-}
-
-.transaction-meta {
-    display: flex;
-    gap: var(--spacing-md);
-    align-items: center;
-    font-size: var(--text-sm);
-    color: var(--text-tertiary);
-}
-
-.transaction-date {
-    font-weight: var(--font-medium);
-}
-
-.transaction-counterparty {
-    color: var(--text-secondary);
-    font-weight: var(--font-medium);
-}
-
-.transaction-description {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    margin-top: var(--spacing-xs);
-}
-
-.transaction-status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-full);
+.tx-sub {
+    display: block;
     font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-weight: var(--font-normal);
+}
+
+.tx-amount {
     font-weight: var(--font-semibold);
-    margin-top: var(--spacing-xs);
+    white-space: nowrap;
 }
 
-.status-completed {
-    background: rgba(16, 185, 129, 0.2);
+.tx-amount--positive {
     color: var(--status-success-text);
-    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.status-pending {
-    background: rgba(245, 158, 11, 0.2);
-    color: var(--status-warning-text);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+.tx-amount--negative {
+    color: var(--text-primary);
 }
 
-.status-failed {
-    background: rgba(239, 68, 68, 0.2);
-    color: var(--status-danger-text);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+.tx-date {
+    white-space: nowrap;
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
 }
 
-.status-flagged {
-    background: rgba(245, 158, 11, 0.2);
-    color: var(--status-warning-text);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+tr.tx-flagged td {
+    background: var(--color-danger-bg);
 }
 
 /* --#-- Empty State */
 .empty-state {
     text-align: center;
-    padding: var(--spacing-3xl) var(--spacing-lg);
-    color: var(--text-tertiary);
+    padding: var(--spacing-2xl) var(--spacing-lg);
 }
 
 .empty-icon {
-    font-size: 4rem;
-    display: block;
-    margin-bottom: var(--spacing-lg);
-    opacity: 0.5;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto var(--spacing-md);
+    border-radius: var(--radius-full);
+    background: var(--input-bg);
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-icon svg {
+    width: 28px;
+    height: 28px;
 }
 
 .empty-text {
-    font-size: var(--text-lg);
-    font-weight: var(--font-medium);
-    margin: 0;
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
+    margin: 0 0 var(--spacing-lg);
 }
 
-/* --#-- Responsive */
-@media (max-width: 1024px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .amount-value {
-        font-size: 2.5rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .transaction-card {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .transaction-header {
-        width: 100%;
-    }
-
-    .transaction-meta {
-        flex-direction: column;
-        gap: var(--spacing-xs);
-        align-items: flex-start;
-    }
-}
-
-/* --#-- Transaction List Page - Staff Filters */
+/* --#-- Filter Form (staff) */
 .filter-form {
     width: 100%;
 }
 
 .filter-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr auto;
+    display: flex;
     gap: var(--spacing-md);
-    align-items: end;
+    align-items: flex-end;
+    flex-wrap: wrap;
 }
 
 .filter-group {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
+    flex: 1;
+    min-width: 180px;
 }
 
 .filter-label {
     font-size: var(--text-xs);
     font-weight: var(--font-semibold);
-    color: var(--text-primary);
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
 }
 
-.filter-label i {
-    color: var(--toasted-almond);
-    font-size: var(--text-sm);
+.filter-label svg {
+    width: 14px;
+    height: 14px;
 }
 
 .filter-input,
 .filter-select {
     padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--input-bg);
+    font-size: var(--text-sm);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
+    background: var(--bg-secondary);
     color: var(--text-primary);
-    font-size: var(--text-sm);
-    font-family: inherit;
-    transition: all var(--transition-fast);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .filter-input:focus,
 .filter-select:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(188, 108, 37, 0.2);
-}
-
-.filter-select {
-    cursor: pointer;
-}
-
-.filter-select option {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-bg);
 }
 
 .filter-actions {
     display: flex;
     gap: var(--spacing-sm);
-    padding-bottom: var(--spacing-xs);
 }
 
-@media (max-width: 1024px) {
-    .filter-row {
-        grid-template-columns: 1fr;
-    }
-
-    .filter-actions {
-        justify-content: flex-end;
-    }
+/* --#-- Pagination */
+.pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+    flex-wrap: wrap;
 }
 
-/* --#-- Data Table for Transactions */
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--text-sm);
-}
-
-.data-table thead {
-    background: var(--bg-tertiary);
-}
-
-.data-table th {
-    padding: var(--spacing-md) var(--spacing-lg);
-    text-align: left;
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-    border-bottom: 2px solid var(--border-color);
-    white-space: nowrap;
-    text-transform: uppercase;
+.pagination-info {
     font-size: var(--text-xs);
-    letter-spacing: 0.05em;
-}
-
-.data-table td {
-    padding: var(--spacing-lg) var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    vertical-align: middle;
-}
-
-.data-table tbody tr {
-    transition: all var(--transition-fast);
-}
-
-.data-table tbody tr:hover {
-    background: var(--table-row-hover);
-}
-
-.user-email {
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.transaction-date {
-    white-space: nowrap;
     color: var(--text-tertiary);
 }
 
-.amount {
-    font-weight: var(--font-semibold);
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    white-space: nowrap;
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
+
+.page-indicator {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    padding: 0 var(--spacing-sm);
+}
+
+.btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* --#-- Info List (deposit/transfer info cards) */
+.info-list p {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+    margin: 0;
+    font-size: var(--text-sm);
+}
+
+.info-list p:last-child {
+    border-bottom: none;
+}
+
+.info-list strong {
+    color: var(--text-tertiary);
+    font-weight: var(--font-medium);
+}
+
+.info-list span {
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+    text-align: right;
+}
+
+/* --#-- Processing Indicator */
+.processing-indicator {
+    display: none;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-left: var(--spacing-md);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+.processing-indicator svg {
+    width: 18px;
+    height: 18px;
+    color: var(--copperwood);
+}
+
+.htmx-request.processing-indicator {
+    display: inline-flex;
+}
+
+/* --#-- Status Badges (transaction.status values) */
+.badge-completed {
+    background: var(--color-success-bg);
+    color: var(--status-success-text);
+}
+
+.badge-pending {
+    background: var(--color-warning-bg);
+    color: var(--status-warning-text);
+}
+
+.badge-failed {
+    background: var(--color-danger-bg);
+    color: var(--status-danger-text);
+}
+
+.badge-flagged {
+    background: var(--color-danger-bg);
+    color: var(--status-danger-text);
+}
+
+.badge-verified {
+    background: var(--color-success-bg);
+    color: var(--status-success-text);
+}
+
+.badge-rejected {
+    background: var(--color-danger-bg);
+    color: var(--status-danger-text);
+}
+
+.badge-unverified {
+    background: var(--input-bg);
+    color: var(--text-tertiary);
+}
+
+/* --#-- Transaction Type Pills (staff table) */
+.transaction-type {
+    font-weight: var(--font-semibold);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.type-deposit { color: var(--status-success-text); }
+.type-withdrawal { color: var(--status-danger-text); }
+.type-transfer { color: var(--color-info); }
+.type-fee { color: var(--status-warning-text); }
