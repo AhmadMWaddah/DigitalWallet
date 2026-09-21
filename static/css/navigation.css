@@ -105,6 +105,22 @@
     gap: var(--spacing-md);
 }
 
+/* --#-- Theme Toggle Button */
+.theme-toggle-btn {
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+    background: var(--border-color-light);
+    border-color: var(--color-primary);
+}
+
 /* --#-- User Menu */
 .user-menu {
     position: relative;

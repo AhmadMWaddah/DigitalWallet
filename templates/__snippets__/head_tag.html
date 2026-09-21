@@ -15,6 +15,20 @@
 <!-- --#-- HTMX CDN -->
 <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 
+<!-- --#-- Theme Bootstrap (before CSS: no flash, saved choice else OS) -->
+<script>
+    (function () {
+        var theme = 'light';
+        try {
+            theme = localStorage.getItem('theme')
+                || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        } catch (e) {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) theme = 'dark';
+        }
+        document.documentElement.dataset.theme = theme;
+    })();
+</script>
+
 <!-- --#-- Modular CSS -->
 <link rel="stylesheet" href="{% static 'css/base_variables.css' %}">
 <link rel="stylesheet" href="{% static 'css/layout.css' %}">

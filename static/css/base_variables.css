@@ -132,9 +132,8 @@
     --line-height-relaxed: 1.625;
 }
 
-/* --#-- Dark Mode (OS preference) */
-@media (prefers-color-scheme: dark) {
-    :root {
+/* --#-- Dark Mode (manual toggle: <html data-theme="dark">) */
+[data-theme="dark"] {
         /* Backgrounds */
         --bg-primary: var(--black-forest);
         --bg-secondary: #1a2410;
@@ -170,7 +169,6 @@
         --glass-bg: rgba(40, 54, 24, 0.6);
         --glass-border: rgba(254, 250, 224, 0.1);
         --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-    }
 }
 
 /* --#-- Global Styles */

@@ -140,3 +140,30 @@ ready(() => {
         });
     }
 });
+
+// --#-- Theme Toggle (light/dark, persists in localStorage)
+function applyThemeIcon(theme) {
+    const icon = document.querySelector('#theme-toggle-btn i');
+    if (!icon) return;
+    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+function setTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    try {
+        localStorage.setItem('theme', theme);
+    } catch (e) { /* private mode: theme just won't persist */ }
+    applyThemeIcon(theme);
+}
+
+ready(() => {
+    applyThemeIcon(document.documentElement.dataset.theme || 'light');
+
+    const toggleBtn = document.querySelector('#theme-toggle-btn');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            const current = document.documentElement.dataset.theme || 'light';
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+    }
+});
