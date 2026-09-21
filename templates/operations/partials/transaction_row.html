@@ -7,21 +7,11 @@
             {{ transaction.get_type_display }}
         </span>
     </td>
-    <td class="amount">${{ transaction.amount|floatformat:2 }}</td>
+    <td class="tx-amount">${{ transaction.amount|floatformat:2 }}</td>
+    <td>{{ transaction.metadata.flag_reason|default:"Under review" }}</td>
+    <td class="tx-date">{{ transaction.created_at|date:"M d, Y H:i" }}</td>
     <td>
-        {% if transaction.counterparty_wallet %}
-            {{ transaction.counterparty_wallet.client_profile.user.email }}
-        {% else %}
-            <span class="text-muted">External</span>
-        {% endif %}
-    </td>
-    <td class="flag-reason">
-        {{ transaction.metadata.flag_reason|default:"Under review" }}
-    </td>
-    <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
-    <td class="actions">
-        <span class="status-badge status-{{ transaction.status|lower }}">
-            <i class="fas fa-{% if transaction.status == "COMPLETED" %}check{% else %}exclamation-circle{% endif %}"></i>
+        <span class="badge badge-{{ transaction.status|lower }}">
             {{ transaction.get_status_display }}
         </span>
     </td>
