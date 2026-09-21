@@ -20,12 +20,14 @@ from django.contrib import admin
 from django.urls import include, path
 
 from accounts.views import LoginRedirectView
+from core.views import HealthView
 
 # -- Custom 403 Error Handler
 handler403 = "accounts.views.custom_permission_denied"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("health/", HealthView.as_view(), name="health"),
     path("accounts/", include("accounts.urls")),
     path("dashboard/", include("wallet.urls")),
     path("staff/", include("operations.urls")),
