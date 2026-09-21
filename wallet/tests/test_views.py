@@ -390,8 +390,8 @@ class TestBalanceCardView:
         response = client.get(reverse("wallet:balance"))
         assert response.status_code == 302
 
-    def test_balance_card_returns_json(self, client):
-        """Test balance card returns JSON."""
+    def test_balance_card_returns_html(self, client):
+        """Test balance card returns raw HTML for HTMX swap."""
         user = CustomUser.objects.create_user(
             email="balance-card@test.com",
             password="testpass123",
@@ -405,5 +405,7 @@ class TestBalanceCardView:
         response = client.get(reverse("wallet:balance"))
 
         assert response.status_code == 200
-        data = json.loads(response.content)
-        assert "html" in data
+        assert response["Content-Type"].startswith("text/html")
+        assert response.content.strip().startswith(b"<")
+        assert b"balance-card" in response.content
+        assert b"999.99" in response.content
