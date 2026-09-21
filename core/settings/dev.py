@@ -4,6 +4,8 @@ Django development settings.
 Inherits from base.py and overrides settings for local development.
 """
 
+import sys
+
 from .base import *
 
 # Enable debug mode for development
@@ -47,8 +49,6 @@ CSRF_COOKIE_SECURE = False  # Allow HTTP for local development
 # -- Django Debug Toolbar Configuration
 
 # Add debug toolbar to INSTALLED_APPS (only if not testing)
-import sys
-
 if "pytest" not in sys.modules:
     INSTALLED_APPS += [
         "debug_toolbar",
@@ -72,5 +72,5 @@ if "pytest" not in sys.modules:
 
 # -- Development Logging (DEBUG level for detailed debugging)
 
-LOGGING["root"]["level"] = "DEBUG"
-LOGGING["loggers"]["django"]["level"] = "DEBUG"
+LOGGING["root"]["level"] = "DEBUG"  # type: ignore[index]
+LOGGING["loggers"]["django"]["level"] = "DEBUG"  # type: ignore[index]

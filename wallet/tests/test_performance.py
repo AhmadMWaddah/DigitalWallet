@@ -9,7 +9,6 @@ from decimal import Decimal
 import pytest
 from django.contrib.auth import get_user_model
 from django.db import connection, reset_queries
-from django.test import Client
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
@@ -79,11 +78,11 @@ class TestTransactionListPerformance:
     def test_transaction_list_query_count(self, client, staff_user_with_data):
         """
         Test that transaction list view has CONSTANT query count (O(1)).
-        
+
         Compares two scenarios:
         - Scenario A: 5 transactions in database
         - Scenario B: 50 transactions in database
-        
+
         Asserts that query count is identical for both scenarios.
         """
         # Get client wallet
@@ -96,7 +95,13 @@ class TestTransactionListPerformance:
         # Scenario A: Query with 5 transactions
         # First, limit to only 5 transactions for this test
         Transaction.objects.filter(wallet=wallet).exclude(
-            reference_id__in=["PERF-TRF-0000", "PERF-TRF-0001", "PERF-TRF-0002", "PERF-TRF-0003", "PERF-TRF-0004"]
+            reference_id__in=[
+                "PERF-TRF-0000",
+                "PERF-TRF-0001",
+                "PERF-TRF-0002",
+                "PERF-TRF-0003",
+                "PERF-TRF-0004",
+            ]
         ).delete()
 
         # Create exactly 5 transactions
@@ -109,7 +114,7 @@ class TestTransactionListPerformance:
                     "amount": Decimal("100.00"),
                     "type": "TRANSFER",
                     "status": "COMPLETED",
-                }
+                },
             )
 
         # Measure queries for 5 transactions
@@ -131,7 +136,7 @@ class TestTransactionListPerformance:
                     "amount": Decimal("100.00"),
                     "type": "TRANSFER",
                     "status": "COMPLETED",
-                }
+                },
             )
 
         # Measure queries for 50 transactions
@@ -162,7 +167,6 @@ class TestStaffDashboardPerformance:
     @pytest.mark.django_db
     def test_staff_dashboard_query_count(self, client, staff_user_with_data):
         """Test that staff dashboard has constant query count."""
-        staff = staff_user_with_data
 
         # Login as staff
         client.login(email="staff_perf@test.com", password="testpass123")
@@ -190,7 +194,6 @@ class TestAnalyticsDashboardPerformance:
     @pytest.mark.django_db
     def test_analytics_dashboard_query_count(self, client, staff_user_with_data):
         """Test that analytics dashboard has constant query count."""
-        staff = staff_user_with_data
 
         # Login as staff
         client.login(email="staff_perf@test.com", password="testpass123")
@@ -244,7 +247,7 @@ class TestQueryOptimization:
     def test_transaction_with_indexes(self, staff_user_with_data):
         """
         Test that queries use indexes on status and type.
-        
+
         Verifies:
         - Filtering by status uses the status index
         - Filtering by type uses the type index
@@ -263,9 +266,7 @@ class TestQueryOptimization:
         assert transfers.count() > 0, "No transfer transactions found"
 
         # Combined filter (should use both indexes efficiently)
-        completed_transfers = Transaction.objects.filter(
-            status="COMPLETED", type="TRANSFER"
-        )
+        completed_transfers = Transaction.objects.filter(status="COMPLETED", type="TRANSFER")
 
         assert completed_transfers.count() > 0, "No completed transfers found"
 
@@ -273,10 +274,10 @@ class TestQueryOptimization:
         # Note: SQLite doesn't expose query plans easily, but we verify the logic
         status_query = str(flagged.query)
         type_query = str(transfers.query)
-        
+
         assert "status" in status_query.lower(), "Query should filter by status"
         assert "type" in type_query.lower(), "Query should filter by type"
-        
+
         # Combined query should have both conditions
         combined_query = str(completed_transfers.query)
         assert "status" in combined_query.lower(), "Combined query should filter by status"

@@ -7,7 +7,7 @@ Registers CustomUser and profile models for Django admin.
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import ClientProfile, CustomUser, StaffProfile, UserType
+from .models import ClientProfile, CustomUser, StaffProfile
 
 # -- Custom User Admin
 

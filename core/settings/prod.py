@@ -4,8 +4,6 @@ Django production settings.
 Inherits from base.py and overrides settings for production deployment.
 """
 
-import environ
-
 from .base import *
 
 # -- Security & Debug

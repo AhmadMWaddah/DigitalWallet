@@ -7,10 +7,6 @@ Verifies:
 - Dev/Prod settings inheritance
 """
 
-from pathlib import Path
-
-import pytest
-
 
 class TestSettingsStructure:
     """Test the settings package structure."""

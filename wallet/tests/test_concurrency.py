@@ -10,12 +10,10 @@ Note: These tests use database-level locking which works with SQLite.
 For production, PostgreSQL is recommended for better concurrency handling.
 """
 
-import threading
 from decimal import Decimal
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.db import connection, transaction
 
 from accounts.models import UserType
 from wallet.exceptions import DuplicateTransactionError, InsufficientFundsError
@@ -125,9 +123,9 @@ class TestConcurrencySafety:
 
         # Verify final balance is exactly $1000
         wallet.refresh_from_db()
-        assert wallet.balance == Decimal("1000.00"), (
-            f"Final balance should be $1000.00, got ${wallet.balance}"
-        )
+        assert wallet.balance == Decimal(
+            "1000.00"
+        ), f"Final balance should be $1000.00, got ${wallet.balance}"
 
     @pytest.mark.django_db
     def test_concurrent_transfers_prevent_race_conditions(self):
@@ -182,12 +180,12 @@ class TestConcurrencySafety:
         wallet_a.refresh_from_db()
         wallet_b.refresh_from_db()
 
-        assert wallet_a.balance == Decimal("0.00"), (
-            f"Wallet A should have $0.00, got ${wallet_a.balance}"
-        )
-        assert wallet_b.balance == Decimal("1000.00"), (
-            f"Wallet B should have $1000.00, got ${wallet_b.balance}"
-        )
+        assert wallet_a.balance == Decimal(
+            "0.00"
+        ), f"Wallet A should have $0.00, got ${wallet_a.balance}"
+        assert wallet_b.balance == Decimal(
+            "1000.00"
+        ), f"Wallet B should have $1000.00, got ${wallet_b.balance}"
 
     @pytest.mark.django_db
     def test_idempotency_prevents_duplicate_transactions(self):
@@ -238,6 +236,6 @@ class TestConcurrencySafety:
 
         # Verify balance is exactly $100 (not $500)
         wallet.refresh_from_db()
-        assert wallet.balance == Decimal("100.00"), (
-            f"Balance should be $100.00, got ${wallet.balance}"
-        )
+        assert wallet.balance == Decimal(
+            "100.00"
+        ), f"Balance should be $100.00, got ${wallet.balance}"

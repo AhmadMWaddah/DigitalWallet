@@ -156,7 +156,9 @@ class TestCeleryTasks:
     """Test Celery task execution."""
 
     @pytest.mark.django_db
-    def test_generate_statement_pdf_task_success(self, wallet_with_transactions, cleanup_statements):
+    def test_generate_statement_pdf_task_success(
+        self, wallet_with_transactions, cleanup_statements
+    ):
         """Test statement generation task completes successfully."""
         from wallet.tasks import generate_statement_pdf
 
@@ -221,7 +223,9 @@ class TestCeleryTasks:
         assert status["status"] in ["PENDING", "FAILURE"]  # Will be PENDING or FAILURE for mock ID
 
     @pytest.mark.django_db
-    def test_generate_statement_pdf_includes_transactions(self, wallet_with_transactions, cleanup_statements):
+    def test_generate_statement_pdf_includes_transactions(
+        self, wallet_with_transactions, cleanup_statements
+    ):
         """Test generated PDF includes transaction data."""
         from wallet.utils.pdf_generator import generate_statement_pdf_to_media
 
@@ -308,7 +312,9 @@ class TestStatementViews:
         assert response["Content-Type"] == "text/html; charset=utf-8"
 
     @pytest.mark.django_db
-    def test_statement_download_view_ownership_check(self, auth_client, wallet_with_transactions, cleanup_statements):
+    def test_statement_download_view_ownership_check(
+        self, auth_client, wallet_with_transactions, cleanup_statements
+    ):
         """Test statement download view verifies ownership."""
         from wallet.utils.pdf_generator import generate_statement_pdf_to_media
 
@@ -337,7 +343,6 @@ class TestOpeningBalanceCalculation:
     def test_opening_balance_calculation(self, client_user):
         """Test opening balance is calculated correctly from pre-period transactions."""
         from wallet.models import Transaction, Wallet
-        from wallet.utils.pdf_generator import PDFStatementGenerator
 
         user, client_profile = client_user
         wallet = Wallet.objects.create(client_profile=client_profile, balance=Decimal("0.00"))
@@ -397,20 +402,11 @@ class TestOpeningBalanceCalculation:
         Transaction.objects.filter(pk=t4.pk).update(created_at=period_start)
         Transaction.objects.filter(pk=t5.pk).update(created_at=period_start + timedelta(days=5))
 
-        # Generate statement for the period (10 days ago to now)
-        generator = PDFStatementGenerator(
-            wallet=wallet,
-            start_date=period_start,
-            end_date=now,
-        )
-
         # Verify opening balance is $700 (from pre-period transactions)
         # Opening Balance = $1000 - $200 - $100 = $700
         opening_balance = Decimal("0.00")
         prior_transactions = Transaction.objects.filter(
-            wallet=wallet,
-            created_at__lt=period_start,
-            status="COMPLETED"
+            wallet=wallet, created_at__lt=period_start, status="COMPLETED"
         )
 
         for txn in prior_transactions:
@@ -427,15 +423,14 @@ class TestOpeningBalanceCalculation:
                 elif txn.counterparty_wallet == wallet:
                     opening_balance += txn.amount
 
-        assert opening_balance == Decimal("700.00"), f"Expected $700.00, got ${opening_balance}, found {prior_transactions.count()} prior transactions"
+        assert opening_balance == Decimal(
+            "700.00"
+        ), f"Expected $700.00, got ${opening_balance}, found {prior_transactions.count()} prior transactions"
 
         # Verify closing balance would be $900 ($700 + $500 - $300)
         net_change = Decimal("0.00")
         period_transactions = Transaction.objects.filter(
-            wallet=wallet,
-            created_at__gte=period_start,
-            created_at__lte=now,
-            status="COMPLETED"
+            wallet=wallet, created_at__gte=period_start, created_at__lte=now, status="COMPLETED"
         )
 
         for txn in period_transactions:

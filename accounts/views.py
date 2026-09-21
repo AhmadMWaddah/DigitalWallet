@@ -188,7 +188,9 @@ class CustomLoginView(BaseLoginView):
 
     template_name = "accounts/login.html"
     redirect_field_name = "next"
-    form_class = EmailAuthenticationForm
+    # Custom email form is not an AuthenticationForm subclass by design;
+    # Django accepts any form exposing get_user() at runtime.
+    form_class = EmailAuthenticationForm  # type: ignore[assignment]
     authentication_form = EmailAuthenticationForm
 
     def get_success_url(self):

@@ -2,12 +2,16 @@
 pytest==9.0.*
 pytest-django==4.12.*
 pytest-cov==6.0.*
+coverage==7.16.*
 
 # Code Quality
 pre-commit==4.5.*
 black==26.1.*
 flake8==7.3.*
 isort==8.0.*
+ruff==0.16.*
+mypy==1.18.*
+django-stubs==5.2.*
 
 # Debugging
 django-debug-toolbar==5.1.*

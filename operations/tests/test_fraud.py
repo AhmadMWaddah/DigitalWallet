@@ -22,7 +22,7 @@ from wallet.services import transfer_funds
 @pytest.fixture
 def staff_user(db):
     """Create a staff user for testing."""
-    from accounts.models import ClientProfile, CustomUser
+    from accounts.models import CustomUser
 
     user = CustomUser.objects.create_user(
         email="staff@test.com",
@@ -35,7 +35,7 @@ def staff_user(db):
 @pytest.fixture
 def client_user_with_wallet(db):
     """Create a client user with wallet for testing."""
-    from accounts.models import ClientProfile, CustomUser
+    from accounts.models import CustomUser
 
     user = CustomUser.objects.create_user(
         email="client@test.com",
@@ -49,7 +49,7 @@ def client_user_with_wallet(db):
 @pytest.fixture
 def new_account_user(db):
     """Create a new account user (created today) with wallet."""
-    from accounts.models import ClientProfile, CustomUser
+    from accounts.models import CustomUser
 
     user = CustomUser.objects.create_user(
         email="newuser@test.com",
@@ -67,7 +67,7 @@ def new_account_user(db):
 @pytest.fixture
 def receiver_wallet(db):
     """Create a receiver wallet for testing."""
-    from accounts.models import ClientProfile, CustomUser
+    from accounts.models import CustomUser
 
     user = CustomUser.objects.create_user(
         email="receiver@test.com",
@@ -216,9 +216,8 @@ class TestFraudEngineRule2:
 
         # Create 10 transfers 2 hours ago (outside the 1-hour window)
         # Use a fixed time in the past to ensure consistency
-        from datetime import datetime
         old_time = timezone.now() - timedelta(hours=2)
-        
+
         for i in range(10):
             txn = Transaction.objects.create(
                 wallet=sender_wallet,
@@ -229,9 +228,7 @@ class TestFraudEngineRule2:
                 reference_id=f"TEST-RULE2-OLD-{i:03d}-{user.email}",
             )
             # Update created_at after creation to ensure it's in the past
-            Transaction.objects.filter(pk=txn.pk).update(
-                created_at=old_time - timedelta(minutes=i)
-            )
+            Transaction.objects.filter(pk=txn.pk).update(created_at=old_time - timedelta(minutes=i))
 
         # Create new transfer (should NOT be flagged by Rule 2)
         transaction = Transaction.objects.create(
@@ -321,7 +318,9 @@ class TestFraudEngineIntegration:
     """Test FraudEngine integration with wallet services."""
 
     @pytest.mark.django_db
-    def test_transfer_over_10k_flagged_automatically(self, client_user_with_wallet, receiver_wallet):
+    def test_transfer_over_10k_flagged_automatically(
+        self, client_user_with_wallet, receiver_wallet
+    ):
         """Test that transfer_funds automatically flags transfers > $10,000."""
         user, sender_wallet = client_user_with_wallet
 
@@ -429,15 +428,20 @@ class TestFraudEngineHelperMethods:
 
         # Create a unique receiver for this test to avoid cross-test contamination
         from accounts.models import CustomUser
+
         test_user = CustomUser.objects.create_user(
             email=f"test-flagged-{user.email}",
             password="testpass123",
             user_type=UserType.CLIENT,
         )
-        test_wallet = Wallet.objects.create(client_profile=test_user.client_profile, balance=Decimal("50000.00"))
+        test_wallet = Wallet.objects.create(
+            client_profile=test_user.client_profile, balance=Decimal("50000.00")
+        )
 
         # Get initial flagged count for this specific wallet
-        initial_flagged = FraudEngine.get_flagged_transactions().filter(wallet=sender_wallet).count()
+        initial_flagged = (
+            FraudEngine.get_flagged_transactions().filter(wallet=sender_wallet).count()
+        )
 
         # Perform transfers that will be flagged (Rule 1: > $10,000)
         transfer_funds(sender_wallet, test_wallet, Decimal("15000.00"))  # Flagged

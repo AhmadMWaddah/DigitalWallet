@@ -333,7 +333,7 @@ class PDFStatementGenerator:
             bottomMargin=0.75 * inch,
         )
 
-        elements = []
+        elements: list = []
         custom_styles = self._get_custom_styles()
 
         # Build document sections
