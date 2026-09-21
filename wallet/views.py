@@ -132,7 +132,7 @@ class BalanceCardView(LoginRequiredMixin, ClientOnlyMixin, View):
     """
     Balance card view for HTMX OOB updates.
 
-    Returns updated balance card HTML.
+    Returns updated balance card as raw HTML for HTMX swap.
     """
 
     def get(self, request):
@@ -148,7 +148,7 @@ class BalanceCardView(LoginRequiredMixin, ClientOnlyMixin, View):
             request=request,
         )
 
-        return JsonResponse({"html": html})
+        return HttpResponse(html)
 
 
 class DepositView(LoginRequiredMixin, ClientOnlyMixin, View):
