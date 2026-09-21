@@ -8,7 +8,7 @@ import pytest
 
 
 def pytest_configure():
-    """Configure Celery for testing."""
+    """Configure Celery and rate limiting for testing."""
     # Use eager mode for testing (tasks run synchronously)
     from celery import current_app
 
@@ -17,6 +17,13 @@ def pytest_configure():
         task_eager_propagates=False,  # Don't propagate exceptions, return them
         task_store_eager_result=True,
     )
+
+    # Disable rate limiting globally in tests (locmem cache is shared
+    # across tests, so limits would leak between cases). Targeted
+    # rate-limit tests re-enable it via the settings fixture.
+    from django.conf import settings as django_settings
+
+    django_settings.RATELIMIT_ENABLE = False
 
 
 # -- Fixtures
