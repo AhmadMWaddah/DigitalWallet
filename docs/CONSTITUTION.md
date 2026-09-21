@@ -1,5 +1,10 @@
 # Fintech Digital Wallet Dashboard - Constitution Plan
 
+> **Execution status (Sept 2026): all 8 phases complete.** The follow-up
+> fix & upgrade plan (`docs/FIX_PLAN.md`) is also executed: CI/CD, rate
+> limiting, DRF API v1, QR payments, transfer fees, KYC foundation.
+> This document is kept as the historical build record.
+
 ## Roles Introductions
 
 - I am Ahmad I am your Manager and I am the owner of this project.
@@ -467,12 +472,12 @@ pytest wallet/tests/test_async.py -v
 
 ### Tasks
 
-1. Create `admin_dashboard` app: `python manage.py startapp admin_dashboard`
+1. Staff app is `operations/` (not `admin_dashboard/`): `python manage.py startapp operations`
 2. Implement `StaffDashboardView` (CBV):
    - List all transactions with filters (date, type, status)
    - Display flagged transactions prominently
    - Show system statistics (total users, transaction volume)
-3. Create `FraudEngine` module (`admin_dashboard/fraud_engine.py`):
+3. Create `FraudEngine` module (`operations/fraud_engine.py`):
    - Rule 1: Flag transfers > $10,000
    - Rule 2: Flag users with > 5 transfers in 1 hour
    - Rule 3: Flag new accounts (< 7 days) with large transfers
@@ -510,7 +515,7 @@ pytest wallet/tests/test_async.py -v
 
 ```bash
 # Run staff & analytics tests
-pytest admin_dashboard/tests/ analytics/tests/ -v
+pytest operations/tests/ analytics/tests/ -v
 
 # Manual staff testing
 python manage.py createsuperuser --settings=core.settings.dev
@@ -605,7 +610,7 @@ pytest wallet/tests/test_performance.py::test_transaction_list_query_count -v
    ├── requirements.txt              # Production dependencies
    ├── requirements-dev.txt          # Development dependencies
    ├── README.md                     # Project documentation
-   ├── Constitution_Digital_Wallet.md # This file
+   ├── Constitution_Digital_Wallet.md # This file (now docs/CONSTITUTION.md)
    ├── Procfile                      # Render deployment config
    │
    ├── .env_digital_wallet/          # Python virtual environment
@@ -649,7 +654,7 @@ pytest wallet/tests/test_performance.py::test_transaction_list_query_count -v
    │   └── tests/
    │       └── test_views.py
    │
-   ├── admin_dashboard/              # Staff back-office tools
+    ├── admin_dashboard/              # Staff back-office tools (implemented as `operations/`)
    │   ├── views.py                  # Staff dashboard views
    │   ├── fraud_engine.py           # Fraud detection rules
    │   └── tests/
