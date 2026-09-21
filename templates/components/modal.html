@@ -1,10 +1,10 @@
 <!-- --#-- Modal Component -->
 <div class="modal-overlay" id="modal-{{ modal_id|default:'default' }}">
-    <div class="modal-container">
+    <div class="modal-container" role="dialog" aria-modal="true" aria-label="{{ title|default:'Modal' }}">
         <div class="modal-header">
             <h3 class="modal-title">{% block modal_title %}{{ title|default:"Modal" }}{% endblock %}</h3>
-            <button class="modal-close" onclick="closeModal()" aria-label="Close">
-                <span>&times;</span>
+            <button class="modal-close" data-close-modal aria-label="Close">
+                {% include '__snippets__/icons/times.svg' %}
             </button>
         </div>
 
@@ -16,7 +16,7 @@
 
         {% block modal_footer %}
         <div class="modal-footer">
-            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-ghost" data-close-modal>Cancel</button>
             {% if confirm_text %}
             <button class="btn btn-primary" id="modal-confirm-btn">{{ confirm_text }}</button>
             {% endif %}
@@ -24,24 +24,3 @@
         {% endblock %}
     </div>
 </div>
-
-<script>
-function closeModal() {
-    const modal = document.getElementById('modal-{{ modal_id|default:"default" }}');
-    if (modal) {
-        modal.remove();
-    }
-}
-
-// Close on overlay click
-document.addEventListener('DOMContentLoaded', function() {
-    const overlay = document.querySelector('.modal-overlay');
-    if (overlay) {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) {
-                closeModal();
-            }
-        });
-    }
-});
-</script>

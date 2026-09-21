@@ -199,12 +199,28 @@ ready(() => {
     observer.observe(canvas);
 });
 
-// --#-- Modal: close on overlay click
+// --#-- Modal: close on overlay click, close button, or Cancel
+function closeModal(modal) {
+    if (typeof modal === 'string') modal = document.getElementById(modal);
+    if (modal) modal.remove();
+}
+
 ready(() => {
     document.addEventListener('click', (e) => {
+        const closer = e.target.closest ? e.target.closest('[data-close-modal]') : null;
+        if (closer) {
+            const overlay = closer.closest('.modal-overlay');
+            closeModal(overlay || document.querySelector('.modal-overlay'));
+            return;
+        }
         if (e.target.classList && e.target.classList.contains('modal-overlay')) {
-            const container = document.getElementById('modal-container');
-            if (container) container.innerHTML = '';
+            closeModal(e.target);
+            return;
+        }
+        const dismisser = e.target.closest ? e.target.closest('[data-dismiss-alert]') : null;
+        if (dismisser) {
+            const alert = dismisser.closest('.alert');
+            if (alert) alert.remove();
         }
     });
 });
