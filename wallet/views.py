@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -22,8 +22,9 @@ from django_ratelimit.decorators import ratelimit
 from accounts.models import ClientProfile, UserType
 from accounts.views import ClientOnlyMixin
 
-from .forms import DepositForm, TransferForm, WithdrawForm
+from .forms import DepositForm, QRPayForm, TransferForm, WithdrawForm
 from .models import Transaction, TransactionStatus, TransactionType, Wallet
+from .qr import build_qr_payload, qr_png_bytes
 from .services import deposit_funds, transfer_funds, withdraw_funds
 from .tasks import generate_statement_pdf, get_task_status
 
@@ -418,6 +419,114 @@ class TransferView(LoginRequiredMixin, ClientOnlyMixin, View):
 
             # For regular requests, return JSON with errors
             return JsonResponse({"success": False, "errors": form.errors})
+
+
+class MyQRView(LoginRequiredMixin, ClientOnlyMixin, TemplateView):
+    """
+    Display the client's own QR code for receiving scan-to-pay payments.
+
+    The PNG itself is served by QRImageView; this page embeds it.
+    """
+
+    template_name = "wallet/qr_display.html"
+
+    def get_context_data(self, **kwargs):
+        """Add the QR image URL to context."""
+        context = super().get_context_data(**kwargs)
+        context["qr_image_url"] = reverse("wallet:qr_image")
+        return context
+
+
+class QRImageView(LoginRequiredMixin, ClientOnlyMixin, View):
+    """
+    Serve the client's QR code as a PNG.
+
+    Generated per request, never stored. The payload is a signed
+    wallet ID (see wallet/qr.py) so codes cannot be forged.
+    """
+
+    def get(self, request):
+        """Return QR PNG for the requesting client's wallet."""
+        wallet = get_object_or_404(Wallet, client_profile__user=request.user)
+        png = qr_png_bytes(build_qr_payload(wallet.id))
+        return HttpResponse(png, content_type="image/png")
+
+
+@method_decorator(ratelimit(key="user", rate="10/m", method="POST", block=True), name="dispatch")
+class QRPayView(LoginRequiredMixin, ClientOnlyMixin, View):
+    """
+    Pay by pasted/scanned QR code.
+
+    Mirrors TransferView response shapes: alert HTML for HTMX,
+    JsonResponse with success flag otherwise.
+    """
+
+    def get(self, request):
+        """Display the scan-and-pay page."""
+        form = QRPayForm()
+        return render(request, "wallet/qr_pay.html", {"form": form})
+
+    def post(self, request):
+        """Verify QR code and process the payment."""
+        try:
+            sender_wallet = request.user.client_profile.wallet
+        except Wallet.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Wallet not found."})
+
+        form = QRPayForm(request.POST, sender_wallet=sender_wallet)
+
+        if form.is_valid():
+            try:
+                receiver_wallet = form.cleaned_data["code"]
+                transaction = transfer_funds(
+                    sender_wallet=sender_wallet,
+                    receiver_wallet=receiver_wallet,
+                    amount=form.cleaned_data["amount"],
+                    description=form.cleaned_data.get("description", ""),
+                    reference_id=(
+                        f"QR-{sender_wallet.id}-{receiver_wallet.id}-{uuid.uuid4().hex[:12]}"
+                    ),
+                )
+                transaction.metadata = {
+                    **(transaction.metadata or {}),
+                    "payment_method": "qr_code",
+                }
+                transaction.save(update_fields=["metadata"])
+
+                email = receiver_wallet.client_profile.user.email
+                message = f"Paid ${transaction.amount:,.2f} to {email} via QR."
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(
+                        render_to_string(
+                            "components/alert.html",
+                            {"message": {"tags": "success", "message": message}},
+                            request=request,
+                        )
+                    )
+                return JsonResponse({"success": True, "message": message})
+
+            except Exception as e:  # noqa: BLE001 - mirror TransferView error shape
+                error = f"QR payment failed: {str(e)}"
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(
+                        render_to_string(
+                            "components/alert.html",
+                            {"message": {"tags": "danger", "message": error}},
+                            request=request,
+                        )
+                    )
+                return JsonResponse({"success": False, "error": str(e)})
+
+        errors = "; ".join(f"{field}: {', '.join(errs)}" for field, errs in form.errors.items())
+        if request.headers.get("HX-Request"):
+            return HttpResponse(
+                render_to_string(
+                    "components/alert.html",
+                    {"message": {"tags": "danger", "message": errors}},
+                    request=request,
+                )
+            )
+        return JsonResponse({"success": False, "errors": form.errors})
 
 
 class StatementFormPartialView(LoginRequiredMixin, ClientOnlyMixin, View):

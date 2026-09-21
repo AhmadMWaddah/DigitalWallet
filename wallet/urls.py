@@ -10,6 +10,9 @@ from .views import (
     BalanceCardView,
     DashboardView,
     DepositView,
+    MyQRView,
+    QRImageView,
+    QRPayView,
     StatementDownloadView,
     StatementFormPartialView,
     StatementRequestView,
@@ -30,6 +33,10 @@ urlpatterns = [
     path("deposit/", DepositView.as_view(), name="deposit"),
     path("withdraw/", WithdrawView.as_view(), name="withdraw"),
     path("transfer/", TransferView.as_view(), name="transfer"),
+    # QR scan-to-pay
+    path("qr/", MyQRView.as_view(), name="my_qr"),
+    path("qr/image/", QRImageView.as_view(), name="qr_image"),
+    path("qr/pay/", QRPayView.as_view(), name="qr_pay"),
     # Statement generation
     path("statement/form/", StatementFormPartialView.as_view(), name="statement_form_partial"),
     path("statement/request/", StatementRequestView.as_view(), name="statement_request"),

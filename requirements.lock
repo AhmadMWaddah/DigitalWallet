@@ -132,7 +132,9 @@ pathspec==1.1.1
     #   black
     #   mypy
 pillow==12.3.0
-    # via reportlab
+    # via
+    #   -r requirements.txt
+    #   reportlab
 pip==26.2.1
     # via pip-api
 pip-api==0.0.35
@@ -186,6 +188,8 @@ pyyaml==6.0.3
     #   bandit
     #   drf-spectacular
     #   pre-commit
+qrcode==8.2
+    # via -r requirements.txt
 redis==5.2.1
     # via -r requirements.txt
 referencing==0.37.0
