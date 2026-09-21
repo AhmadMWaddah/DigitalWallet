@@ -515,18 +515,21 @@ class TaskStatusView(LoginRequiredMixin, View):
 
         # SECURITY: Verify task ownership BEFORE returning any status
         # Check ownership binding from cache (works for PENDING/STARTED/SUCCESS/FAILURE)
-        if status_data and "task_owner_id" in status_data:
-            if status_data["task_owner_id"] != request.user.id:
-                # User is trying to access another user's task status
-                html = render_to_string(
-                    "wallet/partials/statement_error.html",
-                    {
-                        "task_id": task_id,
-                        "error": "Access denied. This is not your statement request.",
-                    },
-                    request=request,
-                )
-                return HttpResponse(html)
+        if (
+            status_data
+            and "task_owner_id" in status_data
+            and status_data["task_owner_id"] != request.user.id
+        ):
+            # User is trying to access another user's task status
+            html = render_to_string(
+                "wallet/partials/statement_error.html",
+                {
+                    "task_id": task_id,
+                    "error": "Access denied. This is not your statement request.",
+                },
+                request=request,
+            )
+            return HttpResponse(html)
 
         status = status_data.get("status", "PENDING")
 
@@ -659,9 +662,11 @@ class StatementDownloadView(LoginRequiredMixin, ClientOnlyMixin, View):
         if not os.path.exists(full_path):
             return JsonResponse({"success": False, "error": "File not found on server."})
 
-        # Serve the file as attachment
+        # Serve the file as attachment (FileResponse owns and closes the handle)
         response = FileResponse(
-            open(full_path, "rb"), content_type="application/pdf", as_attachment=True
+            open(full_path, "rb"),  # noqa: SIM115 - FileResponse closes file on close()
+            content_type="application/pdf",
+            as_attachment=True,
         )
         response["Content-Disposition"] = f'attachment; filename="{os.path.basename(file_path)}"'
         return response

@@ -144,10 +144,14 @@ class FraudEngine:
 
         # Count transfers from this wallet in the last hour
         # Exclude the current transaction from the count
-        transfer_count = transaction.wallet.transactions.filter(
-            type="TRANSFER",
-            created_at__gte=one_hour_ago,
-        ).exclude(pk=transaction.pk).count()
+        transfer_count = (
+            transaction.wallet.transactions.filter(
+                type="TRANSFER",
+                created_at__gte=one_hour_ago,
+            )
+            .exclude(pk=transaction.pk)
+            .count()
+        )
 
         # If count >= MAX_TRANSFERS_PER_HOUR, this would be the (MAX+1)th transfer
         return transfer_count >= cls.MAX_TRANSFERS_PER_HOUR
@@ -204,7 +208,6 @@ class FraudEngine:
         Returns:
             int: Number of transfers in last hour
         """
-        from wallet.models import Transaction
 
         one_hour_ago = timezone.now() - timedelta(hours=1)
 

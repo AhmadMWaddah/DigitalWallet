@@ -171,10 +171,9 @@ class TransferForm(forms.Form):
         if amount <= Decimal("0.00"):
             raise ValidationError("Amount must be greater than zero.")
 
-        if self.sender_wallet:
-            if amount > self.sender_wallet.balance:
-                raise ValidationError(
-                    f"Insufficient funds. Your balance: ${self.sender_wallet.balance:.2f}"
-                )
+        if self.sender_wallet and amount > self.sender_wallet.balance:
+            raise ValidationError(
+                f"Insufficient funds. Your balance: ${self.sender_wallet.balance:.2f}"
+            )
 
         return amount

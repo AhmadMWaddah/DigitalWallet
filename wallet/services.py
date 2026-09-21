@@ -301,7 +301,7 @@ def transfer_funds(sender_wallet, receiver_wallet, amount, description="", refer
 
     # -- Create corresponding receiver transaction with same reference
     try:
-        receiver_transaction = Transaction.objects.create(
+        Transaction.objects.create(
             wallet=receiver_wallet,
             counterparty_wallet=sender_wallet,
             amount=amount,
@@ -425,12 +425,8 @@ def reverse_transfer(transaction_id, staff_user):
         raise ValueError(f"Transaction {transaction_id} is not flagged")
 
     # Get wallets with lock
-    sender_wallet = Wallet.objects.select_for_update().get(
-        pk=original_txn.wallet.pk
-    )
-    receiver_wallet = Wallet.objects.select_for_update().get(
-        pk=original_txn.counterparty_wallet.pk
-    )
+    sender_wallet = Wallet.objects.select_for_update().get(pk=original_txn.wallet.pk)
+    receiver_wallet = Wallet.objects.select_for_update().get(pk=original_txn.counterparty_wallet.pk)
 
     # CRITICAL: Check if isolated funds still exist
     receiver_metadata = receiver_wallet.metadata or {}
@@ -442,9 +438,7 @@ def reverse_transfer(transaction_id, staff_user):
         isolated_amount = Decimal(isolated_amount_str)
 
         # Remove isolated funds from receiver
-        Wallet.objects.filter(pk=receiver_wallet.pk).update(
-            balance=F("balance") - isolated_amount
-        )
+        Wallet.objects.filter(pk=receiver_wallet.pk).update(balance=F("balance") - isolated_amount)
 
         # Remove isolated key from metadata
         del receiver_metadata[isolated_key]
@@ -456,14 +450,10 @@ def reverse_transfer(transaction_id, staff_user):
         # For now, we still reverse but log the loss
         isolated_amount = original_txn.amount
         # Note: receiver balance may go negative - this is tracked for collections
-        Wallet.objects.filter(pk=receiver_wallet.pk).update(
-            balance=F("balance") - isolated_amount
-        )
+        Wallet.objects.filter(pk=receiver_wallet.pk).update(balance=F("balance") - isolated_amount)
 
     # Restore funds to sender
-    Wallet.objects.filter(pk=sender_wallet.pk).update(
-        balance=F("balance") + original_txn.amount
-    )
+    Wallet.objects.filter(pk=sender_wallet.pk).update(balance=F("balance") + original_txn.amount)
 
     # Refresh wallets
     sender_wallet.refresh_from_db()

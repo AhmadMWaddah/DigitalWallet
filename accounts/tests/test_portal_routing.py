@@ -9,8 +9,6 @@ Verifies:
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.urls import reverse
-from django.test import Client
 
 from accounts.models import UserType
 from accounts.views import LoginRedirectView
@@ -57,6 +55,7 @@ class TestLoginRedirectView:
 
         # Test with unauthenticated user
         from django.contrib.auth.models import AnonymousUser
+
         redirect_url = LoginRedirectView.get_redirect_url(AnonymousUser())
         assert redirect_url == "accounts:login"
 
@@ -117,11 +116,12 @@ class TestCustom403Page:
 
         # Manually trigger 403 (this would normally happen via permission denied)
         from django.core.exceptions import PermissionDenied
-        from accounts.views import custom_permission_denied
         from django.test import RequestFactory
 
+        from accounts.views import custom_permission_denied
+
         factory = RequestFactory()
-        request = factory.get('/dashboard/')
+        request = factory.get("/dashboard/")
         request.user = staff_user
 
         response = custom_permission_denied(request, exception=PermissionDenied())
@@ -133,11 +133,12 @@ class TestCustom403Page:
     def test_403_page_has_redirect_button(self, client, staff_user):
         """Test 403 page has Return to Dashboard button."""
         from django.core.exceptions import PermissionDenied
-        from accounts.views import custom_permission_denied
         from django.test import RequestFactory
 
+        from accounts.views import custom_permission_denied
+
         factory = RequestFactory()
-        request = factory.get('/dashboard/')
+        request = factory.get("/dashboard/")
         request.user = staff_user
 
         response = custom_permission_denied(request, exception=PermissionDenied())
@@ -150,11 +151,12 @@ class TestCustom403Page:
     def test_403_page_for_client(self, client, client_user):
         """Test 403 page shows correct message for clients."""
         from django.core.exceptions import PermissionDenied
-        from accounts.views import custom_permission_denied
         from django.test import RequestFactory
 
+        from accounts.views import custom_permission_denied
+
         factory = RequestFactory()
-        request = factory.get('/staff/dashboard/')
+        request = factory.get("/staff/dashboard/")
         request.user = client_user
 
         response = custom_permission_denied(request, exception=PermissionDenied())
@@ -166,13 +168,14 @@ class TestCustom403Page:
 
     def test_403_page_for_anonymous(self, client):
         """Test 403 page for anonymous users."""
-        from django.core.exceptions import PermissionDenied
-        from accounts.views import custom_permission_denied
-        from django.test import RequestFactory
         from django.contrib.auth.models import AnonymousUser
+        from django.core.exceptions import PermissionDenied
+        from django.test import RequestFactory
+
+        from accounts.views import custom_permission_denied
 
         factory = RequestFactory()
-        request = factory.get('/dashboard/')
+        request = factory.get("/dashboard/")
         request.user = AnonymousUser()
 
         response = custom_permission_denied(request, exception=PermissionDenied())
