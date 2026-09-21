@@ -1,3 +1,6 @@
+# Production deps first (mypy/pytest import Django, Celery, etc.)
+-r requirements.txt
+
 # Development & Testing
 pytest==9.0.*
 pytest-django==4.12.*
